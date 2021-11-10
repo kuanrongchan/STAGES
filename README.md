@@ -25,8 +25,8 @@ For multiple comparisons to be made, simply insert more comparison columns (e.g.
 
 Demo examples and descriptions of data formats are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
 
-##Data safety and security
+## Data safety and security
 The data you upload is safe and is never stored anywhere.
 
-##Contributors
+## Contributors
 These apps are jointly made by myself (Kuan Rong Chan), Clara Koh, Justin Ooi and Gabrielle Lee from Duke-NUS, Department of Emerging Infectious Diseases. I am also thankful for Eugenia Ong and Ayesa Syenina from VIREMICS for their constructive feedback. These apps are now free for everyone to use, but for a limited period of time as we are constantly upgrading the apps. For more details on what we do, feel free to visit us at omicsdiary.com.
