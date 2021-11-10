@@ -1,5 +1,5 @@
 # Static and Temporal Analysis of Gene Expression Studies (STAGES)
-![STAGES](https://user-images.githubusercontent.com/91276553/141077657-a7aa8f73-64a7-4f76-addf-ba94bf99e32a.png)
+![Untitled (4)](https://user-images.githubusercontent.com/91276553/141084154-7d84695a-b220-43c5-bd41-08a38fd0ec70.png)
 STAGES is a multi-app that integrates data visualisation and pathway analysis for static and temporal gene expression studies. STAGES is an open source and community funded web tool for creating beautiful charts from gene expression datasets. The multi-page web app built using Streamlit, which currently allows users to:
 1. Plot interactive volcano plots
 2. Identify differentially expressed genes (Users can apply their preferred fold-change and p-value cut-offs to identify number of upregulated and downregulated genes)
