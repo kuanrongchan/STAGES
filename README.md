@@ -16,7 +16,10 @@ To use the app, you will need one comparison file which should minimally contain
 For the app to be able to recognise your ratio and p-values, please label:
 1. Ratio as ratio_X_vs_Y
 2. Adjusted p-values (or p-values) as pval_X_vs_Y,
-where X and Y are the comparison variables. Some examples include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0. 
+
+where X and Y are the comparison variables. 
+
+Some examples include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0. 
 
 For multiple comparisons to be made, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols are in "X" and "Y"
 
