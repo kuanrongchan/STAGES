@@ -4,4 +4,4 @@ STAGES is a multi-app that integrates data visualisation and pathway analysis fo
 2. Identify differentially expressed genes (Users can apply their preferred fold-change and p-value cut-offs to identify number of upregulated and downregulated genes)
 3. Build customised clustergrams based on either identified up-regulated DEGs (UP) and down-regulated DEGs (DOWN)
 4. Build customised clustergrams based on selected gene list
-5. Plot correlation matrix across different time-points or experimental conditions
+5. Plot interactive correlation matrix across different time-points or experimental conditions
