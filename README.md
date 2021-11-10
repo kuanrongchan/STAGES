@@ -1,1 +1,2 @@
-# STAGES
+# Static and Temporal Analysis of Gene Expression Studies (STAGES)
+STAGES is a multi-app that integrates data visualisation and pathway analysis for static and temporal gene expression studies. STAGES is an open source and community funded web tool for creating beautiful charts from gene expression datasets. The multi-page web app built using Streamlit, which allows users to....
