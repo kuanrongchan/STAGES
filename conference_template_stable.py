@@ -77,7 +77,6 @@ if len(df_query) != 0:
             df_names.append(head)
 else:
     testdata = st.experimental_memo(pd.read_csv)("/Users/clara/Desktop/Ad5_seroneg.csv", index_col=0)
-testdata = st.experimental_memo(pd.read_csv)("/Users/clara/Desktop/Ad5_seroneg.csv", index_col=0)
     testname = "Ad5_seroneg"
     df_dict[testname] = testdata
     df_names.append(testname)
