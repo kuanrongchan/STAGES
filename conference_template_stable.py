@@ -888,7 +888,7 @@ for c in choose_app:
             corr_matrix(dfx)
 
         elif c == 'enrichr':
-            enrichr_exp = st.sidebar.expander("Expand for Enrichr", expanded=False)
+            enrichr_exp = st.sidebar.expander("Expand for Enrichr pathway analysis", expanded=False)
             if "DEGs" in choose_app:
                 select_dataset = select_enrichr_dataset()
                 genelist = genes_used(premade_dict=proportions)
