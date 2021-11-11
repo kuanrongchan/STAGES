@@ -55,7 +55,7 @@ st.title("Static and Temporal Analysis of Gene Expression Studies (STAGES)")
 
 ################################################# File Uploader ########################################################
 df_query = st.sidebar.file_uploader(
-    'Upload your .csv/.xlsx file here with the first column as gene names.',
+    'Upload your .csv/.xlsx file here with first column as gene names.',
     accept_multiple_files=True)
 
 df_dict = {}
@@ -81,7 +81,7 @@ else:
     df_dict[testname] = testdata
     df_names.append(testname)
 
-if st.sidebar.checkbox("Show dataframe"):
+if st.sidebar.checkbox("Show uploaded dataframe"):
     for k,v in df_dict.items():
         st.write(f"**{k} dataframe**",v)
 
