@@ -651,7 +651,7 @@ degs_but_manual = 0
 def select_enrichr_dataset():
 #     geneset_list = ["/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/BTM.gmt",
 #                     "/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/Reactome.gmt"]
-    geneset_list = ["BTM.gmt", "Reactome.gmt"]
+    geneset_list = ["BTM", "Reactome"]
 
     # Selecting genesets (BTM or reactome) to plot from a list
     geneset = enrichr_exp.radio(label='# Select a geneset :',
