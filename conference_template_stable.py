@@ -27,8 +27,7 @@ import seaborn as sns
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from mpl_toolkits.axes_grid1.colorbar import colorbar
 
-# Version 3: Added EnrichR
-# Version 4: Ready to Deploy
+# Stable version 1
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -77,7 +76,8 @@ if len(df_query) != 0:
             df_dict[head] = data
             df_names.append(head)
 else:
-    testdata = st.experimental_memo(pd.read_csv)("/Users/clara/Desktop/Ad5_seroneg_clara.csv", index_col=0)
+    testdata = st.experimental_memo(pd.read_csv)("/Users/clara/Desktop/Ad5_seroneg.csv", index_col=0)
+testdata = st.experimental_memo(pd.read_csv)("/Users/clara/Desktop/Ad5_seroneg.csv", index_col=0)
     testname = "Ad5_seroneg"
     df_dict[testname] = testdata
     df_names.append(testname)
@@ -650,6 +650,7 @@ degs_but_manual = 0
 def select_enrichr_dataset():
     geneset_list = ["/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/BTM.gmt",
                     "/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/Reactome.gmt"]
+    geneset_list = ["BTM.gmt", "Reactome.gmt"]
 
     # Selecting genesets (BTM or reactome) to plot from a list
     geneset = enrichr_exp.radio(label='# Select a geneset :',
