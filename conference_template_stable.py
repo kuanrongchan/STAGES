@@ -51,7 +51,7 @@ def to_excel(df):
 #     b64 = base64.b64encode(val)
 #     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="deg_files.xlsx">Download DEGs as Excel File</a>' # decode b'abc' => abc
 
-st.title("Dashboard Template for Conference")
+st.title("Static and Temporal Analysis of Gene Expression Studies (STAGES)")
 
 ################################################# File Uploader ########################################################
 df_query = st.sidebar.file_uploader(
@@ -90,17 +90,17 @@ proportions = {}
 
 ################################################# Read the Docs #######################################################
 def read_docs():
-    st.title("Static and Temporal Analysis of Gene Expression Studies (STAGES)")
     st.image("https://user-images.githubusercontent.com/91276553/141084154-7d84695a-b220-43c5-bd41-08a38fd0ec70.png", width=None)
     st.markdown(
         '''
     STAGES is a multi-app that integrates data visualisation and pathway analysis for static and temporal gene expression studies. STAGES is an open source and community funded web tool for creating beautiful charts from gene expression datasets. The multi-page web app built using Streamlit, which currently allows users to analyse an omics data in distinct stages:
     
     1. Plot interactive volcano plots
-    2. Identify differentially expressed genes (Users can apply their preferred fold-change and p-value cut-offs to identify number of upregulated and downregulated genes)
+    2. Filter data for differentially expressed genes (Users can apply their preferred fold-change and p-value cut-offs to identify DEG number and identities)
     3. Build customised clustergrams based on identified up-regulated DEGs (UP) or down-regulated DEGs (DOWN)
-    4. Build customised clustergrams based on selected gene list
-    5. Plot interactive correlation matrix comparing across different time-points or experimental conditions
+    4. Build customised clustergrams based on user-selected gene list
+    5. Perform Enrichr analysis based on DEGs or user-selected gene list
+    6. Plot interactive correlation matrix comparing across different time-points or experimental conditions
     
     ## Getting started
     
@@ -119,7 +119,9 @@ def read_docs():
     Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0. 
     Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0. 
     
-    For multiple comparisons to be made, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
+    For multiple comparisons to be made within the same graph, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
+    
+    To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
     
     Demo examples and descriptions of data formats are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
     
