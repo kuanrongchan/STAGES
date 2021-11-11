@@ -81,7 +81,7 @@ else:
     df_dict[testname] = testdata
     df_names.append(testname)
 
-if st.sidebar.checkbox("Show dataset"):
+if st.sidebar.checkbox("Show dataframe"):
     for k,v in df_dict.items():
         st.write(f"**{k} dataframe**",v)
 
