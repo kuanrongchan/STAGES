@@ -76,7 +76,7 @@ if len(df_query) != 0:
             df_dict[head] = data
             df_names.append(head)
 else:
-    testdata = st.experimental_memo(pd.read_csv)("/Users/clara/Desktop/Ad5_seroneg.csv", index_col=0)
+    testdata = st.experimental_memo(pd.read_csv)("Ad5_seroneg.csv", index_col=0)
     testname = "Ad5_seroneg"
     df_dict[testname] = testdata
     df_names.append(testname)
@@ -647,8 +647,8 @@ def corr_matrix(dfx):
 # ############################################### Enrichr ##############################################################
 degs_but_manual = 0
 def select_enrichr_dataset():
-    geneset_list = ["/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/BTM.gmt",
-                    "/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/Reactome.gmt"]
+#     geneset_list = ["/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/BTM.gmt",
+#                     "/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/Reactome.gmt"]
     geneset_list = ["BTM.gmt", "Reactome.gmt"]
 
     # Selecting genesets (BTM or reactome) to plot from a list
