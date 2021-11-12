@@ -134,7 +134,7 @@ def read_docs():
 
     To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
 
-    Demo examples and descriptions of data formats are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
+    Demo examples are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
 
     ## Data safety and security
     The data you upload is safe and is never stored anywhere.
