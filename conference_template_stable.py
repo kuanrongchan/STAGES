@@ -823,7 +823,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                                    file_name="enrichr_downDEGs_analysis.xlsx")
             fig = go.Figure(go.Bar(x=toplot_down['-logP'], y=toplot_down.index, orientation='h', marker_color="#636EFA"))
             fig.update_xaxes(title="-logP")
-            fig.update_yaxes(title="Term")
+            fig.update_yaxes(title="Term", dtick=0)
 
         fig.update_layout(title="Enriched Pathways", title_x=0.5, showlegend=False, yaxis={'tickmode':'linear'})
         enrichr_results_exp.info("If nothing was plotted in the bar chart, the pathways did not meet the cutoff of adjusted p-value < 0.05")
