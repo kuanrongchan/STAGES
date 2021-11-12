@@ -828,7 +828,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
             fig.update_xaxes(title="-logP")
             fig.update_yaxes(title="Term", dtick=0)
 
-        fig.update_layout(title="Enriched Pathways", title_x=0.5, showlegend=False, yaxis={'tickmode':'linear'})
+        fig.update_layout(title="Enriched Pathways (Top 10), adjpvalue < 0.05", title_x=0.5, showlegend=False, yaxis={'tickmode':'linear'})
         enrichr_results_exp.info("If nothing was plotted in the bar chart, the pathways did not meet the cutoff of adjusted p-value < 0.05")
         st.plotly_chart(fig, use_container_width=True)
 
