@@ -517,12 +517,13 @@ def deg_cluster(proportions, log_dfx):
     proportion_keys = list(proportions.keys())
     proportion_keys.remove("upcount")
     proportion_keys.remove("downcount")
-
+    
+    select_deg_dicts = postdeg.multiselect("Select DEGs to plot", options=sorted(proportion_keys, key=str.casefold))
     f_width = postdeg.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                              step=1, value=10)
     f_height = postdeg.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
                               step=1, value=10)
-    select_deg_dicts = postdeg.multiselect("Select DEGs to plot", options=sorted(proportion_keys, key=str.casefold))
+    
     for l in select_deg_dicts:
         degs = proportions[l].index.tolist()
         deglist.append(degs)
