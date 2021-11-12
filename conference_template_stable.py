@@ -53,7 +53,7 @@ def to_excel(df):
 #     b64 = base64.b64encode(val)
 #     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="deg_files.xlsx">Download DEGs as Excel File</a>' # decode b'abc' => abc
 
-st.title("Static and Temporal Analysis of Gene Expression Studies (STAGES)")
+st.title("Your personalised transcriptomics dashboard \U0001F4CA")
 
 ################################################# Documentation ########################################################
 documentation = st.sidebar.checkbox("Read the Docs", value=False, key='documentation')
