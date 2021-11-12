@@ -791,7 +791,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                                    file_name="enrichr_updownDEGs_analysis.xlsx")
 
             fig = make_subplots(rows=2, cols=1, subplot_titles=["Upregulated DEGs", "Downregulated DEGs"],
-                                x_title="-logP", shared_xaxes=True, yaxis={'tickmode':'linear'})
+                                x_title="-logP", shared_xaxes=True)
             fig.add_trace(go.Bar(x=toplot_up['-logP'], y=toplot_up.index,
                                  orientation='h', marker_color="#EF553B"),
                           row=1, col=1)
