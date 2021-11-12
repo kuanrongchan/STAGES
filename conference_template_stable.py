@@ -625,7 +625,7 @@ def select_enrichr_dataset():
     geneset_dict = {
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome": "Reactome.gmt",
-        "Vaccinomics (Inhouse)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
+        "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
         "GO Biological Process 2021": "GO_Biological_Process_2021",
         "GO Molecular Function 2021":"GO_Molecular_Function_2021"
     }
