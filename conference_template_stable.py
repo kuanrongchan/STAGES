@@ -798,6 +798,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
             fig.add_trace(go.Bar(x=toplot_down['-logP'], y=toplot_down.index,
                                  orientation='h', marker_color="#636EFA"),
                           row=2, col=1)
+            fig.update_layout(yaxis={'tickmode':'linear'})
 
         elif data_up_trunc is not None and data_down_trunc is None:
             toplot_up = data_up_sig.sort_values("-logP", ascending=True).tail(10)
