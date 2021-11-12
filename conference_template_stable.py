@@ -114,6 +114,7 @@ def read_docs():
     ## Getting started
 
     To use the app, you will need one comparison file which should minimally contain:
+    
     1. Gene names on the first column
     2. Ratio values (relative transcript expression versus control or baseline)
     3. Adjusted p-value (or p-value)
