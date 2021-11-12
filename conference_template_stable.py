@@ -722,9 +722,6 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
         fig.update_layout(title="Enrichr analysis of query genes", title_x=0.5, yaxis={'tickmode':'linear'})
         st.plotly_chart(fig, use_container_width=True)
 
-        # Plot bubble plot
-        # fig2 = px.scatter(data_sig, x=data_sig["Combined Score"], y=data_sig["Term"], color=data_sig["-logP"],
-        #                   size=data_sig["-logP"], color_continuous_scale=px.colors.sequential.Blues)
 
     else:
         ups = genelist[0]
@@ -794,7 +791,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                                    file_name="enrichr_updownDEGs_analysis.xlsx")
 
             fig = make_subplots(rows=2, cols=1, subplot_titles=["Upregulated DEGs", "Downregulated DEGs"],
-                                x_title="-logP", shared_xaxes=True)
+                                x_title="-logP", shared_xaxes=True, yaxis={'tickmode':'linear'})
             fig.add_trace(go.Bar(x=toplot_up['-logP'], y=toplot_up.index,
                                  orientation='h', marker_color="#EF553B"),
                           row=1, col=1)
