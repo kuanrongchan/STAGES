@@ -623,7 +623,7 @@ def select_enrichr_dataset():
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome": "Reactome.gmt",
         "Vaccinomics": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
-        "GO Biological Process_2021": "GO_Biological_Process_2021",
+        "GO Biological Process 2021": "GO_Biological_Process_2021",
         "GO Molecular Function 2021":"GO_Molecular_Function_2021"
     }
 
@@ -778,7 +778,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
             # Calculate -logP
             data_down_sig['-logP'] = np.log10(data_down_sig['Adjusted P-value']) * (-1)
 
-        prettify_geneset = select_dataset.replace(".gmt", "")
+        prettify_geneset = select_dataset.replace(".gmt", "").replace("_", " ")
         enrichr_results_exp.write(f"**EnrichR analysis using {prettify_geneset}**")
 
         if data_up_trunc is not None and data_down_trunc is not None:
