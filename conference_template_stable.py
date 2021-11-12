@@ -59,7 +59,7 @@ st.title("My Transcriptomics Dashboard \U0001F4CA")
 documentation = st.sidebar.checkbox("Read the Docs", value=False, key='documentation')
 ################################################# File Uploader ########################################################
 df_query = st.sidebar.file_uploader(
-    'Upload your .csv/.xlsx file with first column as gene names. A demo dataset will be uploaded if no files are uploaded',
+    'Upload your .csv/.xlsx file. A demo dataset will be uploaded if no files are uploaded',
     accept_multiple_files=True)
 
 df_dict = {}
