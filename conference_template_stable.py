@@ -719,7 +719,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
         # Plot bar graph
         toplot = data_sig.sort_values("-logP", ascending=True).tail(10)
         fig = go.Figure(data=go.Bar(x=toplot['-logP'], y=toplot.index, orientation='h', marker_color="#4FC04F"))
-        fig.update_layout(title="Enrichr analysis of query genes", title_x=0.5)
+        fig.update_layout(title="Enrichr analysis of query genes", title_x=0.5, yaxis={'tickmode':'linear'})
         st.plotly_chart(fig, use_container_width=True)
 
         # Plot bubble plot
