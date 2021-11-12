@@ -84,7 +84,6 @@ else:
     testname = "Ad5_seroneg"
     df_dict[testname] = testdata
     df_names.append(testname)
-    st.write(testname, testdata)
 
 if st.sidebar.checkbox("Show uploaded dataframe"):
     for k, v in df_dict.items():
