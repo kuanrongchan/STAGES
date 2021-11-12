@@ -799,6 +799,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                                  orientation='h', marker_color="#636EFA"),
                           row=2, col=1)
             fig.update_layout(yaxis={'tickmode':'linear'})
+            fig.update_yaxes(dtick=0) 
 
         elif data_up_trunc is not None and data_down_trunc is None:
             toplot_up = data_up_sig.sort_values("-logP", ascending=True).tail(10)
