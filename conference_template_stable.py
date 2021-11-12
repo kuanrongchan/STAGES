@@ -53,13 +53,13 @@ def to_excel(df):
 #     b64 = base64.b64encode(val)
 #     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="deg_files.xlsx">Download DEGs as Excel File</a>' # decode b'abc' => abc
 
-st.title("Transcriptomics Dashboard \U0001F4CA")
+st.title("My Transcriptomics Dashboard \U0001F4CA")
 
 ################################################# Documentation ########################################################
 documentation = st.sidebar.checkbox("Read the Docs", value=False, key='documentation')
 ################################################# File Uploader ########################################################
 df_query = st.sidebar.file_uploader(
-    'Upload your .csv/.xlsx file here with first column as gene names.',
+    'Upload your .csv/.xlsx file with first column as gene names. A demo dataset will be uploaded if no files are uploaded',
     accept_multiple_files=True)
 
 df_dict = {}
