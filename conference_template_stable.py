@@ -53,7 +53,7 @@ def to_excel(df):
 #     b64 = base64.b64encode(val)
 #     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="deg_files.xlsx">Download DEGs as Excel File</a>' # decode b'abc' => abc
 
-st.title("Your personalised transcriptomics dashboard \U0001F4CA")
+st.title("Transcriptomics dashboard \U0001F4CA")
 
 ################################################# Documentation ########################################################
 documentation = st.sidebar.checkbox("Read the Docs", value=False, key='documentation')
@@ -97,6 +97,7 @@ proportions = {}   ########
 
 ################################################# Read the Docs #######################################################
 def read_docs():
+    st.subheader("Static and Temporal Analysis of Gene Expression Studies (STAGES)")
     st.image("https://user-images.githubusercontent.com/91276553/141084154-7d84695a-b220-43c5-bd41-08a38fd0ec70.png",
              width=None)
     st.markdown(
