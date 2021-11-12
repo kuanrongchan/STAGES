@@ -652,7 +652,7 @@ def select_enrichr_dataset():
 #     geneset_list = ["/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/BTM.gmt",
 #                     "/Users/clara/Dropbox/Streamlit_app/App_Templates_KR/Multipage App/chromics_beta-main/Reactome.gmt"]
 #     geneset_list = ["Blood Transcriptomic Modules (BTM)", "Reactome"]
-    geneset_list = ["BTM.gmt", "Reactome.gmt", "Vaccinomics.gmt", ["GO_Biological_Process_2021"]]
+    geneset_list = ["BTM.gmt", "Reactome.gmt", "Vaccinomics.gmt", "GO_Biological_Process_2021"]
 
     # Selecting genesets (BTM or reactome) to plot from a list
     geneset = enrichr_exp.radio(label='# Select a geneset :',
