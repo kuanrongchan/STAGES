@@ -113,7 +113,6 @@ def read_docs():
     6. Plot interactive correlation matrix comparing across different time-points or experimental conditions
     ## Getting started
     To use the app, you will need one comparison file which should minimally contain:
-
     1. Gene names on the first column
     2. Ratio values (relative transcript expression versus control or baseline)
     3. Adjusted p-value (or p-value)
@@ -122,7 +121,6 @@ def read_docs():
     2. Adjusted p-values (or p-values) as pval_X_vs_Y,
     where X and Y are the comparison variables. 
     Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0. 
-
     Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0. 
     For multiple comparisons to be made within the same graph, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
     To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
@@ -696,23 +694,20 @@ def genes_used(premade_dict=None):
             proportion_keys.remove("downcount")
             uplist = []
             downlist = []
-            upkeys = [x for x in proportion_keys if re.search("UP", x)]
-            select_upDEGs = enrichr_exp.multiselect("Select upregulated DEGs to use (optional)", options=upkeys,
-                                                    help="Either upregulated or downregulated DEGs must be selected if using the DEGs option")
 
-            for s in select_upDEGs:
+            select_DEGs = enrichr_exp.multiselect("Select DEGs to use", options=sorted(proportion_keys, key=str.casefold))
+            upkeys = [s for s in select_DEGs if re.search("UP", s)]
+            downkeys = [s for s in select_DEGs if re.search("DOWN", s)]
+
+            for s in upkeys:
                 ups = premade_dict[s].index.tolist()
                 uplist.append(ups)
 
-            downkeys = [x for x in proportion_keys if re.search("DOWN", x)]
-            select_downDEGs = enrichr_exp.multiselect("Select downregulated DEGs to use (optional)", options=downkeys,
-                                                      help="Either upregulated or downregulated DEGs must be selected if using the DEGs option")
-            for s in select_downDEGs:
+            for s in downkeys:
                 downs = premade_dict[s].index.tolist()
                 downlist.append(downs)
 
             gene_final = [uplist, downlist]
-
 
         elif choose_genetype == "Add manually":
             gene_in = enrichr_exp.text_area(label="Input list of at least 3 genes here",
@@ -1001,3 +996,4 @@ for c in choose_app:
         elif c == "correlation matrix":
             dfx = check_log(df_dict)
             corr_matrix(dfx)
+           
