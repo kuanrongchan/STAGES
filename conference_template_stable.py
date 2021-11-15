@@ -679,8 +679,7 @@ def select_enrichr_dataset():
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
-    geneset = enrichr_exp.radio(label='# Select a geneset :', help='Choose BTM or Reactome geneset',
-                                options=geneset_dict.keys())
+    geneset = enrichr_exp.radio(label='# Select a geneset :', options=geneset_dict.keys())
     return geneset_dict[geneset]
 
 
