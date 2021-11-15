@@ -668,7 +668,7 @@ degs_but_manual = 0  # If is 0, means user is using DEGs for Enrichr, if is 1, u
 
 def select_enrichr_dataset():
     geneset_dict = {
-        "Blood Transcriptomic Modules (BTM) 2013": "BTM.gmt",
+        "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome 2021": "Reactome.gmt",
         "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
         "GO Biological Process 2021": "GO_Biological_Process_2021",
