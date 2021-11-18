@@ -113,18 +113,27 @@ def read_docs():
     6. Plot interactive correlation matrix comparing across different time-points or experimental conditions
     ## Getting started
     To use the app, you will need one comparison file which should minimally contain:
+    
     1. Gene names on the first column
     2. Ratio values (relative transcript expression versus control or baseline)
     3. Adjusted p-value (or p-value)
+    
     For the app to be able to recognise your ratio and p-values, please label:
+    
     1. Ratio as ratio_X_vs_Y
     2. Adjusted p-values (or p-values) as pval_X_vs_Y,
+    
     where X and Y are the comparison variables. 
-    Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0. 
-    Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0. 
+    
+    Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0.
+    
+    Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0.
+    
     For multiple comparisons to be made within the same graph, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
     To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
+    
     Demo examples are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
+    
     ## Data safety and security
     The data you upload is safe and is never stored anywhere.
     ## Contributors
