@@ -691,7 +691,7 @@ def select_enrichr_dataset():
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
-    geneset = enrichr_exp.radio(label='# Select a geneset :', options=geneset_dict.keys())
+    geneset = enrichr_exp.radio(label='Select a geneset', options=geneset_dict.keys(), key='enrichr')
     return geneset_dict[geneset]
 
 
@@ -924,7 +924,7 @@ def select_prerank_dataset():
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
-    geneset = prernk_exp.radio(label='# Select a geneset :', options=geneset_dict.keys())
+    geneset = prernk_exp.radio(label='Select a geneset', options=geneset_dict.keys(), key="prerank")
     return geneset_dict[geneset]
 
 ######### Obtain columns for ranking ###################
