@@ -28,7 +28,7 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Version 1b will have prerank function and also convert the gene_final list be reverted to the old list
+# Updates: prerank function, gene list for DEGs will be reverted to the old list for enrichr
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -97,7 +97,8 @@ proportions = {}  ########
 
 ###########################
 
-gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv")
+# gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
+gene_symbols = pd.read_csv("gene_date.csv")
 old_symbols = gene_symbols.iloc[:,0].tolist()
 new_symbols = gene_symbols.iloc[:,3].tolist()
 
