@@ -94,13 +94,13 @@ if st.sidebar.checkbox("Show uploaded/demo dataframe"):
 deg_dict = {}  ########
 proportions = {}  ########
 
-
 ###########################
 
 # gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
 gene_symbols = pd.read_csv("gene_date.csv")
-old_symbols = gene_symbols.iloc[:,0].tolist()
-new_symbols = gene_symbols.iloc[:,3].tolist()
+old_symbols = gene_symbols.iloc[:, 0].tolist()
+new_symbols = gene_symbols.iloc[:, 3].tolist()
+
 
 ################################################# Read the Docs #######################################################
 def read_docs():
@@ -118,27 +118,27 @@ def read_docs():
     6. Plot interactive correlation matrix comparing across different time-points or experimental conditions
     ## Getting started
     To use the app, you will need one comparison file which should minimally contain:
-    
+
     1. Gene names on the first column
     2. Ratio values (relative transcript expression versus control or baseline)
     3. Adjusted p-value (or p-value)
-    
+
     For the app to be able to recognise your ratio and p-values, please label:
-    
+
     1. Ratio as ratio_X_vs_Y
     2. Adjusted p-values (or p-values) as pval_X_vs_Y,
-    
+
     where X and Y are the comparison variables. 
-    
+
     Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0.
-    
+
     Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0.
-    
+
     For multiple comparisons to be made within the same graph, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
     To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
-    
+
     Demo examples are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
-    
+
     ## Data safety and security
     The data you upload is safe and is never stored anywhere.
     ## Contributors
@@ -247,12 +247,14 @@ def volcano(df_dict, list_of_days, colorlist):
                 # edited to negative instead of neg so we can pass all the dfs through data formatter
                 # (to include the log2ratio and -log pval)
                 pvals = df[pval_col_name[0]]
-                for_annotation = pd.concat([fold_changes, pvals],axis=1)
+                for_annotation = pd.concat([fold_changes, pvals], axis=1)
                 filter_pval = for_annotation.loc[for_annotation[pval_col_name[0]] > 1.30]
                 top_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=False).head(10)
                 bottom_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=True).head(10)
-                bottom10annotation.append(bottom_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
-                top10annotation.append(top_10.rename(columns={FC_col_name[0]:"log2FC", pval_col_name[0]:"negative_log_pval"}))
+                bottom10annotation.append(
+                    bottom_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
+                top10annotation.append(
+                    top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
 
                 plt.grid(b=True, which="major", axis="both", alpha=0.3)
                 plt.scatter(fold_changes, pvals, alpha=0.7, label=complabels)
@@ -262,7 +264,6 @@ def volcano(df_dict, list_of_days, colorlist):
                 plt.ylabel('-log10(p-value)')
                 plt.axhline(y=0, color='r', linestyle='dashed')
                 plt.axvline(x=0, linestyle='dashed')
-
 
                 if interactive_volcano:
                     volcano1.add_trace(go.Scatter(x=fold_changes, y=pvals,
@@ -281,11 +282,14 @@ def volcano(df_dict, list_of_days, colorlist):
             bottomoverall = list(annotationconcat_bottom.index)
 
             for i in range(len(annotationconcat_top)):
-                plt.annotate(text=topoverall[i], xy=(annotationconcat_top.iloc[i,0], annotationconcat_top.iloc[i,1]),
-                             xytext=(0,3), horizontalalignment='center', textcoords='offset points', fontsize=7) # top 10
+                plt.annotate(text=topoverall[i], xy=(annotationconcat_top.iloc[i, 0], annotationconcat_top.iloc[i, 1]),
+                             xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
+                             fontsize=7)  # top 10
             for i in range(len(annotationconcat_bottom)):
-                plt.annotate(text=bottomoverall[i], xy=(annotationconcat_bottom.iloc[i, 0], annotationconcat_bottom.iloc[i, 1]),
-                             xytext=(0,3), horizontalalignment='center', textcoords='offset points', fontsize=7)  # bottom 10
+                plt.annotate(text=bottomoverall[i],
+                             xy=(annotationconcat_bottom.iloc[i, 0], annotationconcat_bottom.iloc[i, 1]),
+                             xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
+                             fontsize=7)  # bottom 10
 
         volcano1.update_layout(showlegend=True,
                                title=f"Interactive volcano across {tp_or_comp}",
@@ -323,8 +327,10 @@ def volcano(df_dict, list_of_days, colorlist):
                 filter_pval = for_annotation.loc[for_annotation[pval_col_name[0]] > 1.30]
                 top_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=False).head(10)
                 bottom_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=True).head(10)
-                bottom10annotation.append(bottom_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
-                top10annotation.append(top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
+                bottom10annotation.append(
+                    bottom_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
+                top10annotation.append(
+                    top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
 
                 if len(df_dict) % 2 == 0:
                     plt.subplot(nrows, 2, j)
@@ -707,7 +713,8 @@ def genes_used(premade_dict=None):
             uplist = []
             downlist = []
 
-            select_DEGs = enrichr_exp.multiselect("Select DEGs to use", options=sorted(proportion_keys, key=str.casefold))
+            select_DEGs = enrichr_exp.multiselect("Select DEGs to use",
+                                                  options=sorted(proportion_keys, key=str.casefold))
             upkeys = [s for s in select_DEGs if re.search("UP", s)]
             downkeys = [s for s in select_DEGs if re.search("DOWN", s)]
 
@@ -718,33 +725,33 @@ def genes_used(premade_dict=None):
             for s in downkeys:
                 downs = premade_dict[s].index.tolist()
                 downlist.append(downs)
-            
-            flattenedup = [val for sublist in uplist for val in sublist] # all the upDEGs in 1 list
-            flatteneddown = [val for sublist in downlist for val in sublist] # all the downDEGs in 1 list
-            
-            converter = defaultdict(list) # yes it should remain as list do not change
-            
+
+            flattenedup = [val for sublist in uplist for val in sublist]  # all the upDEGs in 1 list
+            flatteneddown = [val for sublist in downlist for val in sublist]  # all the downDEGs in 1 list
+
+            converter = defaultdict(list)  # yes it should remain as list do not change
+
             for val in flattenedup:
-                 converter[val] = val
-                    
+                converter[val] = val
+
             for val in flatteneddown:
                 converter[val] = val
-            
+
             for o, n in zip(old_symbols, new_symbols):
                 converter[n] = o
-            
-            for k in flattenedup: # why this: if not, the converter will also include all the date genes that may not be a DEG
+
+            for k in flattenedup:  # why this: if not, the converter will also include all the date genes that may not be a DEG
                 t = converter[k]
                 if t not in up_enrichr:
                     up_enrichr.append(t)
-            
+
             for k in flatteneddown:
                 t = converter[k]
                 if t not in down_enrichr:
                     down_enrichr.append(t)
-                    
+
             gene_final = [up_enrichr, down_enrichr]
-            
+
         elif choose_genetype == "Add manually":
             gene_in = enrichr_exp.text_area(label="Input list of at least 3 genes here",
                                             help="Please use one of the following delimiters:line breaks, commas, or semicolons")
@@ -766,7 +773,7 @@ def genes_used(premade_dict=None):
             if g not in remove_dupes:
                 remove_dupes.append(g)
         gene_final = [x.upper() for x in remove_dupes if x != ""]
-    
+
     return gene_final
 
 
@@ -911,6 +918,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
             "If nothing was plotted in the bar chart, the pathways did not meet the cutoff of adjusted p-value < 0.05")
         st.plotly_chart(fig, use_container_width=True)
 
+
 ############################################ Prerank and Visualisation ######################################################
 ########## Choose the prerank geneset to use #############
 def select_prerank_dataset():
@@ -927,25 +935,27 @@ def select_prerank_dataset():
     geneset = prernk_exp.radio(label='Select a geneset', options=geneset_dict.keys(), key="prerank")
     return geneset_dict[geneset]
 
+
 ######### Obtain columns for ranking ###################
 def find_cols(df, timepoints):
-    col_storage = {} # yes this pun was intentional
+    col_storage = {}  # yes this pun was intentional
     fc_regex = "log2Fold[-_\s]?Changes?[-_\s]|log2FC"
     df.reset_index(drop=False, inplace=True)
     for tp in timepoints:
-        df_genes = df.iloc[:,0]
+        df_genes = df.iloc[:, 0]
         df_FC = df.filter(regex=re.compile(fc_regex, re.IGNORECASE))
         df_FC_tp = df_FC.filter(regex=re.compile(r"[-_\s]?{}[-_\s]?".format(tp), re.IGNORECASE))
-        df_FC_tp = df_FC_tp.iloc[:,0] ## remove day10s from day1. giving only genes as index and one timepoint
+        df_FC_tp = df_FC_tp.iloc[:, 0]  ## remove day10s from day1. giving only genes as index and one timepoint
 
         prerank = pd.concat([df_genes, df_FC_tp], axis=1)
-        prerank = prerank.sort_values(prerank.columns[0],ascending=False)
+        prerank = prerank.sort_values(prerank.columns[0], ascending=False)
         col_name1 = (prerank.columns.values)[0]
         col_name2 = (prerank.columns.values)[1]
-        prerank = prerank.rename(columns={col_name1:"0", col_name2: "1"})
+        prerank = prerank.rename(columns={col_name1: "0", col_name2: "1"})
 
         col_storage[tp] = prerank
     return col_storage
+
 
 ########### Run Prerank #############################
 
@@ -953,18 +963,19 @@ def execute_prerank(col_dict, geneset):
     prerank_results_dict = {}
     for key, data in col_dict.items():
         running = gp.prerank(rnk=data,
-                             gene_sets = geneset,
+                             gene_sets=geneset,
                              processes=6,
-                             permutation_num=100, # reduce number to speed up testing
-                             outdir=None, 
+                             permutation_num=100,  # reduce number to speed up testing
+                             outdir=None,
                              seed=6,
                              no_plot=True)
 
         prerank_results_dict[key] = running
-    
+
     prerank_results_exp = st.expander("Expand for prerank dataframe", expanded=False)
+
     prerank_export = []
-    
+
     for key, result in prerank_results_dict.items():
         terms = result.res2d.index
         ledge = result.res2d.ledge_genes
@@ -972,40 +983,61 @@ def execute_prerank(col_dict, geneset):
         fdr = result.res2d.fdr
 
         ranked = pd.concat([ledge, nes, fdr], axis=1)
+        indexcol = list(ranked.index)
+        removed_chars = [i.replace('"', "") for i in indexcol]
+        ranked.index = removed_chars
         prerank_export.append(ranked)
-        
-        pos_nes = ranked[ranked["nes"] > 0]
-#             pos_nes = pos_nes[(pos_nes["nes"] >= nes_cutoff) & (pos_nes["fdr"] <= fdr_cutoff)]
+
+        if applyfdr:
+            pos_nes = ranked[(ranked["nes"] > 0) & (ranked["fdr"] < 0.05)]
+            neg_nes = ranked[(ranked["nes"] < 0) & (ranked["fdr"] < 0.05)]
+            neg_nes["negative nes"] = neg_nes["nes"] * -1
+        else:
+            pos_nes = ranked[ranked["nes"] > 0]
+            neg_nes = ranked[ranked["nes"] < 0]
+            neg_nes["negative nes"] = neg_nes["nes"] * -1
+
         pos_nes_sort = pos_nes.sort_values(by=['nes']).tail(10)
         pos_nes_sort.reset_index(inplace=True)
+        pos_nes_sort.rename(columns={"index":"Term"}, inplace=True)
+        top_pos = len(pos_nes_sort)  # For formatting plot title
 
-
-        neg_nes = ranked[ranked["nes"] < 0]
-        neg_nes["negative nes"] = neg_nes["nes"] * -1          
-#             neg_nes = neg_nes[(neg_nes["negative nes"] >= nes_cutoff) & (neg_nes["fdr"] <= fdr_cutoff)]            
         neg_nes_sort = neg_nes.sort_values(by=['negative nes']).tail(10)
         neg_nes_sort.reset_index(inplace=True)
+        neg_nes_sort.rename(columns={"index": "Term"}, inplace=True)
+        top_neg = len(neg_nes_sort)  # For formatting plot title
 
         pos = px.bar(pos_nes_sort, x="nes", y="Term", orientation="h",
-                    title = "Positive enrichment ({})".format(key))
+                     title=f"Positive enrichment ({key})")
         neg = px.bar(neg_nes_sort, x="negative nes", y="Term", orientation="h",
-                     title = "Negative enrichment ({})".format(key))
+                     title=f"Negative enrichment ({key})")
 
         pos.update_traces(marker_color="#EF553B")
         neg.update_traces(marker_color="#636EFA")
-        
+
+        pos.update_layout(title=f"Top {top_pos} positively enriched pathways",
+                              xaxis_title='NES',
+                              font=dict(
+                                  family='Arial', size=16)
+                              )
+        neg.update_layout(title=f"Top {top_neg} negatively enriched pathways",
+                              xaxis_title='NES',
+                              font=dict(
+                                  family='Arial', size=16)
+                              )
         st.plotly_chart(pos)
         st.plotly_chart(neg)
-        
+
         prerank_results_exp.write(key)
         prerank_results_exp.dataframe(ranked)
-    
+
     prerank_results_exp.download_button(label="Download prerank dataframe",
                                         data=to_excel(prerank_export),
                                         file_name="prerank_analysis.xlsx")
-    
-    
+
     return
+
+
 ##################################### Correlation Matrix (using original df) #########################################
 def corr_matrix(dfx):
     st.subheader("Correlation matrix")
@@ -1116,11 +1148,11 @@ for c in choose_app:
                     execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=False)
                 else:
                     st.stop()
-        
+
         elif c == 'prerank':
             list_of_days = timepoints(df_dict)
             dfx = check_log(df_dict)
-            
+
             prernk_exp = st.sidebar.expander("Expand for Prerank Analysis", expanded=False)
             select_df = prernk_exp.selectbox("Select your dataset to use", options=dfx.keys())
             if is_tp == 1:
@@ -1128,9 +1160,10 @@ for c in choose_app:
             else:
                 fillin = "comparisons"
             use_tps = prernk_exp.multiselect(f"Select {fillin} for prerank", options=list_of_days)
-                                         
-            prerank_dataset = select_prerank_dataset() # same datasets as enrichr
+
+            prerank_dataset = select_prerank_dataset()  # same datasets as enrichr
             prerank_cols = find_cols(dfx[select_df], use_tps)
+            applyfdr = prernk_exp.checkbox("Apply FDR < 0.05 cutoff to the bar plots", value=False)
             run_prerank = prernk_exp.button("Run prerank")
             if run_prerank:
                 execute_prerank(prerank_cols, prerank_dataset)
