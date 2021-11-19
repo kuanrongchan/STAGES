@@ -9,6 +9,7 @@ import csv
 import re
 # import base64
 from io import BytesIO
+from collections import defaultdict
 
 import gseapy as gp
 from scipy.spatial.distance import pdist, squareform
@@ -27,7 +28,7 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Stable version 1
+# Version 1b will have prerank function and also convert the gene_final list be reverted to the old list
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -96,6 +97,9 @@ proportions = {}  ########
 
 ###########################
 
+gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv")
+old_symbols = gene_symbols.iloc[:,0].tolist()
+new_symbols = gene_symbols.iloc[:,3].tolist()
 
 ################################################# Read the Docs #######################################################
 def read_docs():
@@ -518,7 +522,7 @@ def degs(df_dict, list_of_days, colorlist):
                 downreg_deg = pval_fc_pertp[pval_fc_pertp.iloc[:, 1] < 0]
                 downreg_deg_count.append(len(downreg_deg))
                 proportions["downcount"] = downreg_deg_count
-                proportions[f"DOWN{name}_{tp}"] = downreg_deg
+                proportions[f"DOWN_{name}_{tp}"] = downreg_deg
 
             # Stacked Bar
             stacked1.add_trace(
@@ -691,9 +695,7 @@ def select_enrichr_dataset():
 
 
 def genes_used(premade_dict=None):
-    deglist = []
-    remove_dupes = []
-    temp = []
+    deglist, remove_dupes, temp, up_enrichr, down_enrichr = [], [], [], [], []
     if premade_dict is not None:
         choose_genetype = enrichr_exp.selectbox("Select whether to use DEGs or manually add gene list",
                                                 options=["DEGs", "Add manually"])
@@ -715,9 +717,33 @@ def genes_used(premade_dict=None):
             for s in downkeys:
                 downs = premade_dict[s].index.tolist()
                 downlist.append(downs)
-
-            gene_final = [uplist, downlist]
-
+            
+            flattenedup = [val for sublist in uplist for val in sublist] # all the upDEGs in 1 list
+            flatteneddown = [val for sublist in downlist for val in sublist] # all the downDEGs in 1 list
+            
+            converter = defaultdict(list) # yes it should remain as list do not change
+            
+            for val in flattenedup:
+                 converter[val] = val
+                    
+            for val in flatteneddown:
+                converter[val] = val
+            
+            for o, n in zip(old_symbols, new_symbols):
+                converter[n] = o
+            
+            for k in flattenedup: # why this: if not, the converter will also include all the date genes that may not be a DEG
+                t = converter[k]
+                if t not in up_enrichr:
+                    up_enrichr.append(t)
+            
+            for k in flatteneddown:
+                t = converter[k]
+                if t not in down_enrichr:
+                    down_enrichr.append(t)
+                    
+            gene_final = [up_enrichr, down_enrichr]
+            
         elif choose_genetype == "Add manually":
             gene_in = enrichr_exp.text_area(label="Input list of at least 3 genes here",
                                             help="Please use one of the following delimiters:line breaks, commas, or semicolons")
@@ -739,7 +765,7 @@ def genes_used(premade_dict=None):
             if g not in remove_dupes:
                 remove_dupes.append(g)
         gene_final = [x.upper() for x in remove_dupes if x != ""]
-
+    
     return gene_final
 
 
@@ -780,14 +806,12 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
     else:
         ups = genelist[0]
         downs = genelist[1]
-        flattenedup = [val for sublist in ups for val in sublist]
-        flatteneddown = [val for sublist in downs for val in sublist]
         remove_dupes_up, remove_dupes_down = [], []
         data_up_trunc, data_down_trunc = None, None
-        for f in flattenedup:
+        for f in ups:
             if f not in remove_dupes_up:
                 remove_dupes_up.append(f)
-        for f in flatteneddown:
+        for f in downs:
             if f not in remove_dupes_down:
                 remove_dupes_down.append(f)
 
@@ -886,7 +910,101 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
             "If nothing was plotted in the bar chart, the pathways did not meet the cutoff of adjusted p-value < 0.05")
         st.plotly_chart(fig, use_container_width=True)
 
+############################################ Prerank and Visualisation ######################################################
+########## Choose the prerank geneset to use #############
+def select_prerank_dataset():
+    geneset_dict = {
+        "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
+        "Reactome 2021": "Reactome.gmt",
+        "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
+        "GO Biological Process 2021": "GO_Biological_Process_2021",
+        "GO Molecular Function 2021": "GO_Molecular_Function_2021",
+        "KEGG 2021 Human": "KEGG_2021_Human"
+    }
 
+    # Selecting genesets (BTM or reactome) to plot from a list
+    geneset = prernk_exp.radio(label='# Select a geneset :', options=geneset_dict.keys())
+    return geneset_dict[geneset]
+
+######### Obtain columns for ranking ###################
+def find_cols(df, timepoints):
+    col_storage = {} # yes this pun was intentional
+    fc_regex = "log2Fold[-_\s]?Changes?[-_\s]|log2FC"
+    df.reset_index(drop=False, inplace=True)
+    for tp in timepoints:
+        df_genes = df.iloc[:,0]
+        df_FC = df.filter(regex=re.compile(fc_regex, re.IGNORECASE))
+        df_FC_tp = df_FC.filter(regex=re.compile(r"[-_\s]?{}[-_\s]?".format(tp), re.IGNORECASE))
+        df_FC_tp = df_FC_tp.iloc[:,0] ## remove day10s from day1. giving only genes as index and one timepoint
+
+        prerank = pd.concat([df_genes, df_FC_tp], axis=1)
+        prerank = prerank.sort_values(prerank.columns[0],ascending=False)
+        col_name1 = (prerank.columns.values)[0]
+        col_name2 = (prerank.columns.values)[1]
+        prerank = prerank.rename(columns={col_name1:"0", col_name2: "1"})
+
+        col_storage[tp] = prerank
+    return col_storage
+
+########### Run Prerank #############################
+
+def execute_prerank(col_dict, geneset):
+    prerank_results_dict = {}
+    for key, data in col_dict.items():
+        running = gp.prerank(rnk=data,
+                             gene_sets = geneset,
+                             processes=6,
+                             permutation_num=100, # reduce number to speed up testing
+                             outdir=None, 
+                             seed=6,
+                             no_plot=True)
+
+        prerank_results_dict[key] = running
+    
+    prerank_results_exp = st.expander("Expand for prerank dataframe", expanded=False)
+    prerank_export = []
+    
+    for key, result in prerank_results_dict.items():
+        terms = result.res2d.index
+        ledge = result.res2d.ledge_genes
+        nes = result.res2d.nes
+        fdr = result.res2d.fdr
+
+        ranked = pd.concat([ledge, nes, fdr], axis=1)
+        prerank_export.append(ranked)
+        
+        pos_nes = ranked[ranked["nes"] > 0]
+#             pos_nes = pos_nes[(pos_nes["nes"] >= nes_cutoff) & (pos_nes["fdr"] <= fdr_cutoff)]
+        pos_nes_sort = pos_nes.sort_values(by=['nes']).tail(10)
+        pos_nes_sort.reset_index(inplace=True)
+
+
+        neg_nes = ranked[ranked["nes"] < 0]
+        neg_nes["negative nes"] = neg_nes["nes"] * -1          
+#             neg_nes = neg_nes[(neg_nes["negative nes"] >= nes_cutoff) & (neg_nes["fdr"] <= fdr_cutoff)]            
+        neg_nes_sort = neg_nes.sort_values(by=['negative nes']).tail(10)
+        neg_nes_sort.reset_index(inplace=True)
+
+        pos = px.bar(pos_nes_sort, x="nes", y="Term", orientation="h",
+                    title = "Positive enrichment ({})".format(key))
+        neg = px.bar(neg_nes_sort, x="negative nes", y="Term", orientation="h",
+                     title = "Negative enrichment ({})".format(key))
+
+        pos.update_traces(marker_color="#EF553B")
+        neg.update_traces(marker_color="#636EFA")
+        
+        st.plotly_chart(pos)
+        st.plotly_chart(neg)
+        
+        prerank_results_exp.write(key)
+        prerank_results_exp.dataframe(ranked)
+    
+    prerank_results_exp.download_button(label="Download prerank dataframe",
+                                        data=to_excel(prerank_export),
+                                        file_name="prerank_analysis.xlsx")
+    
+    
+    return
 ##################################### Correlation Matrix (using original df) #########################################
 def corr_matrix(dfx):
     st.subheader("Correlation matrix")
@@ -953,7 +1071,8 @@ def corr_matrix(dfx):
 
 ##################################### Choose app to build dashboard ##################################################
 choose_app = st.sidebar.multiselect("Choose an app to render in the main page 👉",
-                                    options=["volcano plot", "DEGs", "enrichr", "clustergram", "correlation matrix"])
+                                    options=["volcano plot", "DEGs", "enrichr", "prerank", "clustergram",
+                                             "correlation matrix"])
 
 for c in choose_app:
     with st.spinner("🔨Building your dashboard 🔨"):
@@ -996,6 +1115,26 @@ for c in choose_app:
                     execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=False)
                 else:
                     st.stop()
+        
+        elif c == 'prerank':
+            list_of_days = timepoints(df_dict)
+            dfx = check_log(df_dict)
+            
+            prernk_exp = st.sidebar.expander("Expand for Prerank Analysis", expanded=False)
+            select_df = prernk_exp.selectbox("Select your dataset to use", options=dfx.keys())
+            if is_tp == 1:
+                fillin = "timepoints"
+            else:
+                fillin = "comparisons"
+            use_tps = prernk_exp.multiselect(f"Select {fillin} for prerank", options=list_of_days)
+                                         
+            prerank_dataset = select_prerank_dataset() # same datasets as enrichr
+            prerank_cols = find_cols(dfx[select_df], use_tps)
+            run_prerank = prernk_exp.button("Run prerank")
+            if run_prerank:
+                execute_prerank(prerank_cols, prerank_dataset)
+            else:
+                st.stop()
 
         elif c == "clustergram":
             dfx = check_log(df_dict)
@@ -1005,4 +1144,3 @@ for c in choose_app:
         elif c == "correlation matrix":
             dfx = check_log(df_dict)
             corr_matrix(dfx)
-           
