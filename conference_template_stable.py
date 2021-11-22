@@ -13,6 +13,7 @@ from collections import defaultdict
 
 import gseapy as gp
 from scipy.spatial.distance import pdist, squareform
+from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy import stats
 
 import streamlit as st
@@ -229,10 +230,10 @@ def volcano(df_dict, list_of_days, colorlist):
     st.subheader("Volcano plot analysis")
     vol_expand = st.sidebar.expander("Expand for volcano plot", expanded=False)
     xaxes = vol_expand.slider("Choose log2 fold-change boundaries for volcano plot",
-                              help="The app will plot the values beyond the minimum and maximum user-set values",
+                              help="The app will plot the values between the user-set range",
                               min_value= -5.0, max_value=5.0, step=0.1, value=(0.0,0.0))
     if vol_expand.checkbox("Reset log2 fold-change boundaries to (0,0)", value=False):
-        xaxes = (0,0)
+        xaxes = (0, 0)
     yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
                               help="The app will plot the values greater than the user-set value",
                               min_value=0.0, max_value=5.0, step = 0.1, value=0.0)
@@ -260,9 +261,13 @@ def volcano(df_dict, list_of_days, colorlist):
                 # (to include the log2ratio and -log pval)
                 pvals = df[pval_col_name[0]]
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
-                                             ((for_annotation[FC_col_name[0]] <= xaxes[0])|
-                                              (for_annotation[FC_col_name[0]] >= xaxes[1]))] # bracket over fc filters
+                if xaxes != (0.0,0.0):
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
+                                                 (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
+                                                  inclusive='both')
+                                                  )] # bracket over fc filters
+                else:
+                    user_filter = for_annotation
 
                 top_10 = user_filter.sort_values(by=FC_col_name[0], ascending=False).head(10)
                 bottom_10 = user_filter.sort_values(by=FC_col_name[0], ascending=True).head(10)
@@ -339,9 +344,13 @@ def volcano(df_dict, list_of_days, colorlist):
                 pvals = df[pval_col_name[0]]
 
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                user_filter = for_annotation[(for_annotation[FC_col_name[0]] <= xaxes[0]) |
-                                             (for_annotation[FC_col_name[0]] >= xaxes[1]) &
-                                             (for_annotation[pval_col_name[0]] >= yaxes)]
+                if xaxes != (0.0, 0.0):
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
+                                                 (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
+                                                                                         inclusive='both')
+                                                  )]  # bracket over fc filters
+                else:
+                    user_filter = for_annotation
 
                 top_10 = user_filter.sort_values(by=FC_col_name[0], ascending=False).head(10)
                 bottom_10 = user_filter.sort_values(by=FC_col_name[0], ascending=True).head(10)
@@ -641,6 +650,16 @@ def deg_cluster(proportions, log_dfx):
         #     st.dataframe(specific_cluster)
         #     st.markdown(get_table_download_link([specific_cluster], "pathway_clustergram"), unsafe_allow_html=True)
         st.pyplot(g)
+        # col_linkage = g.dendrogram_col.linkage
+        # st.write("Column Linkage", col_linkage)
+        # denfig = plt.figure()
+        # dendro_col = dendrogram(col_linkage, orientation='top')
+        # st.pyplot(denfig)
+        # st.write("Row Linkage", g.dendrogram_row.linkage)
+        # denrowfig = plt.figure()
+        # dendro_row = dendrogram(g.dendrogram_row.linkage, orientation='left')
+        # st.pyplot(denrowfig)
+
     else:
         st.warning("Please choose more than 1 DEG")
 
@@ -708,7 +727,11 @@ def clustergram(dfx):
                            center=0, col_cluster=True, yticklabels=True)
         g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
         st.pyplot(g)
-
+        # st.write("Column Linkage", g.dendrogram_col.linkage)
+        # denfig = plt.figure()
+        # dendro_col = dendrogram(g.dendrogram_col.linkage)
+        # st.pyplot(denfig)
+        # st.write("Row Linkage", g.dendrogram_row.linkage)
 
 # ############################################### Enrichr ##############################################################
 degs_but_manual = 0  # If is 0, means user is using DEGs for Enrichr, if is 1, user chooses to add genes manually
