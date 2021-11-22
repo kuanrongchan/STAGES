@@ -7,7 +7,7 @@ import time
 import math
 import csv
 import re
-# import base64
+import base64
 from io import BytesIO
 from collections import defaultdict
 
@@ -34,7 +34,6 @@ from mpl_toolkits.axes_grid1.colorbar import colorbar
 def convert_df(df):
     return df.to_csv().encode('utf-8')
 
-
 def to_excel(df):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
@@ -45,16 +44,17 @@ def to_excel(df):
     return processed_data
 
 
-# def get_table_download_link(df): keeping just in case download button fails
-#     """Generates a link allowing the data in a given panda dataframe to be downloaded
-#     in:  dataframe
-#     out: href string
-#     """
-#     val = to_excel(df)
-#     b64 = base64.b64encode(val)
-#     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="deg_files.xlsx">Download DEGs as Excel File</a>' # decode b'abc' => abc
+def get_table_download_link(df, purpose): # keeping just in case download button fails
+    """Generates a link allowing the data in a given panda dataframe to be downloaded
+    in:  dataframe
+    out: href string
+    """
+    val = to_excel(df)
+    b64 = base64.b64encode(val)
+    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{purpose}.xlsx">' \
+           f'📥 Download {purpose} as Excel File 📥</a>' # decode b'abc' => abc
 
-st.title("Omics Dashboard \U0001F4CA")
+st.title("STAGEs Dashboard \U0001F4CA")
 
 ################################################# Documentation ########################################################
 documentation = st.sidebar.checkbox("Read the Docs", value=False, key='documentation')
@@ -118,27 +118,18 @@ def read_docs():
     6. Plot interactive correlation matrix comparing across different time-points or experimental conditions
     ## Getting started
     To use the app, you will need one comparison file which should minimally contain:
-
     1. Gene names on the first column
     2. Ratio values (relative transcript expression versus control or baseline)
     3. Adjusted p-value (or p-value)
-
     For the app to be able to recognise your ratio and p-values, please label:
-
     1. Ratio as ratio_X_vs_Y
     2. Adjusted p-values (or p-values) as pval_X_vs_Y,
-
     where X and Y are the comparison variables. 
-
     Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0.
-
     Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0.
-
     For multiple comparisons to be made within the same graph, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
     To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
-
     Demo examples are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset
-
     ## Data safety and security
     The data you upload is safe and is never stored anywhere.
     ## Contributors
@@ -224,6 +215,12 @@ def n_colors(list_of_days):
 def volcano(df_dict, list_of_days, colorlist):
     st.subheader("Volcano plot analysis")
     vol_expand = st.sidebar.expander("Expand for volcano plot", expanded=False)
+    xaxes = vol_expand.slider("Choose log2 fold-change boundaries for volcano plot",
+                              help="The app will plot the values beyond the minimum and maximum user-set values",
+                              min_value= -5.0, max_value=5.0, step=0.1, value=(-2.0,2.0))
+    yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
+                              help="The app will plot the values greater than the user-set value",
+                              min_value=0.0, max_value=5.0, step = 0.1, value=2.0)
     interactive_volcano = vol_expand.checkbox(label="Show interactive volcano plot", value=False,
                                               help="Facilitates gene name display on hover. This may cause lag")
 
@@ -248,16 +245,19 @@ def volcano(df_dict, list_of_days, colorlist):
                 # (to include the log2ratio and -log pval)
                 pvals = df[pval_col_name[0]]
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                filter_pval = for_annotation.loc[for_annotation[pval_col_name[0]] > 1.30]
-                top_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=False).head(10)
-                bottom_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=True).head(10)
+                user_filter = for_annotation[(for_annotation[FC_col_name[0]] <= xaxes[0])|
+                                             (for_annotation[FC_col_name[0]] >= xaxes[1]) &
+                                             (for_annotation[pval_col_name[0]] >= yaxes)]
+
+                top_10 = user_filter.sort_values(by=FC_col_name[0], ascending=False).head(10)
+                bottom_10 = user_filter.sort_values(by=FC_col_name[0], ascending=True).head(10)
                 bottom10annotation.append(
                     bottom_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
                 top10annotation.append(
                     top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
 
                 plt.grid(b=True, which="major", axis="both", alpha=0.3)
-                plt.scatter(fold_changes, pvals, alpha=0.7, label=complabels)
+                plt.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
                 plt.title(f"Volcano plot across {tp_or_comp}", loc='center')
                 plt.legend(bbox_to_anchor=(1.04, 1), loc='upper left')
                 plt.xlabel('log2(Fold-change)')
@@ -266,16 +266,16 @@ def volcano(df_dict, list_of_days, colorlist):
                 plt.axvline(x=0, linestyle='dashed')
 
                 if interactive_volcano:
-                    volcano1.add_trace(go.Scatter(x=fold_changes, y=pvals,
+                    volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
                                                   mode='markers',
-                                                  name=complabels, hovertext=list(df.index),
+                                                  name=complabels, hovertext=list(user_filter.index),
                                                   line=dict(color=col)
                                                   )
                                        )
-            annotationconcat_top = pd.concat(top10annotation, axis=0).drop_duplicates(keep='first')
+            annotationconcat_top = pd.concat(top10annotation, axis=0)
             annotationconcat_top = annotationconcat_top.sort_values(by=["log2FC"], ascending=False).head(10)
 
-            annotationconcat_bottom = pd.concat(bottom10annotation, axis=0).drop_duplicates(keep='first')
+            annotationconcat_bottom = pd.concat(bottom10annotation, axis=0)
             annotationconcat_bottom = annotationconcat_bottom.sort_values(by=["log2FC"], ascending=True).head(10)
 
             topoverall = list(annotationconcat_top.index)
@@ -324,9 +324,12 @@ def volcano(df_dict, list_of_days, colorlist):
                 pvals = df[pval_col_name[0]]
 
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                filter_pval = for_annotation.loc[for_annotation[pval_col_name[0]] > 1.30]
-                top_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=False).head(10)
-                bottom_10 = filter_pval.sort_values(by=FC_col_name[0], ascending=True).head(10)
+                user_filter = for_annotation[(for_annotation[FC_col_name[0]] <= xaxes[0]) |
+                                             (for_annotation[FC_col_name[0]] >= xaxes[1]) &
+                                             (for_annotation[pval_col_name[0]] >= yaxes)]
+
+                top_10 = user_filter.sort_values(by=FC_col_name[0], ascending=False).head(10)
+                bottom_10 = user_filter.sort_values(by=FC_col_name[0], ascending=True).head(10)
                 bottom10annotation.append(
                     bottom_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
                 top10annotation.append(
@@ -337,22 +340,22 @@ def volcano(df_dict, list_of_days, colorlist):
                 elif len(df_dict) % 3 == 0:
                     plt.subplot(nrows, 3, j)
                 plt.grid(b=True, which="major", axis="both", alpha=0.3)
-                plt.scatter(fold_changes, pvals, alpha=0.7, label=complabels)
+                plt.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
                 plt.axhline(y=0, color='r', linestyle='dashed')
                 plt.axvline(x=0, linestyle='dashed')
 
                 if interactive_volcano:
-                    volcano1.add_trace(go.Scatter(x=fold_changes, y=pvals,
+                    volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
                                                   mode='markers',
                                                   name=complabels, hovertext=list(df.index),
                                                   line=dict(color=clr)
                                                   ),
                                        row=v_row, col=v_col
                                        )
-            annotationconcat_top = pd.concat(top10annotation, axis=0).drop_duplicates(keep='first')
+            annotationconcat_top = pd.concat(top10annotation, axis=0)
             annotationconcat_top = annotationconcat_top.sort_values(by=["log2FC"], ascending=False).head(10)
 
-            annotationconcat_bottom = pd.concat(bottom10annotation, axis=0).drop_duplicates(keep='first')
+            annotationconcat_bottom = pd.concat(bottom10annotation, axis=0)
             annotationconcat_bottom = annotationconcat_bottom.sort_values(by=["log2FC"], ascending=True).head(10)
 
             topoverall = list(annotationconcat_top.index)
@@ -367,6 +370,9 @@ def volcano(df_dict, list_of_days, colorlist):
                              xy=(annotationconcat_bottom.iloc[i, 0], annotationconcat_bottom.iloc[i, 1]),
                              xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
                              fontsize=7)  # bottom 10
+
+            top10annotation.clear()
+            bottom10annotation.clear()
 
             j += 1
             v_col += 1
@@ -572,8 +578,8 @@ def degs(df_dict, list_of_days, colorlist):
     with st.expander("Expand to view and download DEGs per timepoint/comparison"):
         for k, v in deg_dict.items():
             st.write(f"**{k}**", v)
-        st.download_button(label="Download DEGs", data=to_excel(deg_to_dl), file_name="DEGs.xlsx")
-
+        # st.download_button(label="Download DEGs", data=to_excel(deg_to_dl), file_name="DEGs.xlsx")
+        st.markdown(get_table_download_link(deg_to_dl, "DEGs"), unsafe_allow_html=True)
 
 ############################################### Extract DEGs from deg_dict #############################################
 def deg_cluster(proportions, log_dfx):
@@ -776,7 +782,7 @@ def genes_used(premade_dict=None):
 
     return gene_final
 
-
+@st.cache(suppress_st_warning=True)
 def execute_enrichr(genelist, select_dataset, use_degs=False):
     st.info("Expand the plot to view all of the terms.")
     enrichr_results_exp = st.expander("Expand for enrichr dataframe", expanded=False)
@@ -873,8 +879,9 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                 st.write("Enrichr with downregulated DEGs")
                 st.dataframe(data_down_trunc)
                 enrichr_download = [data_up_trunc, data_down_trunc]
-                st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                                   file_name="enrichr_updownDEGs_analysis.xlsx")
+                st.markdown(get_table_download_link(enrichr_download, "enrichr"), unsafe_allow_html=True)
+                # st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
+                #                    file_name="enrichr_updownDEGs_analysis.xlsx")
 
             fig = make_subplots(rows=2, cols=1, subplot_titles=["Upregulated DEGs", "Downregulated DEGs"],
                                 x_title="-logP", shared_xaxes=True)
@@ -893,8 +900,9 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                 st.write("Enrichr with upregulated DEGs")
                 st.dataframe(data_up_trunc)
                 enrichr_download = [data_up_trunc]
-                st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                                   file_name="enrichr_upDEGs_analysis.xlsx")
+                st.markdown(get_table_download_link(enrichr_download, "enrichr_upDEGs"), unsafe_allow_html=True)
+                # st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
+                #                    file_name="enrichr_upDEGs_analysis.xlsx")
             fig = go.Figure(go.Bar(x=toplot_up['-logP'], y=toplot_up.index, orientation='h', marker_color="#EF553B"))
             fig.update_xaxes(title="-logP")
             fig.update_yaxes(title="Term")
@@ -905,8 +913,9 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                 st.write("Enrichr with downregulated DEGs")
                 st.dataframe(data_down_trunc)
                 enrichr_download = [data_down_trunc]
-                st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                                   file_name="enrichr_downDEGs_analysis.xlsx")
+                st.markdown(get_table_download_link(enrichr_download, "enrichr_downDEGs"), unsafe_allow_html=True)
+                # st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
+                #                    file_name="enrichr_downDEGs_analysis.xlsx")
             fig = go.Figure(
                 go.Bar(x=toplot_down['-logP'], y=toplot_down.index, orientation='h', marker_color="#636EFA"))
             fig.update_xaxes(title="-logP")
@@ -958,7 +967,7 @@ def find_cols(df, timepoints):
 
 
 ########### Run Prerank #############################
-
+@st.cache(suppress_st_warning=True)
 def execute_prerank(col_dict, geneset):
     prerank_results_dict = {}
     for key, data in col_dict.items():
@@ -1031,9 +1040,10 @@ def execute_prerank(col_dict, geneset):
         prerank_results_exp.write(key)
         prerank_results_exp.dataframe(ranked)
 
-    prerank_results_exp.download_button(label="Download prerank dataframe",
-                                        data=to_excel(prerank_export),
-                                        file_name="prerank_analysis.xlsx")
+    prerank_results_exp.markdown(get_table_download_link(prerank_export, "GSEAprerank"), unsafe_allow_html=True)
+    # prerank_results_exp.download_button(label="Download prerank dataframe",
+    #                                     data=to_excel(prerank_export),
+    #                                     file_name="prerank_analysis.xlsx")
 
     return
 
@@ -1104,7 +1114,7 @@ def corr_matrix(dfx):
 
 ##################################### Choose app to build dashboard ##################################################
 choose_app = st.sidebar.multiselect("Choose an app to render in the main page 👉",
-                                    options=["volcano plot", "DEGs", "enrichr", "prerank", "clustergram",
+                                    options=["volcano plot", "DEGs", "enrichr", "GSEA prerank", "pathway clustergram",
                                              "correlation matrix"])
 
 for c in choose_app:
@@ -1132,7 +1142,7 @@ for c in choose_app:
             if "DEGs" in choose_app:
                 select_dataset = select_enrichr_dataset()
                 genelist = genes_used(premade_dict=proportions)
-                run_enrichr = enrichr_exp.button("Run Enrichr")
+                run_enrichr = enrichr_exp.checkbox("Run Enrichr",value=False)
                 if run_enrichr:
                     if degs_but_manual == 0:
                         execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=True)
@@ -1144,12 +1154,13 @@ for c in choose_app:
             else:
                 select_dataset = select_enrichr_dataset()
                 genelist = genes_used(premade_dict=None)
-                if len(genelist) != 0:
+                run_enrichr = enrichr_exp.checkbox("Run Enrichr", value=False)
+                if run_enrichr:
                     execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=False)
                 else:
                     st.stop()
 
-        elif c == 'prerank':
+        elif c == 'GSEA prerank':
             list_of_days = timepoints(df_dict)
             dfx = check_log(df_dict)
 
@@ -1164,13 +1175,13 @@ for c in choose_app:
             prerank_dataset = select_prerank_dataset()  # same datasets as enrichr
             prerank_cols = find_cols(dfx[select_df], use_tps)
             applyfdr = prernk_exp.checkbox("Apply FDR < 0.05 cutoff to the bar plots", value=False)
-            run_prerank = prernk_exp.button("Run prerank")
+            run_prerank = prernk_exp.checkbox("Run GSEA prerank", value=False)
             if run_prerank:
                 execute_prerank(prerank_cols, prerank_dataset)
             else:
                 st.stop()
 
-        elif c == "clustergram":
+        elif c == "pathway clustergram":
             dfx = check_log(df_dict)
             clust_expand = st.sidebar.expander("Expand for user-input gene clustergram", expanded=False)
             clustergram(dfx)
