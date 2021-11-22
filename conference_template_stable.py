@@ -235,7 +235,7 @@ def volcano(df_dict, list_of_days, colorlist):
         xaxes = (0,0)
     yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
                               help="The app will plot the values greater than the user-set value",
-                              min_value=0.0, max_value=5.0, step = 0.1, value=2.0)
+                              min_value=0.0, max_value=5.0, step = 0.1, value=0.0)
     interactive_volcano = vol_expand.checkbox(label="Show interactive volcano plot", value=False,
                                               help="Facilitates gene name display on hover. This may cause lag")
 
