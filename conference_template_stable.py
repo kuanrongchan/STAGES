@@ -627,7 +627,7 @@ def deg_cluster(proportions, log_dfx):
 
 ####################################################### Clustergram #################################################
 def clustergram(dfx):
-    st.subheader("Gene clustergram")
+    st.subheader("Pathway clustergram")
 
     dfx_keys = list(dfx.keys())
     # dfx_keys.insert(0, "all")
@@ -784,6 +784,7 @@ def genes_used(premade_dict=None):
 
 # @st.cache(suppress_st_warning=True)
 def execute_enrichr(genelist, select_dataset, use_degs=False):
+    st.subheader("Enrichr Analysis")
     st.info("Expand the plot to view all of the terms.")
     enrichr_results_exp = st.expander("Expand for enrichr dataframe", expanded=False)
     if not use_degs:
@@ -969,6 +970,7 @@ def find_cols(df, timepoints):
 ########### Run Prerank #############################
 # @st.cache(suppress_st_warning=True)
 def execute_prerank(col_dict, geneset):
+    st.subheader("GSEA Prerank Analysis")
     prerank_results_dict = {}
     for key, data in col_dict.items():
         running = gp.prerank(rnk=data,
