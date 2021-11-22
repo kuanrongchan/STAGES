@@ -782,7 +782,7 @@ def genes_used(premade_dict=None):
 
     return gene_final
 
-@st.cache(suppress_st_warning=True)
+# @st.cache(suppress_st_warning=True)
 def execute_enrichr(genelist, select_dataset, use_degs=False):
     st.info("Expand the plot to view all of the terms.")
     enrichr_results_exp = st.expander("Expand for enrichr dataframe", expanded=False)
@@ -967,7 +967,7 @@ def find_cols(df, timepoints):
 
 
 ########### Run Prerank #############################
-@st.cache(suppress_st_warning=True)
+# @st.cache(suppress_st_warning=True)
 def execute_prerank(col_dict, geneset):
     prerank_results_dict = {}
     for key, data in col_dict.items():
