@@ -229,12 +229,12 @@ def n_colors(list_of_days):
 def volcano(df_dict, list_of_days, colorlist):
     st.subheader("Volcano plot analysis")
     vol_expand = st.sidebar.expander("Expand for volcano plot", expanded=False)
-    if vol_expand.checkbox("Reset to default settings", value=False):
-        xaxes = (0.0, 0.0)
+    reset = vol_expand.checkbox("Reset to default settings", value=False)
     xaxes = vol_expand.slider("Choose log2 fold-change boundaries for volcano plot",
                               help="The app will plot the values between the user-set range",
                               min_value= -5.0, max_value=5.0, step=0.1, value=(0.0,0.0))
-
+    if reset:
+        xaxes = (0.0,0.0)
     yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
                               help="The app will plot the values greater than the user-set value",
                               min_value=0.0, max_value=5.0, step = 0.1, value=0.0)
