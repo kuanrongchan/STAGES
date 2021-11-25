@@ -29,12 +29,12 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Updates: prerank function, gene list for DEGs will be reverted to the old list for enrichr
-# Updates V1c: Volcano plot can now plot user specified log2FC cutoffs
+# Update: removed internal enrichr new -> old converter as the enrichr database has been updated (left as commented in case other gene sets not available)
 
 ################################################ for df download #######################################################
 def convert_df(df):
     return df.to_csv().encode('utf-8')
+
 
 def to_excel(df):
     output = BytesIO()
@@ -46,7 +46,7 @@ def to_excel(df):
     return processed_data
 
 
-def get_table_download_link(df, purpose): # keeping just in case download button fails
+def get_table_download_link(df, purpose):  # keeping just in case download button fails
     """Generates a link allowing the data in a given panda dataframe to be downloaded
     in:  dataframe
     out: href string
@@ -54,7 +54,8 @@ def get_table_download_link(df, purpose): # keeping just in case download button
     val = to_excel(df)
     b64 = base64.b64encode(val)
     return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{purpose}.xlsx">' \
-           f'📥 Download {purpose} as Excel file 📥</a>' # decode b'abc' => abc
+           f'📥 Download {purpose} as Excel file 📥</a>'  # decode b'abc' => abc
+
 
 st.title("STAGEs Dashboard \U0001F4CA")
 
@@ -99,9 +100,9 @@ proportions = {}  ########
 ##########################
 
 # gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
-gene_symbols = pd.read_csv("gene_date.csv")
-old_symbols = gene_symbols.iloc[:, 0].tolist()
-new_symbols = gene_symbols.iloc[:, 3].tolist()
+# gene_symbols = pd.read_csv("gene_date.csv")
+# old_symbols = gene_symbols.iloc[:, 0].tolist()
+# new_symbols = gene_symbols.iloc[:, 3].tolist()
 
 
 ################################################# Read the Docs #######################################################
@@ -112,41 +113,41 @@ def read_docs():
     st.markdown(
         '''
     STAGES is a multi-app that integrates data visualisation and pathway analysis for static and temporal gene expression studies. STAGES is an open source and community funded web tool for creating beautiful charts from gene expression datasets. The multi-page web app built using Streamlit, which currently allows users to analyse an omics data in distinct stages:
-    
+
     1. Plot interactive volcano plots
     2. Filter data for differentially expressed genes (Users can apply their preferred fold-change and p-value cut-offs to identify DEG number and identities)
     3. Build customised clustergrams based on identified up-regulated DEGs (UP) or down-regulated DEGs (DOWN)
     4. Build customised clustergrams based on user-selected gene list
     5. Perform Enrichr analysis based on DEGs or user-selected gene list
     6. Plot interactive correlation matrix comparing across different time-points or experimental conditions
-    
+
     ## Getting started
-    
+
     To use the app, you will need one comparison file which should minimally contain:
-    
+
     1. Gene names on the first column
     2. Ratio values (relative transcript expression versus control or baseline)
     3. Adjusted p-value (or p-value)
-    
+
     For the app to be able to recognise your ratio and p-values, please label:
-    
+
     1. Ratio as ratio_X_vs_Y
     2. Adjusted p-values (or p-values) as pval_X_vs_Y,
     where X and Y are the comparison variables. 
-    
+
     Some examples of labelling "X" include: ratio_virus_vs_ctrl, ratio_drugA_vs_placebo, ratio_hr6_vs_0, ratio_day1_vs_day0.
-    
+
     Some examples of labelling "Y" include: pval_virus_vs_ctrl, pval_drugA_vs_placebo, pval_hr6_vs_0, pval_day1_vs_day0.
-    
+
     For multiple comparisons to be made within the same graph, simply insert more comparison columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y ...), but please ensure that  "Y" is consistently present in all comparisons. Also, ensure that no icons or symbols used for labelling "X" and "Y." If you have other column statistics, it is not necessary to remove them.
-    
+
     To perform multiple comparisons for time-course experiments, you can choose to upload multiple .csv or .xls files. But please do ensure that the header columns are labelled the same way (meaning that the data has to measured at same time-points for the different experimental conditions)
-    
+
     Demo examples are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset.
-    
+
     ## Data safety and security
     The data you upload is safe and is never stored anywhere.
-    
+
     ## Contributors
     These apps are jointly made by myself (Kuan Rong Chan), Clara Koh, Justin Ooi and Gabrielle Lee from Duke-NUS, Department of Emerging Infectious Diseases. I am also thankful for Eugenia Ong and Ayesa Syenina from VIREMICS for their constructive feedback. These apps are now free for everyone to use, but for a limited period of time as we are constantly upgrading the apps. For more details on what we do, feel free to visit us at [omicsdiary.com](https://omicsdiary.com/).
         ''')
@@ -233,12 +234,12 @@ def volcano(df_dict, list_of_days, colorlist):
     reset = vol_expand.checkbox("Reset to default settings", value=False)
     xaxes = vol_expand.slider("Choose log2 fold-change boundaries for volcano plot",
                               help="The app will plot the values between the user-set range",
-                              min_value= -5.0, max_value=5.0, step=0.1, value=(0.0,0.0))
+                              min_value=-5.0, max_value=5.0, step=0.1, value=(0.0, 0.0))
     if reset:
-        xaxes = (0.0,0.0)
+        xaxes = (0.0, 0.0)
     yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
                               help="The app will plot the values greater than the user-set value",
-                              min_value=0.0, max_value=5.0, step = 0.1, value=0.0)
+                              min_value=0.0, max_value=5.0, step=0.1, value=0.0)
     interactive_volcano = vol_expand.checkbox(label="Show interactive volcano plot", value=False,
                                               help="Facilitates gene name display on hover. This may cause lag")
 
@@ -263,11 +264,11 @@ def volcano(df_dict, list_of_days, colorlist):
                 # (to include the log2ratio and -log pval)
                 pvals = df[pval_col_name[0]]
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                if xaxes != (0.0,0.0):
+                if xaxes != (0.0, 0.0):
                     user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
                                                  (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
-                                                  inclusive='both')
-                                                  )] # bracket over fc filters
+                                                                                         inclusive='both')
+                                                  )]  # bracket over fc filters
                 else:
                     user_filter = for_annotation
 
@@ -607,6 +608,7 @@ def degs(df_dict, list_of_days, colorlist):
         # st.download_button(label="Download DEGs", data=to_excel(deg_to_dl), file_name="DEGs.xlsx")
         st.markdown(get_table_download_link(deg_to_dl, "DEGs"), unsafe_allow_html=True)
 
+
 ############################################### Extract DEGs from deg_dict #############################################
 def deg_cluster(proportions, log_dfx):
     st.subheader("Pathway Clustergram from DEGs")
@@ -735,6 +737,7 @@ def clustergram(dfx):
         # st.pyplot(denfig)
         # st.write("Row Linkage", g.dendrogram_row.linkage)
 
+
 # ############################################### Enrichr ##############################################################
 degs_but_manual = 0  # If is 0, means user is using DEGs for Enrichr, if is 1, user chooses to add genes manually
 
@@ -782,28 +785,29 @@ def genes_used(premade_dict=None):
             flattenedup = [val for sublist in uplist for val in sublist]  # all the upDEGs in 1 list
             flatteneddown = [val for sublist in downlist for val in sublist]  # all the downDEGs in 1 list
 
-            converter = defaultdict(list)  # yes it should remain as list do not change
-
-            for val in flattenedup:
-                converter[val] = val
-
-            for val in flatteneddown:
-                converter[val] = val
-
-            for o, n in zip(old_symbols, new_symbols):
-                converter[n] = o
-
-            for k in flattenedup:  # why this: if not, the converter will also include all the date genes that may not be a DEG
-                t = converter[k]
-                if t not in up_enrichr:
-                    up_enrichr.append(t)
-
-            for k in flatteneddown:
-                t = converter[k]
-                if t not in down_enrichr:
-                    down_enrichr.append(t)
-
-            gene_final = [up_enrichr, down_enrichr]
+            # converter = defaultdict(list)  # yes it should remain as list do not change
+            #
+            # for val in flattenedup:
+            #     converter[val] = val
+            #
+            # for val in flatteneddown:
+            #     converter[val] = val
+            #
+            # for o, n in zip(old_symbols, new_symbols):
+            #     converter[n] = o
+            #
+            # for k in flattenedup:  # why this: if not, the converter will also include all the date genes that may not be a DEG
+            #     t = converter[k]
+            #     if t not in up_enrichr:
+            #         up_enrichr.append(t)
+            #
+            # for k in flatteneddown:
+            #     t = converter[k]
+            #     if t not in down_enrichr:
+            #         down_enrichr.append(t)
+            #
+            # gene_final = [up_enrichr, down_enrichr]
+            gene_final = [flattened_up, flattened_down]
 
         elif choose_genetype == "Add manually":
             gene_in = enrichr_exp.text_area(label="Input list of at least 3 genes here",
@@ -828,6 +832,7 @@ def genes_used(premade_dict=None):
         gene_final = [x.upper() for x in remove_dupes if x != ""]
 
     return gene_final
+
 
 def execute_enrichr(genelist, select_dataset, use_degs=False):
     st.info("Expand the plot to view all of the terms.")
@@ -1054,7 +1059,7 @@ def execute_prerank(col_dict, geneset):
 
         pos_nes_sort = pos_nes.sort_values(by=['nes']).tail(10)
         pos_nes_sort.reset_index(inplace=True)
-        pos_nes_sort.rename(columns={"index":"Term"}, inplace=True)
+        pos_nes_sort.rename(columns={"index": "Term"}, inplace=True)
         top_pos = len(pos_nes_sort)  # For formatting plot title
 
         neg_nes_sort = neg_nes.sort_values(by=['negative nes']).tail(10)
@@ -1071,15 +1076,15 @@ def execute_prerank(col_dict, geneset):
         neg.update_traces(marker_color="#636EFA")
 
         pos.update_layout(title=f"Top {top_pos} positively enriched pathways",
-                              xaxis_title='NES',
-                              font=dict(
-                                  family='Arial', size=16)
-                              )
+                          xaxis_title='NES',
+                          font=dict(
+                              family='Arial', size=16)
+                          )
         neg.update_layout(title=f"Top {top_neg} negatively enriched pathways",
-                              xaxis_title='NES',
-                              font=dict(
-                                  family='Arial', size=16)
-                              )
+                          xaxis_title='NES',
+                          font=dict(
+                              family='Arial', size=16)
+                          )
         st.plotly_chart(pos)
         st.plotly_chart(neg)
 
@@ -1188,7 +1193,7 @@ for c in choose_app:
             if "DEGs" in choose_app:
                 select_dataset = select_enrichr_dataset()
                 genelist = genes_used(premade_dict=proportions)
-                run_enrichr = enrichr_exp.checkbox("Run Enrichr",value=False)
+                run_enrichr = enrichr_exp.checkbox("Run Enrichr", value=False)
                 if run_enrichr:
                     if degs_but_manual == 0:
                         execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=True)
