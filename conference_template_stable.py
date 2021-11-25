@@ -78,10 +78,11 @@ if len(df_query) != 0:
 
         elif tail == 'xlsx':
             x = st.experimental_memo(pd.read_excel)(d, index_col=0, sheet_name=None, engine='openpyxl')
-            selected_sheet = st.sidebar.selectbox(label="* Select which sheet to read in", options=x.keys())
-            data = x[selected_sheet]
-            df_dict[head] = data
-            df_names.append(head)
+            selected_sheet = st.sidebar.multiselect(label="* Select which sheet to read in", options=x.keys())
+            for i in selected_sheet:
+                data = x[i]
+                df_dict[i] = data
+                df_names.append(i)
 else:
     testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
     testname = "Demo"
