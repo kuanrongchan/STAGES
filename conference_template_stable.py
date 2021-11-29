@@ -807,7 +807,7 @@ def genes_used(premade_dict=None):
             #         down_enrichr.append(t)
             #
             # gene_final = [up_enrichr, down_enrichr]
-            gene_final = [flattened_up, flattened_down]
+            gene_final = [flattenedup, flatteneddown]
 
         elif choose_genetype == "Add manually":
             gene_in = enrichr_exp.text_area(label="Input list of at least 3 genes here",
