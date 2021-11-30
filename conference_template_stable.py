@@ -5,16 +5,16 @@ import pandas as pd
 import numpy as np
 import time
 import math
-import csv
+# import csv
 import re
 import base64
 from io import BytesIO
-from collections import defaultdict
+# from collections import defaultdict
 
 import gseapy as gp
-from scipy.spatial.distance import pdist, squareform
+# from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy import stats
+# from scipy import stats
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
@@ -746,10 +746,10 @@ def select_enrichr_dataset():
     geneset_dict = {
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome 2021": "Reactome.gmt",
-        "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
-        "GO Biological Process 2021": "GO_Biological_Process_2021",
-        "GO Molecular Function 2021": "GO_Molecular_Function_2021",
-        "KEGG 2021 Human": "KEGG_2021_Human"
+        "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021"
+#         "GO Biological Process 2021": "GO_Biological_Process_2021",
+#         "GO Molecular Function 2021": "GO_Molecular_Function_2021",
+#         "KEGG 2021 Human": "KEGG_2021_Human"
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
