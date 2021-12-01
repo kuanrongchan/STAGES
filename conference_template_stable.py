@@ -330,8 +330,8 @@ def qc_df(dfs):
                                     options=['month-year', 'month-day'],
                                     help='For example, 2001-03-09 (yyyy-mm-dd) may either be Mar-01 (MARCHF1) or Mar-09 (MARCHF9).',
                                     index=1)
-        num_exp.info("If you're unsure about the above option, check your dataframe and select 'month-year' "
-                     "if there are any <NA> symbols found at the bottom of the dataframe.")
+        num_exp.info("If you're unsure about the above option, check your dataframe and select 'month-year'. "
+                     "We recommend you to check the converted dataframe to ensure that the dates are converted correctly. If unsuccessful, <NA> symbols will populate at the bottom of the dataframe.")
         if info_stored == 'month-year':
             strfmt = '%b-%y'
         else:
