@@ -13,3 +13,5 @@ openpyxl==3.0.9
 xlrd==2.0.1
 gseapy==0.10.4
 XlsxWriter==3.0.2
+inflect==5.3.0
+dateparser==1.1.0
