@@ -5,16 +5,17 @@ import pandas as pd
 import numpy as np
 import time
 import math
-# import csv
 import re
 import base64
 from io import BytesIO
-# from collections import defaultdict
+import inflect
+import dateparser
+from datetime import datetime
 
 import gseapy as gp
-# from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
-# from scipy import stats
+from scipy import stats
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
@@ -29,7 +30,9 @@ from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Update: removed internal enrichr new -> old converter as the enrichr database has been updated (left as commented in case other gene sets not available)
+# Update: added internal date-gene conversion
+# Update: Improved caching for enrichr and prerank to prevent slow-down of app when no changes are made to enrichr/prerank results
+# Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -66,7 +69,7 @@ df_query = st.sidebar.file_uploader(
     'Upload your .csv/.xlsx file. A demo dataset will be uploaded if no files are uploaded',
     accept_multiple_files=True)
 
-df_dict = {}
+df_dict = {} # initial, but should use cleaned_dict after uploading and qc checks
 df_names = []
 
 if len(df_query) != 0:
@@ -84,15 +87,16 @@ if len(df_query) != 0:
                 data = x[i]
                 df_dict[i] = data
                 df_names.append(i)
+
 else:
     testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
     testname = "Demo"
     df_dict[testname] = testdata
     df_names.append(testname)
 
-if st.sidebar.checkbox("Show uploaded/demo dataframe"):
-    for k, v in df_dict.items():
-        st.write(f"**{k} dataframe**", v)
+for df in df_dict.values():
+    df.index = df.index.astype(str, copy=False) # expand to format actual dates from excel sheets as text
+
 
 ####### Important ########
 deg_dict = {}  ###########
@@ -104,6 +108,17 @@ proportions = {}  ########
 # old_symbols = gene_symbols.iloc[:, 0].tolist()
 # new_symbols = gene_symbols.iloc[:, 3].tolist()
 
+@st.experimental_memo
+def clean_ref():
+    # for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
+    for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
+    for_ref.reset_index(drop=True,inplace=True)
+    for_ref.columns = for_ref.iloc[0,:]
+    for_ref.drop(index=0, inplace=True)
+    for_ref.drop(columns="Match type", inplace=True)
+    for_ref.rename(columns={"Input":"Previous Symbol"}, inplace=True)
+    return for_ref
+reference_symbols = clean_ref()
 
 ################################################# Read the Docs #######################################################
 def read_docs():
@@ -156,15 +171,270 @@ def read_docs():
 if documentation:
     read_docs()
 
+################################################# Date-Gene Conversion ################################################
+#######################################################################################################################
+cleaned_dict = {}
+def qc_df(dfs):
+    with st.spinner("Checking uploaded dataframe for dates in gene column"):
+        time.sleep(0.5)
+    p = inflect.engine()
+    corrected = {"Dec-01_1st": "DELEC1", "01-Dec_1st": "DELEC1", "Mar-03_1st": "MARCHF3", "03-Mar_1st": "MARCHF3",
+                 "Mar-04_1st": "MARCHF4", "04-Mar_1st": "MARCHF4", "Mar-05_1st": "MARCHF5", "05-Mar_1st": "MARCHF5",
+                 "Mar-06_1st": "MARCHF6", "06-Mar_1st": "MARCHF6", "Mar-07_1st": "MARCHF7", "07-Mar_1st": "MARCHF7",
+                 "Mar-08_1st": "MARCHF8", "08-Mar_1st": "MARCHF8", "Mar-09_1st": "MARCHF9", "09-Mar_1st": "MARCHF9",
+                 "Mar-10_1st": "MARCHF10", "10-Mar_1st": "MARCHF10", "Mar-11_1st": "MARCHF11", "11-Mar_1st": "MARCHF11",
+                 "Sep-15_1st": "SELENOF", "15_Sep_1st": "SELENOF", "Sep-01_1st": "SEPTIN1", "01-Sep_1st": "SEPTIN1",
+                 "Sep-02_1st": "SEPTIN2", "02-Sep_1st": "SEPTIN2", "Sep-03_1st": "SEPTIN3", "03-Sep_1st": "SEPTIN3",
+                 "Sep-04_1st": "SEPTIN4", "04-Sep_1st": "SEPTIN4", "Sep-05_1st": "SEPTIN5", "05-Sep_1st": "SEPTIN5",
+                 "Sep-06_1st": "SEPTIN6", "06-Sep_1st": "SEPTIN6", "Sep-07_1st": "SEPTIN7", "07-Sep_1st": "SEPTIN7",
+                 "Sep-08_1st": "SEPTIN8", "08-Sep_1st": "SEPTIN8", "Sep-09_1st": "SEPTIN9", "09-Sep_1st": "SEPTIN9",
+                 "Sep-10_1st": "SEPTIN10", "10-Sep_1st": "SEPTIN10", "Sep-11_1st": "SEPTIN11", "11-Sep_1st": "SEPTIN11",
+                 "Sep-12_1st": "SEPTIN12", "12-Sep_1st": "SEPTIN12", "Sep-14_1st": "SEPTIN14", "14-Sep_1st": "SEPTIN14"
+                 }
+    ################ Contains dates and March-01/March-02 and have to be resolved ####################
+    def march_resolver(df):
+        find = [g for g in df.index.tolist() if re.search("Mar|Apr|Sept?|Oct|Dec", g)]
+        formatted = {}
+        for d in find:
+            zero_pad = re.search("[0-9]{2}", d)
+            num = re.findall("[0-9]*", d)
+            og_num = [x for x in num if x != ""]
+            month = re.findall("[A-Za-z]*", d)
+            og_month = [x for x in month if x != ""]
+            if not zero_pad:
+                a = f"{og_month[0]}-0{og_num[0]}" # still can't use dateparser bc time fmt requires zero-padded number
+                formatted[d] = a
+            else:
+                a = f"{og_month[0]}-{og_num[0]}"
+                formatted[d] = a
+
+        each_df_exp = st.expander(f"Expand to resolve naming issues for {k} dataframe", expanded=False)
+        found = df.loc[find]
+        found.rename(index=formatted, inplace=True)
+        found = found.drop_duplicates() # ensures that there aren't duplicate rows (not just duplicate row names)
+        found.reset_index(drop=False, inplace=True)
+        index_name = found.columns.tolist()[0]
+        found[index_name] += found.groupby(index_name).cumcount().add(1).map(p.ordinal).radd('_')
+        found.set_index(index_name, inplace=True)
+        mar1 = [f for f in found.index.tolist() if re.search("Mar-0?1_1st|0?1-Mar_1st|Mar-0?1_2nd|Mar-0?1_2nd", f)]
+        if len(mar1) !=0:
+            mar1_df = found.loc[mar1]
+
+            with each_df_exp:
+                st.write(f"**MAR01 Genes: {k} Dataframe**")
+                st.info("Genes like MARCH1 and MARC1 have to be differentiated by function as they are both corrected to Mar-01 in Excel."
+                                 " Check HGNC symbol reference in the sidebar for reference. 👈")
+                st.dataframe(mar1_df.astype(str))
+
+                first_mar01_fx = st.selectbox(f"Select the name and function that {mar1[0]} corresponds to for {k} dataframe",
+                                              options=["MTARC1: mitochondrial amidoxime reducing component 1",
+                                                      "MARCHF1: membrane associated ring-CH-type finger 1"])
+            # function below can still apply to genes with only 1 MAR-01 gene because the dictionary will only match those found in the data
+            if first_mar01_fx == "MTARC1: mitochondrial amidoxime reducing component 1":
+                first_mar01 = "MTARC1"
+                second_mar01 = "MARCHF1"
+            elif first_mar01_fx == "MARCHF1: membrane associated ring-CH-type finger 1":
+                first_mar01 = "MARCHF1"
+                second_mar01 = "MTARC1"
+
+            corrected["Mar-01_1st"] = first_mar01
+            corrected["01-Mar_1st"] = first_mar01
+            corrected["Mar-01_2nd"] = second_mar01
+            corrected["01-Mar_2nd"] = second_mar01
+
+        mar2 = [f for f in found.index.tolist() if re.search("Mar-0?2_1st|0?2-Mar_1st|Mar-0?2_2nd|02-Mar_2nd", f)]
+        if len(mar2) !=0:
+            mar2_df = found.loc[mar2]
+
+            each_df_exp.write(f"**MAR02 Genes: {k} Dataframe**")
+            each_df_exp.info(
+                "Genes like MARCH2 and MARC2 have to be differentiated by function as they are both corrected to Mar-01 in Excel."
+                " Check old and new HGNC symbols in the sidebar for reference. 👈")
+            each_df_exp.dataframe(mar2_df.astype(str))
+
+            first_mar02_fx = each_df_exp.selectbox(f"Select the name and function that {mar2[0]} corresponds to for {k} dataframe",
+                                          options=[
+                                              "MTARC2: mitochondrial amidoxime reducing component 2",
+                                              "MARCHF2: membrane associated ring-CH-type finger 2"])
+
+            if first_mar02_fx == "MTARC2: mitochondrial amidoxime reducing component 2":
+                first_mar02 = "MTARC2"
+                second_mar02 = "MARCHF2"
+            elif first_mar02_fx == "MARCHF2: membrane associated ring-CH-type finger 2":
+                first_mar02 = "MARCHF2"
+                second_mar02 = "MTARC2"
+
+            corrected["Mar-01_1st"] = first_mar01
+            corrected["01-Mar_1st"] = first_mar01
+            corrected["Mar-01_2nd"] = second_mar01
+            corrected["01-Mar_2nd"] = second_mar01
+            corrected["Mar-02_1st"] = first_mar02
+            corrected["02-Mar_1st"] = first_mar02
+            corrected["Mar-02_2nd"] = second_mar02
+            corrected["02-Mar_2nd"] = second_mar02
+
+        else:
+            corrected["Mar-01_1st"] = first_mar01
+            corrected["01-Mar_1st"] = first_mar01
+            corrected["Mar-01_2nd"] = second_mar01
+            corrected["01-Mar_2nd"] = second_mar01
+
+        found["Gene"] = pd.Series(corrected)  # in order to rename just change this to found.rename(corrected)
+        found.reset_index(drop=True, inplace=True)  # remove the gene index with the dates
+        found.rename(columns={"Gene": "gene"}, inplace=True)  # rename the incoming column to be used as index
+        found.set_index('gene', inplace=True)  # set the index of these date genes using corrected names
+        df = df.drop(index=find)  # drop the date genes from the main df
+        df2 = pd.concat([df, found], axis=0)  # join these genes back to the main df
+        df2.sort_index(axis=0, ascending=True, inplace=True)  # sort alphabetically
+        df2.reset_index(drop=False, inplace=True)
+        df2.rename(columns={'index': index_name}, inplace=True)
+        df2.set_index(index_name, inplace=True)
+        cleaned_dict[k] = df2
+        return
+
+    ############ Contains dates but no march-01/march-02 and thus nothing to resolve ##############
+    def date_resolver(df, date_search):
+        formatted = {}
+        for d in date_search:
+            zero_pad = re.search("[0-9]{2}", d)
+            num = re.findall("[0-9]*", d)
+            og_num = [x for x in num if x != ""]
+            month = re.findall("[A-Za-z]*", d)
+            og_month = [x for x in month if x != ""]
+            if not zero_pad:
+                a = f"{og_month[0]}-0{og_num[0]}" # still can't use dateparser as python time fmts only read zero-padded no.
+                formatted[d] = a
+            else:
+                a = f"{og_month[0]}-{og_num[0]}"
+                formatted[d] = a
+        found = df.loc[date_search]
+        found.rename(index=formatted, inplace=True)
+        found = found.drop_duplicates()  # ensures that there aren't duplicate rows (not just duplicate row names)
+        found.reset_index(drop=False, inplace=True)
+        index_name = found.columns.tolist()[0]
+        found[index_name] += found.groupby(index_name).cumcount().add(1).map(p.ordinal).radd('_')
+        found.set_index(index_name, inplace=True)
+        found.rename(index=corrected, inplace=True)  # in order to rename just change this to found.rename(corrected)
+        df = df.drop(index=date_search)  # drop the date genes from the main df
+        df2 = pd.concat([df, found], axis=0)  # join these genes back to the main df
+        df2.sort_index(axis=0, ascending=True, inplace=True)  # sort alphabetically
+        cleaned_dict[k] = df2
+        return
+
+    ############################## Dates are only numbers ##########################################
+    def numeric_date(k, df, numdate):
+        num_exp = st.expander(f"Expand if {k}'s date format is numerical (eg. yyyy/mm/dd)")
+        date_fmt = num_exp.radio(f"Select the format that {k} dataframe is in",
+                                 options=["yyyy-dd-mm", "yyyy-mm-dd", "dd-mm-yyyy", "mm-dd-yyyy"])
+        info_stored = num_exp.radio(f"Select how {k}'s dates should be read to derive gene names (Hover '?' for help)",
+                                    options=['month-year', 'month-day'],
+                                    help='For example, 2001-03-09 (yyyy-mm-dd) may either be Mar-01 (MARCHF1) or Mar-09 (MARCHF9).',
+                                    index=1)
+        num_exp.info("If you're unsure about the above option, check your dataframe and select 'month-year' "
+                     "if there are any <NA> symbols found at the bottom of the dataframe.")
+        if info_stored == 'month-year':
+            strfmt = '%b-%y'
+        else:
+            strfmt = '%b-%d'
+        a = []
+        df.reset_index(drop=False, inplace=True)
+        index_nm = df.columns.tolist()[0]
+        for n in numdate:
+            indices = df.index[df[index_nm] == n].tolist()
+            if indices not in a:
+                a.append(indices)
+        flattened = [item for sublist in a for item in sublist]
+        found = df.iloc[flattened, :]
+        found.set_index(index_nm, inplace=True)
+        num_exp.write(f"**{k} dataframe**")
+        num_exp.dataframe(found)
+
+        if date_fmt == "yyyy-dd-mm":
+            extracted = {n: (dateparser.parse(n, date_formats=["%Y-%d-%m"])).strftime(strfmt) for n in numdate}
+        elif date_fmt == "yyyy-mm-dd":
+            extracted = {n: (dateparser.parse(n, date_formats=["%Y-%m-%d"])).strftime(strfmt) for n in numdate}
+        elif date_fmt == "dd-mm-yyyy":
+            extracted = {n: (dateparser.parse(n, date_formats=["%d-%m-%Y"])).strftime(strfmt) for n in numdate}
+        elif date_fmt == "mm-dd-yyyy":
+            extracted = {n: (dateparser.parse(n, date_formats=["%m-%d-%Y"])).strftime(strfmt) for n in numdate}
+
+        df.set_index(index_nm, inplace=True)
+        df.rename(index=extracted, inplace=True)
+        return df
+
+    ############################ Just old symbols and no date issues ###############################
+    def nodates(df):
+        corrected = {}
+        for i in range(len(reference_symbols)):
+            key = reference_symbols.iloc[i, 0]
+            value = reference_symbols.iloc[i, 1]
+            corrected[key] = value
+
+        df.rename(index=corrected, inplace=True)
+        cleaned_dict[k] = df
+        return
+################################################# Code Flow ##########################################################
+
+# since it's quite likely that old symbols don't exist together with dates (because once opened in excel all are dates),
+# this is an all-or-none approach where if date search picks up sth, old search will be empty
+# if both lists are empty, nothing is wrong, then cleaned dict[k] = df_dict[k], where k is df with no error
+
+    ismar, isnums = 0, 0
+
+    for k,df in dfs.items():
+        date_search = [g for g in df.index.tolist() if re.search("(Mar|Apr|Sept?|Oct|Dec)", g)] # dates
+        old_symbols = list(reference_symbols['Previous Symbol'])
+        old_search = list(set(df.index.tolist()).intersection(set(old_symbols))) # easy way to find old symbols in df index
+        if len(date_search) != 0:
+            march_search = [m for m in date_search if re.search("^Mar-0?1|0?1-Mar|Mar-0?2|0?2-Mar", m)] # only march genes
+            if len(march_search) != 0:
+                ismar += 1
+                if ismar == 1:
+                    st.subheader("Resolve Duplicate Gene Symbols")
+                march_resolver(df) # will have all the date genes (like it is now)
+            else:
+                date_resolver(df, date_search) # will exclude march
+
+        elif len(old_search) != 0:
+            nodates(df) # converts old to new (eg. DEC1 -> DELEC1)
+
+        elif len(date_search) == 0 and len(old_search) == 0:
+            numdate = [g for g in df.index.tolist() if re.search("^\d*[-/]?\W", g)]
+            if len(numdate) != 0:
+                isnums += 1
+                if isnums == 1:
+                    st.subheader("Resolve Date Format")
+                renamed = numeric_date(k,df,numdate)
+                march_search = [m for m in renamed.index.tolist() if re.search("^Mar-0?1|0?1-Mar|Mar-0?2|0?2-Mar", m)]  # only march genes
+                generic_date = [g for g in renamed.index.tolist() if re.search("(Mar|Apr|Sept?|Oct|Dec)", g)]
+                if len(march_search) != 0:
+                    ismar += 1
+                    if ismar == 1:
+                        st.subheader("Resolve Duplicate Gene Symbols")
+                        march_resolver(renamed)  # will have all the date genes (like it is now)
+                else:
+                    date_resolver(renamed, generic_date)  # will exclude march
+            else:
+                noerror = st.success(f"No errors detected for {k} dataframe")
+                time.sleep(0.25)
+                noerror.empty()
+                cleaned_dict[k] = df
+        else:
+            noerror = st.success(f"No errors detected for {k} dataframe")
+            time.sleep(0.25)
+            noerror.empty()
+            cleaned_dict[k] = df
+    return
+
 ################################################## Grabs Timepoint ####################################################
 # Is a variable to allow the following functions to render either timepoint or comparison in plot titles
 is_tp = 1
 
 
-def timepoints(df_dict):
+def timepoints(dfs):
     pattern_days = "[-_\s]{1}(min[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+min)[-_\s]?|(hr[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+hr?)|(D[ay]*[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+D[ay]*)"
     tpcomps = []
-    for k, df in df_dict.items():
+    for k, df in dfs.items():
         extract_days = df.columns.str.extract(pattern_days, flags=re.IGNORECASE)
         for num in range(6):  # 6 capture groups (0-5 but range including 5 has to +1)
             temp = extract_days[num].unique().tolist()
@@ -187,9 +457,9 @@ def timepoints(df_dict):
 
 
 ######################################### Check for log2FC columns only ################################################
-def check_log(df_dict):
+def check_log(dfs):
     df_dict2 = {}
-    for k, df in df_dict.items():
+    for k, df in dfs.items():
         df = df.apply(pd.to_numeric, errors='coerce')
         fc_regex = "log2Fold[-_\s]?Changes?|log2FC"
         cols = df.columns.tolist()
@@ -228,7 +498,7 @@ def n_colors(list_of_days):
 
 
 ###################################################### Volcano Plot ###################################################
-def volcano(df_dict, list_of_days, colorlist):
+def volcano(dfs, list_of_days, colorlist):
     st.subheader("Volcano plot analysis")
     vol_expand = st.sidebar.expander("Expand for volcano plot", expanded=False)
     reset = vol_expand.checkbox("Reset to default settings", value=False)
@@ -250,10 +520,10 @@ def volcano(df_dict, list_of_days, colorlist):
 
     top10annotation, bottom10annotation = [], []
 
-    if len(df_dict) == 1:
+    if len(dfs) == 1:
         volcano1 = go.Figure()
         fig = plt.figure()
-        for k, df in df_dict.items():
+        for k, df in dfs.items():
             for tp, col in zip(list_of_days, colorlist):
                 complabels = tp.replace("_", " ").replace("-", " ")
                 #### selecting the required FC and pval for plotting
@@ -264,9 +534,16 @@ def volcano(df_dict, list_of_days, colorlist):
                 # (to include the log2ratio and -log pval)
                 pvals = df[pval_col_name[0]]
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                if xaxes != (0.0, 0.0):
+                if xaxes != (0.0, 0.0) and yaxes != (0.0):
                     user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
                                                  (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
+                                                                                         inclusive='both')
+                                                  )]  # bracket over fc filters
+                elif xaxes == (0.0, 0.0) and yaxes != (0.0):
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes)]
+
+                elif xaxes != (0.0, 0.0) and yaxes == (0.0):
+                    user_filter = for_annotation[(for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
                                                                                          inclusive='both')
                                                   )]  # bracket over fc filters
                 else:
@@ -320,22 +597,22 @@ def volcano(df_dict, list_of_days, colorlist):
                                font=dict(family='Arial', size=14),
                                xaxis_title="log2(Fold-change)", yaxis_title="-log10(p-value)")
     else:
-        if len(df_dict) % 2 == 0:
-            nrows = math.ceil(len(df_dict) / 2)
-            volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(df_dict.keys())),
+        if len(dfs) % 2 == 0:
+            nrows = math.ceil(len(dfs) / 2)
+            volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
                                      x_title="log2(Fold-Change)", y_title="-log10(p-value)")
             v_row, v_col = 1, 1
             j = 1
             fig, axes = plt.subplots(nrows=nrows, ncols=2, sharex=True, sharey=True)
-        elif math.ceil(len(df_dict) % 3) == 0:
-            nrows = math.ceil(len(df_dict) / 2)
-            volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(df_dict.keys())),
+        elif math.ceil(len(dfs) % 3) == 0:
+            nrows = math.ceil(len(dfs) / 2)
+            volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
                                      x_title="log2(Fold-Change)", y_title="-log10(p-value)")
             v_row, v_col = 1, 1
             j = 1
             fig, axes = plt.subplots(nrows=nrows, ncols=3, sharex=True, sharey=True)
 
-        for k, df, in df_dict.items():
+        for k, df, in dfs.items():
             for tp, clr in zip(list_of_days, colorlist):
                 complabels = tp.replace("_", " ").replace("-", " ")
                 #### selecting the required FC and pval for plotting
@@ -347,9 +624,16 @@ def volcano(df_dict, list_of_days, colorlist):
                 pvals = df[pval_col_name[0]]
 
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
-                if xaxes != (0.0, 0.0):
+                if xaxes != (0.0, 0.0) and yaxes != (0.0):
                     user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
                                                  (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
+                                                                                         inclusive='both')
+                                                  )]  # bracket over fc filters
+                elif xaxes == (0.0, 0.0) and yaxes != (0.0):
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes)]
+
+                elif xaxes != (0.0, 0.0) and yaxes == (0.0):
+                    user_filter = for_annotation[(for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
                                                                                          inclusive='both')
                                                   )]  # bracket over fc filters
                 else:
@@ -362,9 +646,9 @@ def volcano(df_dict, list_of_days, colorlist):
                 top10annotation.append(
                     top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
 
-                if len(df_dict) % 2 == 0:
+                if len(dfs) % 2 == 0:
                     plt.subplot(nrows, 2, j)
-                elif len(df_dict) % 3 == 0:
+                elif len(dfs) % 3 == 0:
                     plt.subplot(nrows, 3, j)
                 plt.grid(b=True, which="major", axis="both", alpha=0.3)
                 plt.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
@@ -403,15 +687,15 @@ def volcano(df_dict, list_of_days, colorlist):
 
             j += 1
             v_col += 1
-            if (len(df_dict) % 2 == 0) and j > 2:
+            if (len(dfs) % 2 == 0) and j > 2:
                 j = 1
-            if (len(df_dict) % 3 == 0) and j > 3:
+            if (len(dfs) % 3 == 0) and j > 3:
                 j = 1
 
-            if (len(df_dict) % 2 == 0) and v_col > 2:
+            if (len(dfs) % 2 == 0) and v_col > 2:
                 v_col = 1
                 v_row += 1
-            if (len(df_dict) % 3 == 0) and v_col > 3:
+            if (len(dfs) % 3 == 0) and v_col > 3:
                 v_col = 1
                 v_row += 1
 
@@ -449,7 +733,7 @@ def volcano(df_dict, list_of_days, colorlist):
 
 
 ############################################# Stacked DEGs ############################################################
-def degs(df_dict, list_of_days, colorlist):
+def degs(dfs, list_of_days, colorlist):
     st.subheader('Differential expression analysis')
     stack_expand = st.sidebar.expander("Expand for stacked bar chart", expanded=False)
     with stack_expand:
@@ -471,7 +755,7 @@ def degs(df_dict, list_of_days, colorlist):
     new_dfs = {}
 
     def organised_df():
-        df_list = [df_dict[x] for x in df_names]
+        df_list = [dfs[x] for x in df_names]
         for name, df in zip(df_names, df_list):
             pvalcols = df.filter(regex=re.compile(pval_regex, flags=re.I))
             pvalcols.columns = pvalcols.columns.str.replace(pval_regex, "pval", regex=True)
@@ -486,7 +770,7 @@ def degs(df_dict, list_of_days, colorlist):
     upreg_deg_count = []
     downreg_deg_count = []
 
-    if len(df_dict) == 1:
+    if len(dfs) == 1:
         stacked1 = go.Figure()
         for df, name in zip(newdf_list, df_names):
             for tp, clrs in zip(list_of_days, colorlist):
@@ -529,13 +813,13 @@ def degs(df_dict, list_of_days, colorlist):
                                font=dict(
                                    family='Arial', size=14))
     else:
-        if len(df_dict) % 2 == 0:
-            nrows = math.ceil(len(df_dict) / 2)
-            stacked1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(df_dict.keys())),
+        if len(dfs) % 2 == 0:
+            nrows = math.ceil(len(dfs) / 2)
+            stacked1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
                                      x_title=tp_or_comp.title(), y_title='Number of DEGs', shared_yaxes=True)
-        elif math.ceil(len(df_dict)) % 3 == 0:
-            nrows = math.ceil(len(df_dict) / 3)
-            stacked1 = make_subplots(rows=row_no, cols=3, subplot_titles=(list(df_dict.keys())),
+        elif math.ceil(len(dfs)) % 3 == 0:
+            nrows = math.ceil(len(dfs) / 3)
+            stacked1 = make_subplots(rows=row_no, cols=3, subplot_titles=(list(dfs.keys())),
                                      x_title=tp_or_comp.title(), y_title='Number of DEGs')
         stacked_row = 1
         stacked_col = 1
@@ -577,10 +861,10 @@ def degs(df_dict, list_of_days, colorlist):
             downreg_deg_count.clear()
 
             stacked_col += 1
-            if len(df_dict) % 2 == 0 and stacked_col > 2:
+            if len(dfs) % 2 == 0 and stacked_col > 2:
                 stacked_col = 1
                 stacked_row += 1
-            elif math.ceil(len(df_dict) % 3) == 0 and stacked_col > 3:
+            elif math.ceil(len(dfs) % 3) == 0 and stacked_col > 3:
                 stacked_col = 1
                 stacked_row += 1
 
@@ -838,7 +1122,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
     st.info("Expand the plot to view all of the terms.")
     enrichr_results_exp = st.expander("Expand for enrichr dataframe", expanded=False)
     if not use_degs:
-        select_enrichr = gp.enrichr(gene_list=genelist,
+        select_enrichr = st.experimental_memo(gp.enrichr)(gene_list=genelist,
                                     gene_sets=select_dataset,
                                     outdir=None,
                                     no_plot=True,
@@ -882,7 +1166,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
 
         if len(ups) != 0:
             gene_final_up = sorted(remove_dupes_up)
-            enrichr_up = gp.enrichr(gene_list=gene_final_up,
+            enrichr_up = st.experimental_memo(gp.enrichr)(gene_list=gene_final_up,
                                     gene_sets=select_dataset,
                                     outdir=None,
                                     no_plot=True,
@@ -901,7 +1185,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
 
         if len(downs) != 0:
             gene_final_down = sorted(remove_dupes_down)
-            enrichr_down = gp.enrichr(gene_list=gene_final_down,
+            enrichr_down = st.experimental_memo(gp.enrichr)(gene_list=gene_final_down,
                                       gene_sets=select_dataset,
                                       outdir=None,
                                       no_plot=True,
@@ -986,10 +1270,10 @@ def select_prerank_dataset():
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome 2021": "Reactome.gmt",
         "Vaccinomics (In-house)": "Vaccinomics.gmt",
-#         "GO Cellular Component 2021": "GO_Cellular_Component_2021",
-#         "GO Biological Process 2021": "GO_Biological_Process_2021",
-#         "GO Molecular Function 2021": "GO_Molecular_Function_2021",
-#         "KEGG 2021 Human": "KEGG_2021_Human"
+        # "GO Cellular Component 2021": "GO_Cellular_Component_2021",
+        # "GO Biological Process 2021": "GO_Biological_Process_2021",
+        # "GO Molecular Function 2021": "GO_Molecular_Function_2021",
+        # "KEGG 2021 Human": "KEGG_2021_Human"
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
@@ -1023,7 +1307,7 @@ def find_cols(df, timepoints):
 def execute_prerank(col_dict, geneset):
     prerank_results_dict = {}
     for key, data in col_dict.items():
-        running = gp.prerank(rnk=data,
+        running = st.experimental_memo(gp.prerank)(rnk=data,
                              gene_sets=geneset,
                              processes=6,
                              permutation_num=100,  # reduce number to speed up testing
@@ -1168,20 +1452,25 @@ def corr_matrix(dfx):
 choose_app = st.sidebar.multiselect("Choose an app to render in the main page 👉",
                                     options=["volcano plot", "DEGs", "enrichr", "GSEA prerank", "pathway clustergram",
                                              "correlation matrix"])
+qc_df(df_dict)
+
+if st.sidebar.checkbox("Show uploaded/demo dataframe"):
+    for k, v in cleaned_dict.items():
+        st.write(f"**{k} dataframe**", v)
 
 for c in choose_app:
     with st.spinner("🔨Building your dashboard 🔨"):
         time.sleep(0.25)
         if c == "volcano plot":
-            list_of_days = timepoints(df_dict)
+            list_of_days = timepoints(cleaned_dict)
             colorlist = n_colors(list_of_days)
-            dfx = check_log(df_dict)
+            dfx = check_log(cleaned_dict)
             volcano(dfx, list_of_days, colorlist)
 
         elif c == "DEGs":
-            list_of_days = timepoints(df_dict)
+            list_of_days = timepoints(cleaned_dict)
             colorlist = n_colors(list_of_days)
-            dfx = check_log(df_dict)
+            dfx = check_log(cleaned_dict)
             degs(dfx, list_of_days, colorlist)
             postdeg = st.sidebar.expander("Expand to plot clustergram based on DEGs", expanded=False)
             with postdeg:
@@ -1213,8 +1502,8 @@ for c in choose_app:
                     st.stop()
 
         elif c == 'GSEA prerank':
-            list_of_days = timepoints(df_dict)
-            dfx = check_log(df_dict)
+            list_of_days = timepoints(cleaned_dict)
+            dfx = check_log(cleaned_dict)
 
             prernk_exp = st.sidebar.expander("Expand for Prerank Analysis", expanded=False)
             select_df = prernk_exp.selectbox("Select your dataset to use", options=dfx.keys())
@@ -1234,10 +1523,10 @@ for c in choose_app:
                 st.stop()
 
         elif c == "pathway clustergram":
-            dfx = check_log(df_dict)
+            dfx = check_log(cleaned_dict)
             clust_expand = st.sidebar.expander("Expand for user-input pathway clustergram", expanded=False)
             clustergram(dfx)
 
         elif c == "correlation matrix":
-            dfx = check_log(df_dict)
+            dfx = check_log(cleaned_dict)
             corr_matrix(dfx)
