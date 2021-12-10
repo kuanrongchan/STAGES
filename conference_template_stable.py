@@ -33,6 +33,7 @@ from mpl_toolkits.axes_grid1.colorbar import colorbar
 # Update: added internal date-gene conversion
 # Update: Improved caching for enrichr and prerank to prevent slow-down of app when no changes are made to enrichr/prerank results
 # Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
+# Update v1e: Changes to clustergram to set fold change and have the legend include log2FC
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -904,13 +905,16 @@ def deg_cluster(proportions, log_dfx):
     proportion_keys.remove("downcount")
 
     select_deg_dicts = postdeg.multiselect("Select DEGs to plot", options=sorted(proportion_keys, key=str.casefold))
+    fc_slider = postdeg.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
+                              min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='degbased')
     f_width = postdeg.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                              step=1, value=10)
     f_height = postdeg.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
                               step=1, value=10)
-
+    
     for l in select_deg_dicts:
-        degs = proportions[l].index.tolist()
+        fc_filter = proportions[l][(proportions[l].iloc[:,1].between(fc_slider[0], fc_slider[1],inclusive='both'))]
+        degs = fc_filter.index.tolist()
         deglist.append(degs)
     flattened = [val for sublist in deglist for val in sublist]
     for f in flattened:
@@ -929,9 +933,10 @@ def deg_cluster(proportions, log_dfx):
         specific_cluster = filter_on.loc[remove_dupes]
 
         # plot
-        g = sns.clustermap(specific_cluster, cmap="vlag", method='average', figsize=(f_width, f_height),
+        g = sns.clustermap(specific_cluster, cmap='vlag', method='average', figsize=(f_width, f_height),
                            cbar_pos=(0.01, 0.1, 0.03, 0.1), center=0,
-                           col_cluster=True, yticklabels=True)
+                           col_cluster=True, yticklabels=True,
+                           cbar_kws={'label': 'log2FC'})
         g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
         # with st.expander("Expand for pathway clustergram dataframe from DEGs", expanded=False):
         #     st.write("**User-Input Pathway Clustergram**")
@@ -949,13 +954,12 @@ def deg_cluster(proportions, log_dfx):
         # st.pyplot(denrowfig)
 
     else:
-        st.warning("Please choose more than 1 DEG")
+        st.warning("Please choose more than 1 DEG or increase the log2 fold-change limit.")
 
 
 ####################################################### Clustergram #################################################
 def clustergram(dfx):
     st.subheader("Pathway clustergram")
-
     dfx_keys = list(dfx.keys())
     fc_regex = "log2Fold[-_\s]?Changes?|log2FC"
     temp = []
@@ -966,6 +970,8 @@ def clustergram(dfx):
         all_df = st.checkbox("All dataframes", value=False)
         gene_list = st.text_area(label="Input list of genes here",
                                  help="Please use one of the following delimiters: line breaks, commas, or semicolons")
+        fc_slider = st.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
+                              min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='userselected')
         g_width = clust_expand.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                                       step=1, value=10, key='reg1')
         g_height = clust_expand.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
@@ -1003,28 +1009,32 @@ def clustergram(dfx):
                 remove_dupes.append(g)
 
         gene_final = [x.upper() for x in remove_dupes if x != ""]
-        specific_cluster = filter_on.loc[gene_final]
+        gene_cluster = filter_on.loc[gene_final]
+        specific_cluster = gene_cluster[gene_cluster.iloc[:,1].between(fc_slider[0], fc_slider[1],inclusive='both')]
         # with st.expander("Expand for pathway clustergram dataframe", expanded=False):
         #     st.write("**User-Input Pathway Clustergram**")
         #     st.dataframe(specific_cluster)
         #     st.markdown(get_table_download_link([specific_cluster], "pathway_clustergram"), unsafe_allow_html=True)
-        # clustergram
-        g = sns.clustermap(specific_cluster, cmap="vlag",
-                           method='average', figsize=(g_width, g_height),
-                           cbar_pos=(0.01, 0.1, 0.03, 0.15),
-                           center=0, col_cluster=True, yticklabels=True)
-        g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
-        st.pyplot(g)
-        # st.write("Column Linkage", g.dendrogram_col.linkage)
-        # denfig = plt.figure()
-        # dendro_col = dendrogram(g.dendrogram_col.linkage)
-        # st.pyplot(denfig)
-        # st.write("Row Linkage", g.dendrogram_row.linkage)
+
+        try:
+            # clustergram
+            g = sns.clustermap(specific_cluster, cmap="vlag",
+                            method='average', figsize=(g_width, g_height),
+                            cbar_pos=(0.01, 0.1, 0.03, 0.15),
+                            center=0, col_cluster=True, yticklabels=True, cbar_kws={'label':'log2FC'})
+            g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
+            st.pyplot(g)
+            # st.write("Column Linkage", g.dendrogram_col.linkage)
+            # denfig = plt.figure()
+            # dendro_col = dendrogram(g.dendrogram_col.linkage)
+            # st.pyplot(denfig)
+            # st.write("Row Linkage", g.dendrogram_row.linkage)
+        except ValueError:
+            st.warning("Increase the log2FC limit or add more genes.")
 
 
-# ############################################### Enrichr ##############################################################
+################################################# Enrichr ##############################################################
 degs_but_manual = 0  # If is 0, means user is using DEGs for Enrichr, if is 1, user chooses to add genes manually
-
 
 def select_enrichr_dataset():
     geneset_dict = {
