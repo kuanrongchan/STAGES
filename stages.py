@@ -111,8 +111,8 @@ proportions = {}  ########
 
 @st.experimental_memo
 def clean_ref():
-    for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
-    # for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
+#     for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
+    for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
     for_ref.reset_index(drop=True,inplace=True)
     for_ref.columns = for_ref.iloc[0,:]
     for_ref.drop(index=0, inplace=True)
