@@ -505,7 +505,7 @@ def volcano(dfs, list_of_days, colorlist):
     reset = vol_expand.checkbox("Reset to default settings", value=False)
     xaxes = vol_expand.slider("Choose log2 fold-change boundaries for volcano plot",
                               help="The app will plot the values between the user-set range",
-                              min_value=-5.0, max_value=5.0, step=0.1, value=(0.0, 0.0))
+                              min_value=-10.0, max_value=10.0, step=0.1, value=(0.0, 0.0))
     if reset:
         xaxes = (0.0, 0.0)
     yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
@@ -908,7 +908,7 @@ def deg_cluster(proportions, log_dfx):
     postdeg.info("Note that you should deselect the default settings checkbox before setting your log2 fold-change to see the changes.")
     resetter = postdeg.checkbox("Default settings", help="Do not filter by log2 fold-change cutoff", value=True, key='degbased')
     fc_slider = postdeg.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
-                              min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='degbased')
+                              min_value=-10.0, max_value=10.0, step=0.1, value=(-1.0,1.0), key='degbased')
 
     f_width = postdeg.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                              step=1, value=10)
@@ -980,7 +980,7 @@ def clustergram(dfx):
         st.info("Note that you should deselect the default settings checkbox before setting your log2 fold-change to see the changes.")
         resetter = st.checkbox("Default settings", value=True, help="Do not filter by log2 fold-change cutoff", key='userclust')
         fc_slider = st.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
-                                    min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='userclust')
+                                    min_value=-10.0, max_value=10.0, step=0.1, value=(-1.0,1.0), key='userclust')
         g_width = clust_expand.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                                       step=1, value=10, key='reg1')
         g_height = clust_expand.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
