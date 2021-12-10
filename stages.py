@@ -562,6 +562,10 @@ def volcano(dfs, list_of_days, colorlist):
                 plt.title(f"Volcano plot across {tp_or_comp}", loc='center')
                 plt.legend(bbox_to_anchor=(1.04, 1), loc='upper left')
                 plt.xlabel('log2(Fold-change)')
+                if xaxes != (0.0,0.0):
+                    plt.xlim([xaxes[0], xaxes[1]])
+                else:
+                    pass
                 plt.ylabel('-log10(p-value)')
                 plt.axhline(y=0, color='r', linestyle='dashed')
                 plt.axvline(x=0, linestyle='dashed')
@@ -596,7 +600,8 @@ def volcano(dfs, list_of_days, colorlist):
                                title=f"Interactive volcano across {tp_or_comp}",
                                legend_title_text="Timepoint",
                                font=dict(family='Arial', size=14),
-                               xaxis_title="log2(Fold-change)", yaxis_title="-log10(p-value)")
+                               xaxis_title="log2(Fold-change)", yaxis_title="-log10(p-value)",
+                               xaxis_range=[xaxes[0], xaxes[1]])
     else:
         if len(dfs) % 2 == 0:
             nrows = math.ceil(len(dfs) / 2)
@@ -604,14 +609,14 @@ def volcano(dfs, list_of_days, colorlist):
                                      x_title="log2(Fold-Change)", y_title="-log10(p-value)")
             v_row, v_col = 1, 1
             j = 1
-            fig, axes = plt.subplots(nrows=nrows, ncols=2, sharex=True, sharey=True)
+            fig, axes = plt.subplots(nrows=nrows, ncols=2, sharex=True)
         elif math.ceil(len(dfs) % 3) == 0:
             nrows = math.ceil(len(dfs) / 2)
             volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
                                      x_title="log2(Fold-Change)", y_title="-log10(p-value)")
             v_row, v_col = 1, 1
             j = 1
-            fig, axes = plt.subplots(nrows=nrows, ncols=3, sharex=True, sharey=True)
+            fig, axes = plt.subplots(nrows=nrows, ncols=3, sharex=True)
 
         for k, df, in dfs.items():
             for tp, clr in zip(list_of_days, colorlist):
@@ -648,13 +653,17 @@ def volcano(dfs, list_of_days, colorlist):
                     top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
 
                 if len(dfs) % 2 == 0:
-                    plt.subplot(nrows, 2, j)
+                    ax = plt.subplot(nrows, 2, j)
                 elif len(dfs) % 3 == 0:
-                    plt.subplot(nrows, 3, j)
-                plt.grid(b=True, which="major", axis="both", alpha=0.3)
-                plt.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
-                plt.axhline(y=0, color='r', linestyle='dashed')
-                plt.axvline(x=0, linestyle='dashed')
+                    ax = plt.subplot(nrows, 3, j)
+                ax.grid(b=True, which="major", axis="both", alpha=0.3)
+                ax.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
+                ax.axhline(y=0, color='r', linestyle='dashed')
+                ax.axvline(x=0, linestyle='dashed')
+                if xaxes != (0.0,0.0):
+                    ax.set_xlim([xaxes[0], xaxes[1]])
+                else:
+                    pass
 
                 if interactive_volcano:
                     volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
@@ -718,7 +727,8 @@ def volcano(dfs, list_of_days, colorlist):
         volcano1.update_layout(showlegend=True,
                                title=f"Interactive volcano across {tp_or_comp}",
                                legend_title_text="Timepoint",
-                               font=dict(family='Arial', size=14)
+                               font=dict(family='Arial', size=14),
+                               xaxis_range=[xaxes[0], xaxes[1]]
                                )
     if interactive_volcano:
         ivolcano = st.success("Plot complete!")
