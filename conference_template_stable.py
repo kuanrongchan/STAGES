@@ -111,7 +111,7 @@ proportions = {}  ########
 
 @st.experimental_memo
 def clean_ref():
-    # for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
+#     for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
     for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
     for_ref.reset_index(drop=True,inplace=True)
     for_ref.columns = for_ref.iloc[0,:]
@@ -905,15 +905,21 @@ def deg_cluster(proportions, log_dfx):
     proportion_keys.remove("downcount")
 
     select_deg_dicts = postdeg.multiselect("Select DEGs to plot", options=sorted(proportion_keys, key=str.casefold))
+    resetter = postdeg.checkbox("Default settings", help="Do not filter by log2 fold-change cutoff", value=True, key='degbased')
     fc_slider = postdeg.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
                               min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='degbased')
+
     f_width = postdeg.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                              step=1, value=10)
     f_height = postdeg.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
                               step=1, value=10)
     
     for l in select_deg_dicts:
-        fc_filter = proportions[l][(proportions[l].iloc[:,1].between(fc_slider[0], fc_slider[1],inclusive='both'))]
+        if not resetter:
+            fc_filter = proportions[l][(proportions[l].iloc[:,1].between(fc_slider[0], fc_slider[1],inclusive='both'))]
+        else:
+            fc_filter = proportions[l]
+
         degs = fc_filter.index.tolist()
         deglist.append(degs)
     flattened = [val for sublist in deglist for val in sublist]
@@ -970,8 +976,9 @@ def clustergram(dfx):
         all_df = st.checkbox("All dataframes", value=False)
         gene_list = st.text_area(label="Input list of genes here",
                                  help="Please use one of the following delimiters: line breaks, commas, or semicolons")
+        resetter = st.checkbox("Default settings", value=True, help="Do not filter by log2 fold-change cutoff", key='userclust')
         fc_slider = st.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
-                              min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='userselected')
+                                    min_value=-5.0, max_value=5.0, step=0.1, value=(-1.0,1.0), key='userclust')
         g_width = clust_expand.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                                       step=1, value=10, key='reg1')
         g_height = clust_expand.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
@@ -1010,7 +1017,10 @@ def clustergram(dfx):
 
         gene_final = [x.upper() for x in remove_dupes if x != ""]
         gene_cluster = filter_on.loc[gene_final]
-        specific_cluster = gene_cluster[gene_cluster.iloc[:,1].between(fc_slider[0], fc_slider[1],inclusive='both')]
+        if not resetter:
+            specific_cluster = gene_cluster[gene_cluster.iloc[:,1].between(fc_slider[0], fc_slider[1],inclusive='both')]
+        else:
+            specific_cluster = gene_cluster
         # with st.expander("Expand for pathway clustergram dataframe", expanded=False):
         #     st.write("**User-Input Pathway Clustergram**")
         #     st.dataframe(specific_cluster)
