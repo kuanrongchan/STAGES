@@ -906,7 +906,7 @@ def degs(dfs, list_of_days, colorlist):
 
 ############################################### Extract DEGs from deg_dict #############################################
 def deg_cluster(proportions, log_dfx):
-    st.subheader("Pathway Clustergram from DEGs")
+    st.subheader("Clustergram from DEGs")
     deglist = []  # first list to add the selected DEGs
     remove_dupes = []  # second list to remove duplicate genes
     temp = []  # third list to add log-filtered datasets to be concatenated
