@@ -111,8 +111,8 @@ proportions = {}  ########
 
 @st.experimental_memo
 def clean_ref():
-    for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
-    # for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
+#     for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
+    for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
     for_ref.reset_index(drop=True,inplace=True)
     for_ref.columns = for_ref.iloc[0,:]
     for_ref.drop(index=0, inplace=True)
@@ -724,8 +724,12 @@ def volcano(dfs, list_of_days, colorlist):
                                title=f"Interactive volcano across {tp_or_comp}",
                                legend_title_text="Timepoint",
                                font=dict(family='Arial', size=14),
-                               xaxis_title="log2(Fold-change)", yaxis_title="-log10(p-value)",
-                               xaxis_range=[xaxes[0], xaxes[1]])
+                               xaxis_title="log2(Fold-change)", yaxis_title="-log10(p-value)")
+        if xaxes != (0.0,0.0):
+            volcano1.update_layout(xaxis_range=[xaxes[0], xaxes[1]])
+        else:
+            pass
+        
     else:
         if len(dfs) % 2 == 0:
             nrows = math.ceil(len(dfs) / 2)
@@ -851,9 +855,13 @@ def volcano(dfs, list_of_days, colorlist):
         volcano1.update_layout(showlegend=True,
                                title=f"Interactive volcano across {tp_or_comp}",
                                legend_title_text="Timepoint",
-                               font=dict(family='Arial', size=14),
-                               xaxis_range=[xaxes[0], xaxes[1]]
+                               font=dict(family='Arial', size=14)
                                )
+        if xaxes != (0.0,0.0):
+            volcano1.update_layout(xaxis_range=[xaxes[0], xaxes[1]])
+        else:
+            pass
+        
     if interactive_volcano:
         ivolcano = st.success("Plot complete!")
         time.sleep(0.25)
