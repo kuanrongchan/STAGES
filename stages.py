@@ -734,14 +734,14 @@ def volcano(dfs, list_of_days, colorlist):
         if len(dfs) % 2 == 0:
             nrows = math.ceil(len(dfs) / 2)
             volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
-                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)")
+                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_yaxes=True)
             v_row, v_col = 1, 1
             j = 1
             fig, axes = plt.subplots(nrows=nrows, ncols=2, sharex=True)
         elif math.ceil(len(dfs) % 3) == 0:
             nrows = math.ceil(len(dfs) / 2)
             volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
-                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)")
+                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_yaxes=True)
             v_row, v_col = 1, 1
             j = 1
             fig, axes = plt.subplots(nrows=nrows, ncols=3, sharex=True)
