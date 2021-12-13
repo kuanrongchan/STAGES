@@ -124,7 +124,7 @@ reference_symbols = clean_ref()
 ################################################# Read the Docs #######################################################
 def read_docs():
     st.subheader("Static and Temporal Analysis of Gene Expression Studies (STAGES) documentation")
-    st.image("images/STAGESgraphicalabstract_v3.png",width=None)
+    st.image("images/STAGESgraphicalabstract_v4.png",width=None)
     st.markdown(
     '''
     <div style="text-align: justify">
