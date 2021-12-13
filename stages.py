@@ -792,7 +792,7 @@ def volcano(dfs, list_of_days, colorlist):
                 if interactive_volcano:
                     volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
                                                   mode='markers',
-                                                  name=complabels, hovertext=list(df.index),
+                                                  name=complabels, hovertext=list(user_filter.index),
                                                   line=dict(color=clr)
                                                   ),
                                        row=v_row, col=v_col
@@ -1030,7 +1030,7 @@ def degs(dfs, list_of_days, colorlist):
 
 ############################################### Extract DEGs from deg_dict #############################################
 def deg_cluster(proportions, log_dfx):
-    st.subheader("Pathway Clustergram from DEGs")
+    st.subheader("Clustergram from DEGs")
     deglist = []  # first list to add the selected DEGs
     remove_dupes = []  # second list to remove duplicate genes
     temp = []  # third list to add log-filtered datasets to be concatenated
