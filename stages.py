@@ -727,7 +727,7 @@ def volcano(dfs, list_of_days, colorlist):
                                font=dict(family='Arial', size=14),
                                xaxis_title="log2(Fold-change)", yaxis_title="-log10(p-value)")
         if xaxes != (0.0,0.0):
-            volcano1.update_layout(xaxis_range=[xaxes[0], xaxes[1]])
+            volcano1.update_axes(range=[xaxes[0], xaxes[1]])
         else:
             pass
         
@@ -875,7 +875,7 @@ def volcano(dfs, list_of_days, colorlist):
                                font=dict(family='Arial', size=14)
                                )
         if xaxes != (0.0,0.0):
-            volcano1.update_layout(xaxis_range=[xaxes[0], xaxes[1]])
+            volcano1.update_xaxes(range=[xaxes[0], xaxes[1]])
         else:
             pass
         
