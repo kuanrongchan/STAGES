@@ -731,20 +731,25 @@ def volcano(dfs, list_of_days, colorlist):
             pass
         
     else:
+        i = str(1)
         if len(dfs) % 2 == 0:
             nrows = math.ceil(len(dfs) / 2)
             volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
-                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_yaxes=True)
+                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_xaxes=True, shared_yaxes=True)
             v_row, v_col = 1, 1
             j = 1
-            fig, axes = plt.subplots(nrows=nrows, ncols=2, sharex=True)
-        elif math.ceil(len(dfs) % 3) == 0:
-            nrows = math.ceil(len(dfs) / 2)
-            volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
-                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_yaxes=True)
+            fig, axs = plt.subplots(nrows=nrows, ncols=2, sharex=True)
+
+        # elif len(dfs) % 3 == 0:
+        else:
+            nrows = math.ceil(len(dfs) / 3)
+            extras = nrows*3 - len(dfs)
+            volcano1 = make_subplots(rows=nrows, cols=3, subplot_titles=(list(dfs.keys())),
+                                     x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_xaxes=True, shared_yaxes=True)
             v_row, v_col = 1, 1
             j = 1
-            fig, axes = plt.subplots(nrows=nrows, ncols=3, sharex=True)
+            fig, axs = plt.subplots(nrows=nrows, ncols=3, sharex=True)
+            
 
         for k, df, in dfs.items():
             for tp, clr in zip(list_of_days, colorlist):
@@ -782,12 +787,16 @@ def volcano(dfs, list_of_days, colorlist):
 
                 if len(dfs) % 2 == 0:
                     ax = plt.subplot(nrows, 2, j)
-                elif len(dfs) % 3 == 0:
+                else:
                     ax = plt.subplot(nrows, 3, j)
+
                 ax.grid(b=True, which="major", axis="both", alpha=0.3)
                 ax.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
                 ax.axhline(y=0, color='r', linestyle='dashed')
                 ax.axvline(x=0, linestyle='dashed')
+                ax.set_title(f"{k}", fontdict={'fontsize':10})
+                handles, labels = ax.get_legend_handles_labels()
+
                 if xaxes != (0.0,0.0):
                     ax.set_xlim([xaxes[0], xaxes[1]])
                 else:
@@ -797,10 +806,11 @@ def volcano(dfs, list_of_days, colorlist):
                     volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
                                                   mode='markers',
                                                   name=complabels, hovertext=list(user_filter.index),
-                                                  line=dict(color=clr)
+                                                  line=dict(color=clr), legendgroup=i
                                                   ),
                                        row=v_row, col=v_col
                                        )
+                    i += str(1)
             annotationconcat_top = pd.concat(top10annotation, axis=0)
             annotationconcat_top = annotationconcat_top.sort_values(by=["log2FC"], ascending=False).head(10)
 
@@ -823,12 +833,9 @@ def volcano(dfs, list_of_days, colorlist):
             top10annotation.clear()
             bottom10annotation.clear()
 
+            i = str(1)
             j += 1
             v_col += 1
-            if (len(dfs) % 2 == 0) and j > 2:
-                j = 1
-            if (len(dfs) % 3 == 0) and j > 3:
-                j = 1
 
             if (len(dfs) % 2 == 0) and v_col > 2:
                 v_col = 1
@@ -836,11 +843,19 @@ def volcano(dfs, list_of_days, colorlist):
             if (len(dfs) % 3 == 0) and v_col > 3:
                 v_col = 1
                 v_row += 1
-
-        plt.legend(bbox_to_anchor=(1.04, 1), loc='upper left')
+            
+        
+        fig.legend(handles, labels, bbox_to_anchor=(1.01, 1), loc='upper left')
         fig.add_subplot(111, frameon=False)
+        if extras == 1:
+            axs[nrows-1, 2].remove()
+        elif extras == 2:
+            axs[nrows-1, 2].remove()
+            axs[nrows-1, 1].remove()
+        else:
+            pass
         plt.tick_params(labelcolor="none", bottom=False, left=False)
-        plt.title(f"Volcano plot across {tp_or_comp}", loc='center')
+        fig.suptitle(f"Volcano plot across {tp_or_comp}")
         plt.xlabel('log2(Fold-change)')
         plt.ylabel('-log10(p-value)')
         plt.tight_layout(h_pad=1.0)
@@ -853,7 +868,7 @@ def volcano(dfs, list_of_days, colorlist):
             if (trace.name in names) else names.add(trace.name))
 
         volcano1.update_layout(showlegend=True,
-                               title=f"Interactive volcano across {tp_or_comp}",
+                               title=f"Interactive volcano across {tp_or_comp}", title_x=0.5,
                                legend_title_text="Timepoint",
                                font=dict(family='Arial', size=14)
                                )
@@ -951,7 +966,7 @@ def degs(dfs, list_of_days, colorlist):
 
         stacked1.update_layout(showlegend=True, barmode='stack',
                                title=f"Number of DEGs across {tp_or_comp} (based on selected cutoffs)",
-                               xaxis_title=tp_or_comp.title(), yaxis_title="Number of DEGs",
+                               title_x=0.5, xaxis_title=tp_or_comp.title(), yaxis_title="Number of DEGs",
                                legend_title_text='DEGs:',
                                font=dict(
                                    family='Arial', size=14))
@@ -960,9 +975,9 @@ def degs(dfs, list_of_days, colorlist):
             nrows = math.ceil(len(dfs) / 2)
             stacked1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
                                      x_title=tp_or_comp.title(), y_title='Number of DEGs', shared_yaxes=True)
-        elif math.ceil(len(dfs)) % 3 == 0:
+        else:
             nrows = math.ceil(len(dfs) / 3)
-            stacked1 = make_subplots(rows=row_no, cols=3, subplot_titles=(list(dfs.keys())),
+            stacked1 = make_subplots(rows=nrows, cols=3, subplot_titles=(list(dfs.keys())),
                                      x_title=tp_or_comp.title(), y_title='Number of DEGs')
         stacked_row = 1
         stacked_col = 1
@@ -1007,7 +1022,7 @@ def degs(dfs, list_of_days, colorlist):
             if len(dfs) % 2 == 0 and stacked_col > 2:
                 stacked_col = 1
                 stacked_row += 1
-            elif math.ceil(len(dfs) % 3) == 0 and stacked_col > 3:
+            elif len(dfs) % 2 != 0 and stacked_col > 3:
                 stacked_col = 1
                 stacked_row += 1
 
@@ -1020,6 +1035,7 @@ def degs(dfs, list_of_days, colorlist):
 
         stacked1.update_layout(showlegend=True, barmode='stack',
                                title=f"Number of DEGs across {tp_or_comp} (based on selected cutoffs)",
+                               title_x=0.5,
                                legend_title_text='DEGs:',
                                font=dict(
                                    family='Arial', size=14))
