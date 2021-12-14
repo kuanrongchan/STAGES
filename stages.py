@@ -735,6 +735,7 @@ def volcano(dfs, list_of_days, colorlist):
         i = str(1)
         if len(dfs) % 2 == 0:
             nrows = math.ceil(len(dfs) / 2)
+            extras = nrows*2 - len(dfs)
             volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(dfs.keys())),
                                      x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_xaxes=True, shared_yaxes=True)
             v_row, v_col = 1, 1
