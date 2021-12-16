@@ -842,7 +842,7 @@ def volcano(dfs, list_of_days, colorlist):
             if (len(dfs) % 2 == 0) and v_col > 2:
                 v_col = 1
                 v_row += 1
-            if (len(dfs) % 3 == 0) and v_col > 3:
+            if (len(dfs) % 2 != 0) and v_col > 3:
                 v_col = 1
                 v_row += 1
             
