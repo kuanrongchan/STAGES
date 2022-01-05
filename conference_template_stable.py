@@ -106,7 +106,7 @@ proportions = {}  ########
 ##########################
 
 # gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
-gene_symbols = pd.read_csv("gene_date.csv")
+# gene_symbols = pd.read_csv("gene_date.csv")
 # old_symbols = gene_symbols.iloc[:, 0].tolist()
 # new_symbols = gene_symbols.iloc[:, 3].tolist()
 
