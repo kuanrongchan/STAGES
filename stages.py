@@ -691,6 +691,11 @@ def volcano(dfs, list_of_days, colorlist):
                     plt.xlim([xaxes[0], xaxes[1]])
                 else:
                     pass
+                if yaxes != (0.0):
+                    plt.ylim(0.0, yaxes)
+                else:
+                    pass
+                
                 plt.ylabel('-log10(p-value)')
                 plt.axhline(y=0, color='r', linestyle='dashed')
                 plt.axvline(x=0, linestyle='dashed')
@@ -803,7 +808,11 @@ def volcano(dfs, list_of_days, colorlist):
                     ax.set_xlim([xaxes[0], xaxes[1]])
                 else:
                     pass
-
+                if yaxes != (0.0):
+                    plt.ylim(0.0, yaxes)
+                else:
+                    pass
+                
                 if interactive_volcano:
                     volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
                                                   mode='markers',
