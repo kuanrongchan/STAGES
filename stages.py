@@ -26,8 +26,8 @@ import plotly.figure_factory as ff
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
-from mpl_toolkits.axes_grid1.colorbar import colorbar
+# from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
+# from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
 # Update: added internal date-gene conversion
@@ -634,8 +634,8 @@ def volcano(dfs, list_of_days, colorlist):
     if reset:
         xaxes = (0.0, 0.0)
     yaxes = vol_expand.slider("Choose negative log10 p-value boundaries for volcano plot",
-                              help="The app will plot the values greater than the user-set value",
-                              min_value=0.0, max_value=5.0, step=0.1, value=0.0)
+                              help="The app will plot the values less than or equal to the user-set value",
+                              min_value=0.0, max_value=50.0, step=0.1, value=0.0)
     interactive_volcano = vol_expand.checkbox(label="Show interactive volcano plot", value=False,
                                               help="Facilitates gene name display on hover. This may cause lag")
 
@@ -661,12 +661,12 @@ def volcano(dfs, list_of_days, colorlist):
                 pvals = df[pval_col_name[0]]
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
                 if xaxes != (0.0, 0.0) and yaxes != (0.0):
-                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] <= yaxes) &
                                                  (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
                                                                                          inclusive='both')
                                                   )]  # bracket over fc filters
                 elif xaxes == (0.0, 0.0) and yaxes != (0.0):
-                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes)]
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] <= yaxes)]
 
                 elif xaxes != (0.0, 0.0) and yaxes == (0.0):
                     user_filter = for_annotation[(for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
@@ -766,12 +766,12 @@ def volcano(dfs, list_of_days, colorlist):
 
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
                 if xaxes != (0.0, 0.0) and yaxes != (0.0):
-                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes) &
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] <= yaxes) &
                                                  (for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
                                                                                          inclusive='both')
                                                   )]  # bracket over fc filters
                 elif xaxes == (0.0, 0.0) and yaxes != (0.0):
-                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] >= yaxes)]
+                    user_filter = for_annotation[(for_annotation[pval_col_name[0]] <= yaxes)]
 
                 elif xaxes != (0.0, 0.0) and yaxes == (0.0):
                     user_filter = for_annotation[(for_annotation[FC_col_name[0]].between(xaxes[0], xaxes[1],
