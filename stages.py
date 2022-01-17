@@ -37,7 +37,7 @@ import seaborn as sns
 # Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
 # Update v1e: Changes to clustergram to set fold change and have the legend include log2FC
 # Bug fix v1e: Adding more than 3 plots caused errors in volcano and DEGs.
-# Update v1g: Included more correlation coefficients including Phik
+# Update v1g: Included more correlation coefficients including Phik and added the missing axis labels for user-input enrichr
 
 ################################################ for df download #######################################################
 def convert_df(df):
