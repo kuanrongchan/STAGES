@@ -16,6 +16,8 @@ import gseapy as gp
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy import stats
+import phik
+from phik import report
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
@@ -35,6 +37,7 @@ import seaborn as sns
 # Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
 # Update v1e: Changes to clustergram to set fold change and have the legend include log2FC
 # Bug fix v1e: Adding more than 3 plots caused errors in volcano and DEGs.
+# Update v1g: Included more correlation coefficients including Phik
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -105,7 +108,6 @@ deg_dict = {}  ###########
 proportions = {}  ########
 ##########################
 
-# gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
 # gene_symbols = pd.read_csv("gene_date.csv")
 # old_symbols = gene_symbols.iloc[:, 0].tolist()
 # new_symbols = gene_symbols.iloc[:, 3].tolist()
@@ -695,7 +697,6 @@ def volcano(dfs, list_of_days, colorlist):
                     plt.ylim(0.0, yaxes)
                 else:
                     pass
-                
                 plt.ylabel('-log10(p-value)')
                 plt.axhline(y=0, color='r', linestyle='dashed')
                 plt.axvline(x=0, linestyle='dashed')
@@ -812,7 +813,7 @@ def volcano(dfs, list_of_days, colorlist):
                     plt.ylim(0.0, yaxes)
                 else:
                     pass
-                
+
                 if interactive_volcano:
                     volcano1.add_trace(go.Scatter(x=user_filter[FC_col_name[0]], y=user_filter[pval_col_name[0]],
                                                   mode='markers',
@@ -1340,6 +1341,8 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
         toplot = data_sig.sort_values("-logP", ascending=True).tail(10)
         fig = go.Figure(data=go.Bar(x=toplot['-logP'], y=toplot.index, orientation='h', marker_color="#4FC04F"))
         fig.update_layout(title="Enrichr analysis of query genes", title_x=0.5, yaxis={'tickmode': 'linear'})
+        fig.update_xaxes(title="-logP")
+        fig.update_yaxes(title="Term")
         st.plotly_chart(fig, use_container_width=True)
 
 
@@ -1578,6 +1581,7 @@ def execute_prerank(col_dict, geneset):
 ##################################### Correlation Matrix (using original df) #########################################
 def corr_matrix(dfx):
     st.subheader("Correlation matrix")
+    method = corr_exp.selectbox("Choose the correlation coefficient to use", options=['pearson', 'kendall', 'spearman', 'phik'], format_func = lambda x: x.title())
     fc_regex = "log2Fold[-_\s]?Changes?|log2FC"
 
     updated_df_list = []
@@ -1589,7 +1593,10 @@ def corr_matrix(dfx):
 
     concat_fc = pd.concat(updated_df_list, axis=1)
     concat_fc = concat_fc.dropna()
-    concat_corr = concat_fc.corr()
+    if method != 'phik':
+        concat_corr = concat_fc.corr(method=method)
+    else:
+        concat_corr = concat_fc.phik_matrix()
 
     # plot
     mask = np.triu(np.ones_like(concat_corr, dtype=bool))
@@ -1690,7 +1697,7 @@ for c in choose_app:
                 if run_enrichr:
                     execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=False)
                 else:
-                    st.stop()
+                    pass
 
         elif c == 'GSEA prerank':
             list_of_days = timepoints(cleaned_dict)
@@ -1711,7 +1718,7 @@ for c in choose_app:
             if run_prerank:
                 execute_prerank(prerank_cols, prerank_dataset)
             else:
-                st.stop()
+                pass
 
         elif c == "pathway clustergram":
             dfx = check_log(cleaned_dict)
@@ -1720,4 +1727,5 @@ for c in choose_app:
 
         elif c == "correlation matrix":
             dfx = check_log(cleaned_dict)
+            corr_exp = st.sidebar.expander("Expand for correlation matrix", expanded=False)
             corr_matrix(dfx)
