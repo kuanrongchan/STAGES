@@ -17,6 +17,7 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy import stats
 import phik
+from phik import report
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
@@ -31,7 +32,12 @@ import seaborn as sns
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Update v1g: Included more correlation coefficients including Phik and added the missing axis labels for user-input enrichr
+# Update: added internal date-gene conversion
+# Update: Improved caching for enrichr and prerank to prevent slow-down of app when no changes are made to enrichr/prerank results
+# Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
+# Update v1e: Changes to clustergram to set fold change and have the legend include log2FC
+# Bug fix v1e: Adding more than 3 plots caused errors in volcano and DEGs.
+# Update v1g: Included more correlation coefficients including Phik
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -88,7 +94,7 @@ if len(df_query) != 0:
                 df_names.append(i)
 
 else:
-    testdata = pd.read_csv("demo_dataframe_corrected.csv", index_col=0)
+    testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
     testname = "Demo"
     df_dict[testname] = testdata
     df_names.append(testname)
