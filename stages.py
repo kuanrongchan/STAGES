@@ -17,7 +17,6 @@ from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy import stats
 import phik
-from phik import report
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
