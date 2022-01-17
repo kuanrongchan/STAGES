@@ -94,7 +94,7 @@ if len(df_query) != 0:
                 df_names.append(i)
 
 else:
-    testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
+    testdata = pd.read_csv("demo_dataframe_corrected.csv", index_col=0)
     testname = "Demo"
     df_dict[testname] = testdata
     df_names.append(testname)
