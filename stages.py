@@ -31,11 +31,6 @@ import seaborn as sns
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Update: added internal date-gene conversion
-# Update: Improved caching for enrichr and prerank to prevent slow-down of app when no changes are made to enrichr/prerank results
-# Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
-# Update v1e: Changes to clustergram to set fold change and have the legend include log2FC
-# Bug fix v1e: Adding more than 3 plots caused errors in volcano and DEGs.
 # Update v1g: Included more correlation coefficients including Phik and added the missing axis labels for user-input enrichr
 
 ################################################ for df download #######################################################
@@ -114,8 +109,8 @@ proportions = {}  ########
 
 @st.experimental_memo
 def clean_ref():
-    for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
-    # for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
+#     for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
+    for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
     for_ref.reset_index(drop=True,inplace=True)
     for_ref.columns = for_ref.iloc[0,:]
     for_ref.drop(index=0, inplace=True)
