@@ -7,17 +7,21 @@ import time
 import math
 import re
 import base64
+import io
+from PIL import Image
 from io import BytesIO
 import inflect
 import dateparser
 from datetime import datetime
+import requests
+from st_aggrid import AgGrid
 
 import gseapy as gp
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy import stats
 import phik
-from phik import report
+# from phik import report
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
@@ -27,7 +31,6 @@ from plotly.subplots import make_subplots
 import plotly.figure_factory as ff
 import plotly.express as px
 import matplotlib.pyplot as plt
-import seaborn as sns
 # from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
@@ -94,6 +97,7 @@ if len(df_query) != 0:
                 df_names.append(i)
 
 else:
+#     testdata = st.experimental_memo(pd.read_csv)("Desktop/Work/Interactive Dashboard/test_datasets/demo_dataframe_corrected.csv", index_col=0)
     testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
     testname = "Demo"
     df_dict[testname] = testdata
@@ -108,11 +112,12 @@ deg_dict = {}  ###########
 proportions = {}  ########
 ##########################
 
+# gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
 # gene_symbols = pd.read_csv("gene_date.csv")
 # old_symbols = gene_symbols.iloc[:, 0].tolist()
 # new_symbols = gene_symbols.iloc[:, 3].tolist()
 
-@st.experimental_memo
+@st.experimental_memo()
 def clean_ref():
 #     for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
     for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
@@ -900,6 +905,7 @@ def volcano(dfs, list_of_days, colorlist):
         time.sleep(0.25)
         svolcano.empty()
         st.pyplot(fig)
+    return fig
 
 
 ############################################# Stacked DEGs ############################################################
@@ -1320,6 +1326,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                                     no_plot=True,
                                     cutoff=0.5  # test dataset, use lower value from range(0,1)
                                     )
+
         # Sort values by adjusted p-value
         data = select_enrichr.results
         data.set_index("Term", inplace=True)
@@ -1645,16 +1652,54 @@ def corr_matrix(dfx):
         "If the plot is too small, please hover over the plot and click the expand button on the top right corner of the plot.")
     st.plotly_chart(corr_matrix, use_container_width=True)
 
+##################################### STRINGdb from DEGs or input list ###############################################
+def string_query(DEG = None):
+    string_api_url = "https://version-11-5.string-db.org/api"
+    output_format = "highres_image"
+    method = "network"
+    request_url = "/".join([string_api_url, output_format, method])
 
+    if DEG is not None:
+        proportion_keys = list(DEG.keys())
+        proportion_keys.remove("upcount")
+        proportion_keys.remove("downcount")
+        deg_choice = string_exp.selectbox("Select DEGs to plot", options=sorted(proportion_keys, key=str.casefold))
+        gene_choice = proportions[deg_choice].index.to_list()
+
+    else:
+        gene_input = st.text_area(label="Input list of at least 3 genes here",
+                                            help="Please use one of the following delimiters:line breaks, commas, or semicolons")
+        genes = list(set(gene_input.replace(";", ",").replace(" ", ",").replace("\n", ",").split(',')))
+        gene_choice = [x.upper() for x in genes if x != ""]
+                
+    if string_exp.checkbox("Run STRING query"):
+        gene_ready  = "%0d".join(gene_choice)
+
+        params = {
+            "identifiers" : gene_ready,
+            "species" : 9606, # species NCBI identifier 
+            "network_flavor": "confidence", # show confidence links
+            "caller_identity" : "stages" # your app name
+            }
+        if len(gene_ready) != 0:
+            response = requests.post(request_url, data=params)
+            in_memory_file = io.BytesIO(response.content)
+            im = Image.open(in_memory_file)
+
+            st.subheader("STRING Interaction Network")
+            st.image(im, use_column_width=True)
+    return
+    
 ##################################### Choose app to build dashboard ##################################################
 choose_app = st.sidebar.multiselect("Choose an app to render in the main page 👉",
                                     options=["volcano plot", "DEGs", "enrichr", "GSEA prerank", "pathway clustergram",
-                                             "correlation matrix"])
+                                             "STRING query", "correlation matrix"])
 qc_df(df_dict)
 
 if st.sidebar.checkbox("Show uploaded/demo dataframe"):
     for k, v in cleaned_dict.items():
-        st.write(f"**{k} dataframe**", v)
+        st.markdown(f"**{k}**")
+        AgGrid(v.reset_index())
 
 for c in choose_app:
     with st.spinner("🔨Building your dashboard 🔨"):
@@ -1663,7 +1708,7 @@ for c in choose_app:
             list_of_days = timepoints(cleaned_dict)
             colorlist = n_colors(list_of_days)
             dfx = check_log(cleaned_dict)
-            volcano(dfx, list_of_days, colorlist)
+            volcanoplot = volcano(dfx, list_of_days, colorlist)
 
         elif c == "DEGs":
             list_of_days = timepoints(cleaned_dict)
@@ -1729,3 +1774,14 @@ for c in choose_app:
             dfx = check_log(cleaned_dict)
             corr_exp = st.sidebar.expander("Expand for correlation matrix", expanded=False)
             corr_matrix(dfx)
+
+        elif c == "STRING query":
+            string_exp = st.sidebar.expander("Expand for STRING query", expanded=False)    
+            if "DEGs" in choose_app:
+                DEG_or_own =string_exp.selectbox("Use DEGs or enter own set of genes", options=["DEGs", "Manually"])
+                if DEG_or_own == "DEGs":
+                    string_query(DEG=proportions)
+                else:
+                    string_query(DEG=None)
+            else:
+                string_query(DEG=None)
