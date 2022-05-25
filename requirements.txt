@@ -6,7 +6,7 @@ seaborn==0.11.1
 scipy==1.5.4
 numpy==1.19.1
 streamlit==1.4.0
-pandas==1.0.5
+pandas==1.2
 scikit_learn==1.0
 Multiapp
 openpyxl==3.0.9
