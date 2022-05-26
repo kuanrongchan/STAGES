@@ -31,6 +31,7 @@ from plotly.subplots import make_subplots
 import plotly.figure_factory as ff
 import plotly.express as px
 import matplotlib.pyplot as plt
+import seaborn as sns
 # from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
@@ -1667,7 +1668,7 @@ def string_query(DEG = None):
         gene_choice = proportions[deg_choice].index.to_list()
 
     else:
-        gene_input = st.text_area(label="Input list of at least 3 genes here",
+        gene_input = string_exp.text_area(label="Input list of at least 3 genes here",
                                             help="Please use one of the following delimiters:line breaks, commas, or semicolons")
         genes = list(set(gene_input.replace(";", ",").replace(" ", ",").replace("\n", ",").split(',')))
         gene_choice = [x.upper() for x in genes if x != ""]
