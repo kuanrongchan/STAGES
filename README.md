@@ -12,13 +12,18 @@ STAGES is an easy-to-use web tool that integrates data visualisation and pathway
 
 ## Getting started
 To use the web tool, you will need at least one comparison file which contain:
+
     1.	Gene names on the first column
     2.	Ratio values (relative transcript expression versus control or baseline)
     3.	Adjusted p-values (or p-values)
+    
     For the tool to be able to recognise your ratio and p-value columns, please format the ratio and p-value header columns to be parsed by underscores ( _ ):
+    
     1.	Ratio as ratio_X_vs_Y
     2.	Adjusted p-values (or p-values) as pval_X_vs_Y,
+    
     where X and Y are comparison variables parsed by underscores ( _ ). The X and Y variables can be time-point comparisons (e.g.ratio_hr6_vs_0) or experimental-control comparisons (e.g. ratio_drugA_vs_placebo, ratio_virus_vs_ctrl).
+    
     For multiple comparisons to be analysed simultaneously, users can add more ratio and p-value columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y). Users do not need to manually remove any other column labels and values that are present within the file.
 
 Demo examples and descriptions of data formats are provided. You can try out the demo examples to familiarise yourself with the apps before uploading your dataset. Further documentation breaking down each feature of the webtool is available within the website's 'Read the Docs'.
