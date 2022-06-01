@@ -2,13 +2,14 @@
 ![Untitled (4)](https://user-images.githubusercontent.com/91276553/141084154-7d84695a-b220-43c5-bd41-08a38fd0ec70.png)
 
 STAGES is an easy-to-use web tool that integrates data visualisation and pathway enrichment analysis for both static and temporal gene expression studies. STAGES is free and open to all users and there is no login requirement. The web tool works by running the Python programming language at backend to perform the data analysis and graph plotting, while the Streamlit framework is used to display the output data tables and graphs at frontend. Overall, STAGEs allow users to perform the following:
-    1.	Plot interactive volcano plots
-    2.	Filter data to identify and quantify number of differentially expressed genes based on users’ pre-defined fold change and p-value cut-offs
-    3.	Pathway analysis by Enrichr against Gene Ontology (GO) Biological Processes, GO Molecular Function. GO Cellular Component, Reactome databases. Also allows pathway enrichment analysis against customised gene sets such as the Blood Transcriptomic Modules (BTM) and our in-house curated database (Vaccinomics)
-    4.	GSEA pre-ranked analysis against the Reactome database, BTM and Vaccinomics
-    5.	Plot clustergrams based on DEGs, genes from Enrichr pathway enrichment analysis or leading edge genes from GSEA
-		6.  STRING query based on DEGs or user-input gene list.
-    7.	Correlation matrix comparing transcriptomics responses between different experimental conditions.
+
+1. Plot interactive volcano plots
+2. Filter data to identify and quantify number of differentially expressed genes based on users’ pre-defined fold change and p-value cut-offs
+3. Pathway analysis by Enrichr against Gene Ontology (GO) Biological Processes, GO Molecular Function. GO Cellular Component, Reactome databases. Also allows pathway enrichment analysis against customised gene sets such as the Blood Transcriptomic Modules (BTM) and our in-house curated database (Vaccinomics)
+4. GSEA pre-ranked analysis against the Reactome database, BTM and Vaccinomics
+5. Plot clustergrams based on DEGs, genes from Enrichr pathway enrichment analysis or leading edge genes from GSEA
+6. STRING query based on DEGs or user-input gene list.
+7. Correlation matrix comparing transcriptomics responses between different experimental conditions.
 
 ## Getting started
 To use the web tool, you will need at least one comparison file which contain:
