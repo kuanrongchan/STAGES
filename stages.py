@@ -133,49 +133,50 @@ reference_symbols = clean_ref()
 ################################################# Read the Docs #######################################################
 def read_docs():
     st.subheader("Static and Temporal Analysis of Gene Expression Studies (STAGES) documentation")
-    st.image("images/STAGESgraphicalabstract_v4.png",width=None)
+    st.image("images/STAGESgraphicalabstract_v4.png",width=None) #changed
     st.markdown(
     '''
     <div style="text-align: justify">
     STAGES is an easy-to-use web tool that integrates data visualisation and pathway enrichment analysis for both static and temporal gene expression studies. STAGES is free and open to all users and there is no login requirement. The web tool works by running the Python programming language at backend to perform the data analysis and graph plotting, while the Streamlit framework is used to display the output data tables and graphs at frontend. Overall, STAGEs allow users to perform the following:
+    
 
     1.	Plot interactive volcano plots
     2.	Filter data to identify and quantify number of differentially expressed genes based on users’ pre-defined fold change and p-value cut-offs
     3.	Pathway analysis by Enrichr against Gene Ontology (GO) Biological Processes, GO Molecular Function. GO Cellular Component, Reactome databases. Also allows pathway enrichment analysis against customised gene sets such as the Blood Transcriptomic Modules (BTM) and our in-house curated database (Vaccinomics)
     4.	GSEA pre-ranked analysis against the Reactome database, BTM and Vaccinomics
     5.	Plot clustergrams based on DEGs, genes from Enrichr pathway enrichment analysis or leading edge genes from GSEA
-    6.	Correlation matrix comparing transcriptomics responses between different experimental conditions
-
+    6.  STRING query based on DEGs or user-input gene list.
+    7.	Correlation matrix comparing transcriptomics responses between different experimental conditions
+    
     All data uploaded and analysed are safe and is never stored anywhere.
-
+    
     ### Getting Started
     To use the web tool, you will need at least one comparison file which contain:
 
-    1.	Gene names on the first column
-    2.	Ratio values (relative transcript expression versus control or baseline)
-    3.	Adjusted p-values (or p-values)
+    1.	**Gene names** on the first column
+    2.	**Ratio values** (relative transcript expression versus control or baseline)
+    3.	**Adjusted p-values** (or p-values)
 
     For the tool to be able to recognise your ratio and p-value columns, please format the ratio and p-value header columns to be parsed by underscores ( _ ):
 
     1.	Ratio as ratio_X_vs_Y
     2.	Adjusted p-values (or p-values) as pval_X_vs_Y,
 
-    where X and Y are comparison variables parsed by underscores ( _ ). The X and Y variables can be time-point comparisons (e.g. ratio_day1_vs_day0, ratio_hr6_vs_0) or experimental-control comparisons (e.g. ratio_drugA_vs_placebo, ratio_virus_vs_ctrl).
-
+    where X and Y are comparison variables parsed by underscores ( _ ). The X and Y variables can be time-point comparisons (e.g.ratio_hr6_vs_0) or experimental-control comparisons (e.g. ratio_drugA_vs_placebo, ratio_virus_vs_ctrl).
+    
     For multiple comparisons to be analysed simultaneously, users can add more ratio and p-value columns (e.g. ratio_A_vs_Y, pval_A_vs_Y, ratio_B_vs_Y, pval_B_vs_Y). Users do not need to manually remove any other column labels and values that are present within the file.
-
+    
     To analyse different experimental conditions across various time-points, users can upload multiple .csv or .xlsx files. However, the time-points sampled and the naming of header columns must be matched across the different experimental conditions for valid comparisons to be made.
-
+   
     ### Browser Compatibility
-
     Streamlit has been demonstrated to work on Google Chrome, Firefox, Safari and Microsoft Edge (https://docs.streamlit.io/knowledge-base/using-streamlit/supported-browsers), and on MacOS, Windows and Linux (https://docs.streamlit.io/library/get-started/installation). While we have not tested STAGEs in all these browsers and OS, the web tool has been tested and evaluated in these below settings:
-
     |     OS         |     Version    |     Chrome          |     Firefox          |     Microsoft Edge    |     Safari    |
     |----------------|----------------|---------------------|----------------------|-----------------------|---------------|
     |     MacOS      |     Big Sur    |     96.0.4664.93    |     95.0 (64 bit)    |     not tested        |     14.1.2    |
     |     Windows    |     10         |     96.0.4664.93    |     95.0 (64 bit)    |     not tested        |     14.1.2    |
 
-    ##
+
+    <br> </br>
     ### Data Output from STAGEs
     #### STAGEs Dashboard
     The STAGEs dashboard displays the output data tables and charts, while the sidebar allows users to upload data files, select the data output files to render and customise graph settings. If no dataset is uploaded,  a demo dataset showing the gene transcript expression levels in seronegative subjects after MERCK Ad5/HIV vaccination by Zak et al., 2012 will be uploaded.
@@ -183,122 +184,124 @@ def read_docs():
     </div>
     ''', unsafe_allow_html=True)
 
-    st.image("images/dashboard1.png", width=None)
+    st.image("images/dashboard1.png", width=None) #keep
     st.markdown('''
     <div style="text-align: justify">
 
     ##### Gene Updater
     Gene Updater is incorporated into STAGEs at backend, and auto-converts old gene names and dates back into the new gene names as recommended by the HUGO Gene Nomenclature Committee (HGNC).
-    For more details, please see [pre-print] (https://www.researchsquare.com/article/rs-1146062/v1).
+    For more details, please see [pre-print](https://www.researchsquare.com/article/rs-1146062/v1).
 
     ##### Volcano Plot Output
-    The first graph that can be rendered is the volcano plot, where users can visualise the distribution of fold change and p-values of all data points. If multiple comparisons are indicated in the uploaded dataset,
-    the volcano plots of each comparison will be overlaid, allowing users to compare distribution of volcano plots between the different experimental conditions. The top 10 most upregulated and downregulated are also annotated in the volcano plots. The default settings allow all data points to be plotted. An example of the output from the demo dataset is as shown below:
-
-    </div>
-    ''', unsafe_allow_html=True)
-    st.image("images/dashboard2.png", width=None)
-    st.markdown('''
-    <div style="text-align: justify">
-
-    To define the range of x and y-axis to be plotted, users can click on the expander for volcano plots at the side bar. In this case, we have changed the settings of the log2-transformed fold change values from -4 to 10, and the dashboard will immediately update the dashboard.
-
-    </div>
-    ''', unsafe_allow_html=True)
-    st.image("images/dashboard3.png", width=None)
-    st.markdown('''
-    <div style="text-align: justify">
+    The first graph that can be rendered is the volcano plot, where users can visualise the distribution of fold change and p-values of all data points. If multiple comparisons are indicated in the uploaded dataset, the volcano plots of each comparison will be overlaid, allowing users to compare distribution of volcano plots between the different experimental conditions. <br> 
+    The top 10 most upregulated and downregulated are also annotated in the volcano plots. The default settings allow all data points to be plotted. An example of the output from the demo dataset is as shown below. <br>
+    To define the range of x and y-axis to be plotted, users can click on the expander for volcano plots at the side bar. In this case, we have changed the settings of the log2-transformed fold change values from -3.00 to 6.50, and the dashboard will immediately update the dashboard. <br>
+    To visualise the contents of every single data-point, users can click on the checkbox on “Show interactive volcano plot” and the dashboard will show a new volcano plot output. This graph will allow users to show data characteristics upon mouseover as seen in b). <br>
     To reset the settings to default settings, users just have to check on the “Reset to default settings” checkbox.
-
-    
-    To visualise the contents of every single data-point, users can click on the checkbox on “Show interactive volcano plot” and the dashboard will show a new volcano plot output. This graph will allow users to show data characteristics upon mouseover.
-    An example is as shown below, where the details of a data point is featured when the mouse is hovered over the data-point:
-
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard4.png", width=None)
+    st.image("images/Fig2.png", width=None) #changed
     st.markdown('''
     <div style="text-align: justify">
 
     ##### DEGs Stacked Bar Output
-
-    For the DEGs analysis, users can define the fold-change and p-value cutoffs at the side-bar, and the corresponding stacked bar chart showing the number of upregulated and downregulated DEGs will be updated in real-time on the STAGEs dashboard. The default cutoffs are fold-change = 2 and p-values < 0.05, but if required, users can adjust these parameters located at the sidebar. Users can also hover the mouse cursor over the bar charts to display the exact number of up- or down-regulated DEGs. An example of the DEGs stacked bar output from the demo dataset is as shown below:
-
+    For the DEGs analysis, users can define the fold-change and p-value cutoffs at the side-bar, and the corresponding stacked bar chart showing the number of upregulated and downregulated DEGs will be updated in real-time on the STAGEs dashboard. The default cutoffs are fold-change ≥ 2 and p-values < 0.05, but if required, users can adjust these parameters located at the sidebar. Users can also hover the mouse cursor over the bar charts to display the exact number of up- or down-regulated DEGs. An example of the DEGs stacked bar output from the demo dataset is as shown below:
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard5.png", width=None)
+
+    st.image("images/Fig3A.png", width=None) #changed-split Fig3
     st.markdown('''
     <div style="text-align: justify">
     To determine the identity of the DEGs and their respective log2 fold-change values and p-values, users can click on the expander and the data table showing the respective values will be displayed. At the bottom of the page, users can download the data as an Excel file to easy visualisation of tables. An example of the output is as displayed:
-
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard6.png", width=None)
+    st.image("images/dashboard6.png", width=None) #keep
     st.markdown('''
     <div style="text-align: justify">
-
     To plot clustergrams from DEGs, users can click on the expander at the sidebar and check on the checkbox to plot DEGs in the clustergram. Next, users can specify the DEGs to plot on the clustergram with the widget: “Select DEGs to plot.” The default clustergram will then be plotted. Users can uncheck the default settings and adjust the sliders for the range of log2-fold change values to be displayed if a customised clustergram is preferred. With the example below, we have used the upregulated DEGs from day 1 of the demo set to plot the clustergram to examine the relative expression between the different time-points.
-
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard7.png", width=None)
+    st.image("images/Fig3B.png", width=None) #changed-split Fig3
     st.markdown('''
     <div style="text-align: justify">
 
     ##### Enrichr Output
-    DEGs can be queried against curated pathway databases such as Gene Ontology (GO), Reactome and KEGG to understand the role of DEGs in biological processes, functions and their cell localisation. Once the users selected the enrichr app to display on dashboard, the databases available for database will be displayed at the sidebar after clicking on the “Expand for Enrichr pathway analysis” expander. First, users select a geneset as the database to query against. Next, using the widget, users can select the DEGs to be use for analysis. Alternatively, users can also manually input the genes by selecting the “Add manually” option. Finally, users can click on the checkbox on “Run Enrichr” to peform the enrichr pathway analysis. Besides the established databases, we have also included the Blood Transcriptomic Modules (BTM) annotated by Li et al., 2014, and also a customised in-house dataset, named as Vaccinomics which curates the different vaccine signatures that are published to date. In the example below, we have selected the BTM database, and used upregulated DEGs from day 1 as the gene list for database query. The top 10 enriched pathways will then be plotted.
-    </div>
-    ''', unsafe_allow_html=True)
-    st.image("images/dashboard8.png", width=None)
-    st.markdown('''
-    <div style="text-align: justify">
+
+    DEGs can be queried against curated pathway databases such as Gene Ontology (GO), Reactome and KEGG to understand the role of DEGs in biological processes, functions and their cell localisation. Once the users selected the enrichr app to display on dashboard, the databases available for database will be displayed at the sidebar after clicking on the “Expand for Enrichr pathway analysis” expander. <br>
+
+    First, users select a geneset as the database to query against. <br>
+
+    Next, using the widget, users can select the DEGs to be use for analysis. Alternatively, users can also manually input the genes by selecting the “Add manually” option. <br>
+    
+    Finally, users can click on the checkbox on “Run Enrichr” to peform the enrichr pathway analysis. <br>
+
+    Besides the established databases, we have also included the Blood Transcriptomic Modules (BTM) annotated by Li et al., 2014, and also a customised in-house dataset, named as Vaccinomics which curates the different vaccine signatures that are published to date. In the example below, we have selected the BTM database, and used upregulated DEGs from day 1 as the gene list for database query. The top 10 enriched pathways will then be plotted. <br>
+
     To obtain the data table showing the full list of pathways, p-values and the identity of DEGs that are captured in the respective pathways, users can click on the expander to display the enrichr dataframe as shown below.  The Excel file capturing the data table information can also be exported by clicking on the download hyperlink.
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard9.png", width=None)
-    st.markdown('''
-    <div style="text-align: justify">
+    st.image("images/Fig4.png", width=None) #changed
     
+    st.markdown('''
+    <div style="text-align: justify">
+
     ##### Prerank Analysis Output
-    Another method for pathway analysis is to use the Gene Set Enrichment Analysis, which relies on ranking of ratio values to determine leading edge genes responsible for pathway enrichment. As the pathway analysis utilises on the full list of genes in your dataset, the time taken for data analysis will be much longer than in Enrichr. At this point, we also recommend users to save all the graph plots and tables in your computer and remove (or uncheck) the app rendering for DEGs and Enrichr before proceeding with prerank analysis, as this will drastically improve the analysis speed. Similar to enrichr analysis, users can select the experimental condition to perform the prerank analysis, and select the geneset database for pathway analysis. Finally, users can apply the FDR<0.05 cutoff and run the GSEA prerank to render the bar charts. As shown below, we have unchecked the apps for DEGs and enrichr, and proceeded with prerank analysis, where we analysed the day 1 for prerank analysis. We also selected to apply the FDR<0.05 to display on the charts. The top 10 positively and negatively enriched pathways are presented as follows:
-
+    Another method for pathway analysis is to use the Gene Set Enrichment Analysis, which relies on ranking of ratio values to determine leading edge genes responsible for pathway enrichment. As the pathway analysis utilises on the full list of genes in your dataset, the time taken for data analysis will be much longer than in Enrichr. <br>
+    
+    At this point, we also recommend users to save all the graph plots and tables in your computer and remove (or uncheck) the app rendering for DEGs and Enrichr before proceeding with prerank analysis, as this will drastically improve the analysis speed. Similar to enrichr analysis, users can select the experimental condition to perform the prerank analysis, and select the geneset database for pathway analysis. Finally, users can apply the FDR<0.05 cutoff and run the GSEA prerank to render the bar charts. As shown below, we have unchecked the apps for DEGs and enrichr, and proceeded with prerank analysis, where we analysed the day 1 for prerank analysis. We also selected to apply the FDR<0.05 to display on the charts. <br>
+    
+    The top 10 positively and negatively enriched pathways are presented as follows:
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard10.png", width=None)
+
+    st.image("images/Fig5.png", width=None) #changed
+
     st.markdown('''
     <div style="text-align: justify">
-
     Finally, to obtain the data table showing the full list of pathways, leading edge genes, normalised enrichment scores and FDR values users can click on the expander to display the prerank dataframe as shown below.  The Excel file capturing the data table information can also be exported by clicking on the download hyperlink.
-
     </div>
+
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard11.png", width=None)
+    st.image("images/dashboard11.png", width=None) #keep
     st.markdown('''
     <div style="text-align: justify">
+    <br></br>
 
     ##### Pathway Clustergram Output
-    After pathway enrichment analysis, users can render the pathway clustergram to highlight the gene expression levels of genes involved in the respective pathways. Users can select the dataframe, and perform a copy-and-paste from the data table of the genes obtained from the enrichr or prerank analysis. The default clustergrams will then the plotted on the dashboard. In the example below, we used the demo dataset and used the leading edge genes from the DC surface signature enrichment analysis to render the pathway clustergram. The default settings are checked.
+    After pathway enrichment analysis, users can render the pathway clustergram to highlight the gene expression levels of genes involved in the respective pathways. Users can select the dataframe, and perform a copy-and-paste from the data table of the genes obtained from the enrichr or prerank analysis. The default clustergrams will then the plotted on the dashboard. <br>
 
+    In the example below, we used the demo dataset and used the leading edge genes from the DC surface signature enrichment analysis to render the pathway clustergram. The default settings are checked. To customise the clustergram, users can simply uncheck the default settings and use the sliders to select the data range to be plotted on the clustergram.
     </div>
     ''', unsafe_allow_html=True)
-    st.image("images/dashboard12.png", width=None)
+    st.image("images/dashboard12.png", width=None) #keep
+
     st.markdown('''
     <div style="text-align: justify">
+    <br></br>
 
-    To customise the clustergram, users can simply uncheck the default settings and use the sliders to select the data range to be plotted on the clustergram.
+    ##### STRING Query Output
+    Users may also use the STRING query function to render a STRING protein-protein interaction network with their own gene list or from selected DEGs.
+    </div>
+    ''', unsafe_allow_html=True)
+    st.image("images/Fig7.png", width=None)
+    
+    st.markdown('''
+    <div style="text-align: justify">
+    <br></br>
 
     ##### Correlation Matrix Output
-    The correlation matrix can be used to compare the similarities in host transcriptomics responses between different experimental conditions. The ratio values are converted to log2-transformed fold change values at backend, and the correlation matrices are generated through pairwaise correlations of the log2-transformed fold changes between the different experimental conditions. If the transcriptomics responses are similar, then the correlation coefficient will be close to 1 (positive correlation) or -1 (Negative correlation). In the demo example, we used STAGEs to correlated the transcriptional responses between the different time-points.
-
+    The correlation matrix can be used to compare the similarities in host transcriptomics responses between different experimental conditions. The ratio values are converted to log2-transformed fold change values at backend, and the correlation matrices are generated through pairwaise correlations of the log2-transformed fold changes between the different experimental conditions. Users may also select their preferred correlation coefficient from the sidebar. <br>
+    
+    If the transcriptomics responses are similar, then the correlation coefficient will be close to 1 (positive correlation) or -1 (Negative correlation). In the demo example, we used STAGEs to correlated the transcriptional responses between the different time-points.
     </div>
     ''', unsafe_allow_html=True)
 
-    st.image("images/dashboard13.png", width=None)
+    st.image("images/Fig8.png", width=None) #changed
     st.markdown('''
     <div style="text-align: justify">
 
     ### Contributors
-    These apps are jointly made by myself (Kuan Rong Chan), Clara Koh and Justin Ooi from Duke-NUS, Department of Emerging Infectious Diseases. I am also thankful for Eugenia Ong and Ayesa Syenina from VIREMICS for their constructive feedback. For more details on what we do, feel free to visit us at [kuanrongchan.com] (kuanrongchan.com).
+    These apps are jointly made by myself (Kuan Rong Chan), Clara Koh and Justin Ooi from Duke-NUS, Department of Emerging Infectious Diseases. I am also thankful for Eugenia Ong and Ayesa Syenina from VIREMICS for their constructive feedback. For more details on what we do, feel free to visit us at [kuanrongchan.com](kuanrongchan.com).
     </div>
     ''', unsafe_allow_html=True)
 
@@ -1318,6 +1321,7 @@ def genes_used(premade_dict=None):
 
 
 def execute_enrichr(genelist, select_dataset, use_degs=False):
+    st.subheader("Enrichr Analysis")
     st.info("Expand the plot to view all of the terms.")
     enrichr_results_exp = st.expander("Expand for enrichr dataframe", expanded=False)
     if not use_degs:
@@ -1507,6 +1511,7 @@ def find_cols(df, timepoints):
 ########### Run Prerank #############################
 # @st.cache(suppress_st_warning=True)
 def execute_prerank(col_dict, geneset):
+    st.subheader("GSEA Prerank Analysis")
     prerank_results_dict = {}
     for key, data in col_dict.items():
         running = st.experimental_memo(gp.prerank)(rnk=data,
@@ -1655,6 +1660,7 @@ def corr_matrix(dfx):
 
 ##################################### STRINGdb from DEGs or input list ###############################################
 def string_query(DEG = None):
+    st.subheader("STRING Interaction Network")
     string_api_url = "https://version-11-5.string-db.org/api"
     output_format = "highres_image"
     method = "network"
@@ -1683,11 +1689,10 @@ def string_query(DEG = None):
             "caller_identity" : "stages" # your app name
             }
         if len(gene_ready) != 0:
-            response = requests.post(request_url, data=params)
+            response = st.experimental_memo(requests.post)(request_url, data=params)
             in_memory_file = io.BytesIO(response.content)
             im = Image.open(in_memory_file)
 
-            st.subheader("STRING Interaction Network")
             st.image(im, use_column_width=True)
     return
     
