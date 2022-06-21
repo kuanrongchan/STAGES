@@ -14,14 +14,12 @@ import inflect
 import dateparser
 from datetime import datetime
 import requests
-from st_aggrid import AgGrid
 
 import gseapy as gp
 from scipy.spatial.distance import pdist, squareform
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy import stats
 import phik
-# from phik import report
 
 import streamlit as st
 from streamlit_tags import st_tags, st_tags_sidebar
@@ -36,12 +34,7 @@ import seaborn as sns
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# Update: added internal date-gene conversion
-# Update: Improved caching for enrichr and prerank to prevent slow-down of app when no changes are made to enrichr/prerank results
-# Update: Fixed bug where volcano plot was unable to be freely manipulated (negative log did not change the graph at (0,0))
-# Update v1e: Changes to clustergram to set fold change and have the legend include log2FC
-# Bug fix v1e: Adding more than 3 plots caused errors in volcano and DEGs.
-# Update v1g: Included more correlation coefficients including Phik
+# What's new: reverted AgGrid to st dataframe due to streamlit's own updates for it; enabled GO pathways for GSEA prerank; added HumanCyc 2016 to enrichr and prerank
 
 ################################################ for df download #######################################################
 def convert_df(df):
@@ -1068,6 +1061,7 @@ def degs(dfs, list_of_days, colorlist):
     st.plotly_chart(stacked1, use_container_width=True)
     deg_to_dl = [deg_dict[f"{name}_{tp}"] for name in df_names for tp in list_of_days]
     with st.expander("Expand to view and download DEGs per timepoint/comparison"):
+        st.info("Users may select the gene names within this dataframe and copy them for downstream analysis.")
         for k, v in deg_dict.items():
             st.write(f"**{k}**", v)
         # st.download_button(label="Download DEGs", data=to_excel(deg_to_dl), file_name="DEGs.xlsx")
@@ -1235,7 +1229,8 @@ def select_enrichr_dataset():
         "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
         "GO Biological Process 2021": "GO_Biological_Process_2021",
         "GO Molecular Function 2021": "GO_Molecular_Function_2021",
-        "KEGG 2021 Human": "KEGG_2021_Human"
+        "KEGG 2021 Human": "KEGG_2021_Human",
+        "HumanCyc 2016": "HumanCyc_2016"
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
@@ -1271,28 +1266,6 @@ def genes_used(premade_dict=None):
             flattenedup = [val for sublist in uplist for val in sublist]  # all the upDEGs in 1 list
             flatteneddown = [val for sublist in downlist for val in sublist]  # all the downDEGs in 1 list
 
-            # converter = defaultdict(list)  # yes it should remain as list do not change
-            #
-            # for val in flattenedup:
-            #     converter[val] = val
-            #
-            # for val in flatteneddown:
-            #     converter[val] = val
-            #
-            # for o, n in zip(old_symbols, new_symbols):
-            #     converter[n] = o
-            #
-            # for k in flattenedup:  # why this: if not, the converter will also include all the date genes that may not be a DEG
-            #     t = converter[k]
-            #     if t not in up_enrichr:
-            #         up_enrichr.append(t)
-            #
-            # for k in flatteneddown:
-            #     t = converter[k]
-            #     if t not in down_enrichr:
-            #         down_enrichr.append(t)
-            #
-            # gene_final = [up_enrichr, down_enrichr]
             gene_final = [flattenedup, flatteneddown]
 
         elif choose_genetype == "Add manually":
@@ -1476,10 +1449,11 @@ def select_prerank_dataset():
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome 2021": "Reactome.gmt",
         "Vaccinomics (In-house)": "Vaccinomics.gmt",
-        # "GO Cellular Component 2021": "GO_Cellular_Component_2021",
-        # "GO Biological Process 2021": "GO_Biological_Process_2021",
-        # "GO Molecular Function 2021": "GO_Molecular_Function_2021",
-        # "KEGG 2021 Human": "KEGG_2021_Human"
+        "GO Cellular Component 2021": "GO_Cellular_Component_2021",
+        "GO Biological Process 2021": "GO_Biological_Process_2021",
+        "GO Molecular Function 2021": "GO_Molecular_Function_2021",
+        "KEGG 2021 Human": "KEGG_2021_Human",
+        "HumanCyc 2016": "HumanCyc_2016"
     }
 
     # Selecting genesets (BTM or reactome) to plot from a list
@@ -1489,7 +1463,7 @@ def select_prerank_dataset():
 
 ######### Obtain columns for ranking ###################
 def find_cols(df, timepoints):
-    col_storage = {}  # yes this pun was intentional
+    col_storage = {}
     fc_regex = "log2Fold[-_\s]?Changes?[-_\s]|log2FC"
     df.reset_index(drop=False, inplace=True)
     for tp in timepoints:
@@ -1509,7 +1483,6 @@ def find_cols(df, timepoints):
 
 
 ########### Run Prerank #############################
-# @st.cache(suppress_st_warning=True)
 def execute_prerank(col_dict, geneset):
     st.subheader("GSEA Prerank Analysis")
     prerank_results_dict = {}
@@ -1705,7 +1678,8 @@ qc_df(df_dict)
 if st.sidebar.checkbox("Show uploaded/demo dataframe"):
     for k, v in cleaned_dict.items():
         st.markdown(f"**{k}**")
-        AgGrid(v.reset_index())
+        st.info("Click anywhere within the dataframe and use Cmd+F or Ctrl+F to search the dataframe.")
+        st.dataframe(v)
 
 for c in choose_app:
     with st.spinner("🔨Building your dashboard 🔨"):
