@@ -35,7 +35,12 @@ import seaborn as sns
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# What's new: reverted AgGrid to st dataframe due to streamlit's own updates for it; enabled GO pathways for GSEA prerank; added HumanCyc 2016 to enrichr and prerank
+# What's new in V2:
+# reverted AgGrid to st dataframe due to streamlit's own updates for it;
+# enabled GO pathways for GSEA prerank; 
+# added HumanCyc 2016 and KEGG 2019 Mouse to enrichr and prerank;
+# optimised some of the regex codes for volcano plot and DEGs
+
 ################################################ for df download #######################################################
 def convert_df(df):
     return df.to_csv().encode('utf-8')
