@@ -10,6 +10,7 @@ import base64
 import io
 from PIL import Image
 from io import BytesIO
+# import zipfile
 import inflect
 import dateparser
 from datetime import datetime
@@ -35,7 +36,6 @@ import seaborn as sns
 
 
 # What's new: reverted AgGrid to st dataframe due to streamlit's own updates for it; enabled GO pathways for GSEA prerank; added HumanCyc 2016 to enrichr and prerank
-
 ################################################ for df download #######################################################
 def convert_df(df):
     return df.to_csv().encode('utf-8')
@@ -51,15 +51,29 @@ def to_excel(df):
     return processed_data
 
 
-def get_table_download_link(df, purpose):  # keeping just in case download button fails
+def get_table_download_link(df, purpose):  # downloads without needing to reset the whole scripts
     """Generates a link allowing the data in a given panda dataframe to be downloaded
     in:  dataframe
     out: href string
     """
     val = to_excel(df)
     b64 = base64.b64encode(val)
-    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{purpose}.xlsx">' \
+    return f'<a style = "border:1px solid #31333f33; border-radius:0.25rem; background-color:#f9f9fb; text-decoration:none; color:black; padding:0.50rem 0.75rem" href="data:application/octet-stream;base64,{b64.decode()}" download="{purpose}.xlsx">' \
            f'📥 Download {purpose} as Excel file 📥</a>'  # decode b'abc' => abc
+
+# def zip_file(dfs, keys):
+#     with zipfile.ZipFile("cleanedfiles.zip", 'w') as compress:
+#         for df, k in zip(dfs, keys):
+#             file = df.to_csv().encode('utf-8')
+#             compress.writestr(f"cleaned_{k}.csv", file)
+
+#     with open("cleanedfiles.zip", "rb") as fp:
+#           btn = st.download_button(
+#               label="Download ZIP",
+#               data=fp,
+#               file_name="cleanedfiles.zip",
+#               mime="application/octet-stream"
+#               )
 
 
 st.title("STAGEs Dashboard \U0001F4CA")
@@ -91,7 +105,6 @@ if len(df_query) != 0:
                 df_names.append(i)
 
 else:
-#     testdata = st.experimental_memo(pd.read_csv)("Desktop/Work/Interactive Dashboard/test_datasets/demo_dataframe_corrected.csv", index_col=0)
     testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
     testname = "Demo"
     df_dict[testname] = testdata
@@ -99,6 +112,7 @@ else:
 
 for df in df_dict.values():
     df.index = df.index.astype(str, copy=False) # expand to format actual dates from excel sheets as text
+    df.index = df.index.str.upper()
 
 
 ####### Important ########
@@ -106,14 +120,8 @@ deg_dict = {}  ###########
 proportions = {}  ########
 ##########################
 
-# gene_symbols = pd.read_csv("/Users/clara/Desktop/Actual Work/Correcting Date Genes/gene_date.csv") # local
-# gene_symbols = pd.read_csv("gene_date.csv")
-# old_symbols = gene_symbols.iloc[:, 0].tolist()
-# new_symbols = gene_symbols.iloc[:, 3].tolist()
-
 @st.experimental_memo()
 def clean_ref():
-#     for_ref = pd.read_csv("/Users/clara/Dropbox/Streamlit_app/Date Gene Converter/hgnc-symbol-check.csv") # local
     for_ref = pd.read_csv("hgnc-symbol-check2.csv") # github
     for_ref.reset_index(drop=True,inplace=True)
     for_ref.columns = for_ref.iloc[0,:]
@@ -303,27 +311,45 @@ if documentation:
 
 ################################################# Date-Gene Conversion ################################################
 #######################################################################################################################
-cleaned_dict = {}
-def qc_df(dfs):
-    with st.spinner("Checking uploaded dataframe for dates in gene column"):
-        time.sleep(0.5)
+def qc_df(df_dict):    
+    cleaned_dict = {}
     p = inflect.engine()
-    corrected = {"Dec-01_1st": "DELEC1", "01-Dec_1st": "DELEC1", "Mar-03_1st": "MARCHF3", "03-Mar_1st": "MARCHF3",
-                 "Mar-04_1st": "MARCHF4", "04-Mar_1st": "MARCHF4", "Mar-05_1st": "MARCHF5", "05-Mar_1st": "MARCHF5",
-                 "Mar-06_1st": "MARCHF6", "06-Mar_1st": "MARCHF6", "Mar-07_1st": "MARCHF7", "07-Mar_1st": "MARCHF7",
-                 "Mar-08_1st": "MARCHF8", "08-Mar_1st": "MARCHF8", "Mar-09_1st": "MARCHF9", "09-Mar_1st": "MARCHF9",
-                 "Mar-10_1st": "MARCHF10", "10-Mar_1st": "MARCHF10", "Mar-11_1st": "MARCHF11", "11-Mar_1st": "MARCHF11",
-                 "Sep-15_1st": "SELENOF", "15_Sep_1st": "SELENOF", "Sep-01_1st": "SEPTIN1", "01-Sep_1st": "SEPTIN1",
-                 "Sep-02_1st": "SEPTIN2", "02-Sep_1st": "SEPTIN2", "Sep-03_1st": "SEPTIN3", "03-Sep_1st": "SEPTIN3",
-                 "Sep-04_1st": "SEPTIN4", "04-Sep_1st": "SEPTIN4", "Sep-05_1st": "SEPTIN5", "05-Sep_1st": "SEPTIN5",
-                 "Sep-06_1st": "SEPTIN6", "06-Sep_1st": "SEPTIN6", "Sep-07_1st": "SEPTIN7", "07-Sep_1st": "SEPTIN7",
-                 "Sep-08_1st": "SEPTIN8", "08-Sep_1st": "SEPTIN8", "Sep-09_1st": "SEPTIN9", "09-Sep_1st": "SEPTIN9",
-                 "Sep-10_1st": "SEPTIN10", "10-Sep_1st": "SEPTIN10", "Sep-11_1st": "SEPTIN11", "11-Sep_1st": "SEPTIN11",
-                 "Sep-12_1st": "SEPTIN12", "12-Sep_1st": "SEPTIN12", "Sep-14_1st": "SEPTIN14", "14-Sep_1st": "SEPTIN14"
-                 }
+    corrected = {"DEC-01_1st": "DELEC1", "01-DEC_1st":"DELEC1", "MAR-03_1st": "MARCHF3", "03-MAR_1st":"MARCHF3",
+                "MAR-04_1st": "MARCHF4", "04-MAR_1st":"MARCHF4", "MAR-05_1st": "MARCHF5", "05-MAR_1st":"MARCHF5",
+                "MAR-06_1st": "MARCHF6", "06-MAR_1st":"MARCHF6", "MAR-07_1st": "MARCHF7", "07-MAR_1st":"MARCHF7",
+                "MAR-08_1st": "MARCHF8", "08-MAR_1st":"MARCHF8", "MAR-09_1st": "MARCHF9", "09-MAR_1st":"MARCHF9",
+                "MAR-10_1st": "MARCHF10", "10-MAR_1st":"MARCHF10", "MAR-11_1st": "MARCHF11", "11-MAR_1st":"MARCHF11",
+                "SEP-15_1st": "SELENOF", "15_SEP_1st":"SELENOF", "SEP-01_1st": "SEPTIN1", "01-SEP_1st":"SEPTIN1",
+                "SEP-02_1st": "SEPTIN2", "02-SEP_1st":"SEPTIN2", "SEP-03_1st": "SEPTIN3", "03-SEP_1st":"SEPTIN3",
+                "SEP-04_1st": "SEPTIN4", "04-SEP_1st":"SEPTIN4", "SEP-05_1st": "SEPTIN5", "05-SEP_1st":"SEPTIN5",
+                "SEP-06_1st": "SEPTIN6", "06-SEP_1st":"SEPTIN6", "SEP-07_1st": "SEPTIN7", "07-SEP_1st":"SEPTIN7",
+                "SEP-08_1st": "SEPTIN8", "08-SEP_1st":"SEPTIN8", "SEP-09_1st": "SEPTIN9", "09-SEP_1st":"SEPTIN9",
+                "SEP-10_1st": "SEPTIN10", "10-SEP_1st":"SEPTIN10", "SEP-11_1st": "SEPTIN11", "11-SEP_1st":"SEPTIN11",
+                "SEP-12_1st": "SEPTIN12", "12-SEP_1st":"SEPTIN12", "SEP-14_1st": "SEPTIN14", "14-SEP_1st":"SEPTIN14",
+
+                "Dec-01_1st": "DELEC1", "01-Dec_1st":"DELEC1", "Mar-03_1st": "MARCHF3", "03-Mar_1st":"MARCHF3",
+                "Mar-04_1st": "MARCHF4", "04-Mar_1st":"MARCHF4", "Mar-05_1st": "MARCHF5", "05-Mar_1st":"MARCHF5",
+                "Mar-06_1st": "MARCHF6", "06-Mar_1st":"MARCHF6", "Mar-07_1st": "MARCHF7", "07-Mar_1st":"MARCHF7",
+                "Mar-08_1st": "MARCHF8", "08-Mar_1st":"MARCHF8", "Mar-09_1st": "MARCHF9", "09-Mar_1st":"MARCHF9",
+                "Mar-10_1st": "MARCHF10", "10-Mar_1st":"MARCHF10", "Mar-11_1st": "MARCHF11", "11-Mar_1st":"MARCHF11",
+                "Sep-15_1st": "SELENOF", "15_Sep_1st":"SELENOF", "Sep-01_1st": "SEPTIN1", "01-Sep_1st":"SEPTIN1",
+                "Sep-02_1st": "SEPTIN2", "02-Sep_1st":"SEPTIN2", "Sep-03_1st": "SEPTIN3", "03-Sep_1st":"SEPTIN3",
+                "Sep-04_1st": "SEPTIN4", "04-Sep_1st":"SEPTIN4", "Sep-05_1st": "SEPTIN5", "05-Sep_1st":"SEPTIN5",
+                "Sep-06_1st": "SEPTIN6", "06-Sep_1st":"SEPTIN6", "Sep-07_1st": "SEPTIN7", "07-Sep_1st":"SEPTIN7",
+                "Sep-08_1st": "SEPTIN8", "08-Sep_1st":"SEPTIN8", "Sep-09_1st": "SEPTIN9", "09-Sep_1st":"SEPTIN9",
+                "Sep-10_1st": "SEPTIN10", "10-Sep_1st":"SEPTIN10", "Sep-11_1st": "SEPTIN11", "11-Sep_1st":"SEPTIN11",
+                "Sep-12_1st": "SEPTIN12", "12-Sep_1st":"SEPTIN12", "Sep-14_1st": "SEPTIN14", "14-Sep_1st":"SEPTIN14"
+                    }
+
+    misidentified = None
+
+    ############################### Path after initial regex ############################################################
+
     ################ Contains dates and March-01/March-02 and have to be resolved ####################
-    def march_resolver(df):
-        find = [g for g in df.index.tolist() if re.search("Mar|Apr|Sept?|Oct|Dec", g)]
+    def march_resolver(dfs):
+        find = [g for g in dfs.index.tolist() if re.search("^MAR-|^APR-|^SEPT?-|^OCT-|^DEC-", g, flags=re.I)]
+        global misidentified
+        misidentified = ";".join(find)
         formatted = {}
         for d in find:
             zero_pad = re.search("[0-9]{2}", d)
@@ -346,19 +372,19 @@ def qc_df(dfs):
         index_name = found.columns.tolist()[0]
         found[index_name] += found.groupby(index_name).cumcount().add(1).map(p.ordinal).radd('_')
         found.set_index(index_name, inplace=True)
-        mar1 = [f for f in found.index.tolist() if re.search("Mar-0?1_1st|0?1-Mar_1st|Mar-0?1_2nd|Mar-0?1_2nd", f)]
+        mar1 = [f for f in found.index.tolist() if re.search("Mar-0?1_1st|0?1-Mar_1st|Mar-0?1_2nd|Mar-0?1_2nd", f, flags=re.I)]
         if len(mar1) !=0:
             mar1_df = found.loc[mar1]
 
             with each_df_exp:
                 st.write(f"**MAR01 Genes: {k} Dataframe**")
-                st.info("Genes like MARCH1 and MARC1 have to be differentiated by function as they are both corrected to Mar-01 in Excel."
-                                 " Check HGNC symbol reference in the sidebar for reference. 👈")
+                st.info("Genes like MARCH1 and MARC1 have to be differentiated by another identifier (e.g. Gene description) as they are both corrected to Mar-01 in Excel."
+                                " Check HGNC symbol reference in the sidebar for reference. 👈")
                 st.dataframe(mar1_df.astype(str))
 
                 first_mar01_fx = st.selectbox(f"Select the name and function that {mar1[0]} corresponds to for {k} dataframe",
-                                              options=["MTARC1: mitochondrial amidoxime reducing component 1",
-                                                      "MARCHF1: membrane associated ring-CH-type finger 1"])
+                                            options=["MTARC1: mitochondrial amidoxime reducing component 1",
+                                                    "MARCHF1: membrane associated ring-CH-type finger 1"])
             # function below can still apply to genes with only 1 MAR-01 gene because the dictionary will only match those found in the data
             if first_mar01_fx == "MTARC1: mitochondrial amidoxime reducing component 1":
                 first_mar01 = "MTARC1"
@@ -367,25 +393,23 @@ def qc_df(dfs):
                 first_mar01 = "MARCHF1"
                 second_mar01 = "MTARC1"
 
-            corrected["Mar-01_1st"] = first_mar01
-            corrected["01-Mar_1st"] = first_mar01
-            corrected["Mar-01_2nd"] = second_mar01
-            corrected["01-Mar_2nd"] = second_mar01
+            corrected["MAR-01_1st"], corrected['Mar-01_1st'], corrected["01-MAR_1st"], corrected["01-Mar_1st"] = first_mar01, first_mar01, first_mar01, first_mar01
+            corrected["MAR-01_2nd"], corrected["Mar-01_2nd"], corrected["01-MAR_2nd"], corrected["01-Mar_2nd"] = second_mar01, second_mar01, second_mar01, second_mar01
 
-        mar2 = [f for f in found.index.tolist() if re.search("Mar-0?2_1st|0?2-Mar_1st|Mar-0?2_2nd|02-Mar_2nd", f)]
+        mar2 = [f for f in found.index.tolist() if re.search("Mar-0?2_1st|0?2-Mar_1st|Mar-0?2_2nd|02-Mar_2nd", f, flags=re.I)]
         if len(mar2) !=0:
             mar2_df = found.loc[mar2]
 
             each_df_exp.write(f"**MAR02 Genes: {k} Dataframe**")
             each_df_exp.info(
-                "Genes like MARCH2 and MARC2 have to be differentiated by function as they are both corrected to Mar-01 in Excel."
+                "Genes like MARCH2 and MARC2 have to be differentiated by another identifier (e.g. Gene description) as they are both corrected to Mar-01 in Excel."
                 " Check old and new HGNC symbols in the sidebar for reference. 👈")
             each_df_exp.dataframe(mar2_df.astype(str))
 
             first_mar02_fx = each_df_exp.selectbox(f"Select the name and function that {mar2[0]} corresponds to for {k} dataframe",
-                                          options=[
-                                              "MTARC2: mitochondrial amidoxime reducing component 2",
-                                              "MARCHF2: membrane associated ring-CH-type finger 2"])
+                                        options=[
+                                            "MTARC2: mitochondrial amidoxime reducing component 2",
+                                            "MARCHF2: membrane associated ring-CH-type finger 2"])
 
             if first_mar02_fx == "MTARC2: mitochondrial amidoxime reducing component 2":
                 first_mar02 = "MTARC2"
@@ -394,27 +418,21 @@ def qc_df(dfs):
                 first_mar02 = "MARCHF2"
                 second_mar02 = "MTARC2"
 
-            corrected["Mar-01_1st"] = first_mar01
-            corrected["01-Mar_1st"] = first_mar01
-            corrected["Mar-01_2nd"] = second_mar01
-            corrected["01-Mar_2nd"] = second_mar01
-            corrected["Mar-02_1st"] = first_mar02
-            corrected["02-Mar_1st"] = first_mar02
-            corrected["Mar-02_2nd"] = second_mar02
-            corrected["02-Mar_2nd"] = second_mar02
+            corrected["MAR-02_1st"], corrected["Mar-02_1st"], corrected["02-MAR_1st"], corrected["02-Mar_1st"]  = first_mar02, first_mar02, first_mar02, first_mar02
+            corrected["MAR-02_2nd"], corrected["Mar-02_2nd"], corrected["02-MAR_2nd"], corrected["02-Mar_2nd"] = second_mar02, second_mar02, second_mar02, second_mar02
 
-        else:
-            corrected["Mar-01_1st"] = first_mar01
-            corrected["01-Mar_1st"] = first_mar01
-            corrected["Mar-01_2nd"] = second_mar01
-            corrected["01-Mar_2nd"] = second_mar01
+        # else:
+        #     corrected["MAR-01_1st"], corrected['Mar-01_1st'], corrected["01-MAR_1st"], corrected["01-Mar_1st"] = first_mar01, first_mar01, first_mar01, first_mar01
+        #     corrected["MAR-01_2nd"], corrected["Mar-01_2nd"], corrected["01-MAR_2nd"], corrected["01-Mar_2nd"] = second_mar01, second_mar01, second_mar01, second_mar01
+        #     corrected["MAR-02_1st"], corrected["Mar-02_1st"], corrected["02-MAR_1st"], corrected["02-Mar_1st"]  = first_mar02, first_mar02, first_mar02, first_mar02
+        #     corrected["MAR-02_2nd"], corrected["Mar-02_2nd"], corrected["02-MAR_2nd"], corrected["02-Mar_2nd"] = second_mar02, second_mar02, second_mar02, second_mar02
 
         found["Gene"] = pd.Series(corrected)  # in order to rename just change this to found.rename(corrected)
         found.reset_index(drop=True, inplace=True)  # remove the gene index with the dates
         found.rename(columns={"Gene": "gene"}, inplace=True)  # rename the incoming column to be used as index
         found.set_index('gene', inplace=True)  # set the index of these date genes using corrected names
-        df = df.drop(index=find)  # drop the date genes from the main df
-        df2 = pd.concat([df, found], axis=0)  # join these genes back to the main df
+        dfs = dfs.drop(index=find)  # drop the date genes from the main df
+        df2 = pd.concat([dfs, found], axis=0)  # join these genes back to the main df
         df2.sort_index(axis=0, ascending=True, inplace=True)  # sort alphabetically
         df2.reset_index(drop=False, inplace=True)
         df2.rename(columns={'index': index_name}, inplace=True)
@@ -424,6 +442,8 @@ def qc_df(dfs):
 
     ############ Contains dates but no march-01/march-02 and thus nothing to resolve ##############
     def date_resolver(df, date_search):
+        global misidentified
+        misidentified = ";".join(date_search)
         formatted = {}
         for d in date_search:
             zero_pad = re.search("[0-9]{2}", d)
@@ -452,16 +472,16 @@ def qc_df(dfs):
         return
 
     ############################## Dates are only numbers ##########################################
-    def numeric_date(k, df, numdate):
+    def numeric_date(k,df,numdate):
         num_exp = st.expander(f"Expand if {k}'s date format is numerical (eg. yyyy/mm/dd)")
         date_fmt = num_exp.radio(f"Select the format that {k} dataframe is in",
-                                 options=["yyyy-dd-mm", "yyyy-mm-dd", "dd-mm-yyyy", "mm-dd-yyyy"])
+                    options=["yyyy-dd-mm", "yyyy-mm-dd", "dd-mm-yyyy", "mm-dd-yyyy"])
         info_stored = num_exp.radio(f"Select how {k}'s dates should be read to derive gene names (Hover '?' for help)",
                                     options=['month-year', 'month-day'],
                                     help='For example, 2001-03-09 (yyyy-mm-dd) may either be Mar-01 (MARCHF1) or Mar-09 (MARCHF9).',
                                     index=1)
-        num_exp.info("If you're unsure about the above option, check your dataframe and select 'month-year'. "
-                     "We recommend you to check the converted dataframe to ensure that the dates are converted correctly. If unsuccessful, <NA> symbols will populate at the bottom of the dataframe.")
+        num_exp.info("If you're unsure about the above option, check the converted dataframe and select 'month-year.' "
+                    "We recommend you to check the converted dataframe to ensure that the dates are converted correctly. If unsuccessful, <NA> symbols will populate at the bottom of the converted dataframe.")
         if info_stored == 'month-year':
             strfmt = '%b-%y'
         else:
@@ -474,20 +494,22 @@ def qc_df(dfs):
             if indices not in a:
                 a.append(indices)
         flattened = [item for sublist in a for item in sublist]
-        found = df.iloc[flattened, :]
+        found = df.iloc[flattened,:]
         found.set_index(index_nm, inplace=True)
         num_exp.write(f"**{k} dataframe**")
         num_exp.dataframe(found)
 
         if date_fmt == "yyyy-dd-mm":
-            extracted = {n: (dateparser.parse(n, date_formats=["%Y-%d-%m"])).strftime(strfmt) for n in numdate}
+            extracted = {n:(dateparser.parse(n, date_formats=["%Y-%d-%m"])).strftime(strfmt) for n in numdate}
         elif date_fmt == "yyyy-mm-dd":
-            extracted = {n: (dateparser.parse(n, date_formats=["%Y-%m-%d"])).strftime(strfmt) for n in numdate}
+            extracted = {n:(dateparser.parse(n, date_formats=["%Y-%m-%d"])).strftime(strfmt) for n in numdate}
         elif date_fmt == "dd-mm-yyyy":
-            extracted = {n: (dateparser.parse(n, date_formats=["%d-%m-%Y"])).strftime(strfmt) for n in numdate}
+            extracted = {n:(dateparser.parse(n, date_formats=["%d-%m-%Y"])).strftime(strfmt) for n in numdate}
         elif date_fmt == "mm-dd-yyyy":
-            extracted = {n: (dateparser.parse(n, date_formats=["%m-%d-%Y"])).strftime(strfmt) for n in numdate}
+            extracted = {n:(dateparser.parse(n, date_formats=["%m-%d-%Y"])).strftime(strfmt) for n in numdate}
 
+        global misidentified
+        misidentified = ";".join(extracted.keys())
         df.set_index(index_nm, inplace=True)
         df.rename(index=extracted, inplace=True)
         return df
@@ -500,23 +522,26 @@ def qc_df(dfs):
             value = reference_symbols.iloc[i, 1]
             corrected[key] = value
 
+        global misidentified
+        misidentified = ";".join(corrected.keys())
         df.rename(index=corrected, inplace=True)
         cleaned_dict[k] = df
         return
-################################################# Code Flow ##########################################################
 
-# since it's quite likely that old symbols don't exist together with dates (because once opened in excel all are dates),
-# this is an all-or-none approach where if date search picks up sth, old search will be empty
-# if both lists are empty, nothing is wrong, then cleaned dict[k] = df_dict[k], where k is df with no error
+    ################################################# Code Flow ##########################################################
+
+    # since it's quite likely that old symbols don't exist together with dates (because once opened in excel all are dates),
+    # this is an all-or-none approach where if date search picks up sth, old search will be empty
+    # if both lists are empty, nothing is wrong, then cleaned dict[k] = df_dict[k], where k is df with no error
 
     ismar, isnums = 0, 0
 
-    for k,df in dfs.items():
-        date_search = [g for g in df.index.tolist() if re.search("(Mar|Apr|Sept?|Oct|Dec)", g)] # dates
+    for k,df in df_dict.items():
+        date_search = [g for g in df.index.tolist() if re.search("^Mar-|^Apr-|^Sept?-|^Oct-|^Dec-", g, flags=re.I)] # dates
         old_symbols = list(reference_symbols['Previous Symbol'])
         old_search = list(set(df.index.tolist()).intersection(set(old_symbols))) # easy way to find old symbols in df index
         if len(date_search) != 0:
-            march_search = [m for m in date_search if re.search("^Mar-0?1|0?1-Mar|Mar-0?2|0?2-Mar", m)] # only march genes
+            march_search = [m for m in date_search if re.search("^Mar-0?1|^0?1-Mar|^Mar-0?2|^0?2-Mar", m, flags=re.I)] # only march genes
             if len(march_search) != 0:
                 ismar += 1
                 if ismar == 1:
@@ -529,14 +554,14 @@ def qc_df(dfs):
             nodates(df) # converts old to new (eg. DEC1 -> DELEC1)
 
         elif len(date_search) == 0 and len(old_search) == 0:
-            numdate = [g for g in df.index.tolist() if re.search("^\d*[-/]?\W", g)]
+            numdate = [g for g in df.index.tolist() if re.search("^\d*[-/]?\W", g, flags=re.I)]
             if len(numdate) != 0:
                 isnums += 1
                 if isnums == 1:
                     st.subheader("Resolve Date Format")
                 renamed = numeric_date(k,df,numdate)
-                march_search = [m for m in renamed.index.tolist() if re.search("^Mar-0?1|0?1-Mar|Mar-0?2|0?2-Mar", m)]  # only march genes
-                generic_date = [g for g in renamed.index.tolist() if re.search("(Mar|Apr|Sept?|Oct|Dec)", g)]
+                march_search = [m for m in renamed.index.tolist() if re.search("^Mar-0?1|^0?1-Mar|^Mar-0?2|^0?2-Mar", m, flags=re.I)]  # only march genes
+                generic_date = [g for g in renamed.index.tolist() if re.search("^Mar-|^Apr-|^Sept?-|^Oct-|^Dec-", g, flags=re.I)]
                 if len(march_search) != 0:
                     ismar += 1
                     if ismar == 1:
@@ -545,17 +570,12 @@ def qc_df(dfs):
                 else:
                     date_resolver(renamed, generic_date)  # will exclude march
             else:
-                noerror = st.success(f"No errors detected for {k} dataframe")
-                time.sleep(0.25)
-                noerror.empty()
+                st.success(f"No errors detected for {k} dataframe")
                 cleaned_dict[k] = df
         else:
-            noerror = st.success(f"No errors detected for {k} dataframe")
-            time.sleep(0.25)
-            noerror.empty()
+            st.success(f"No errors detected for {k} dataframe")
             cleaned_dict[k] = df
-    return
-
+    return cleaned_dict
 ################################################## Grabs Timepoint ####################################################
 # Is a variable to allow the following functions to render either timepoint or comparison in plot titles
 is_tp = 1
@@ -592,12 +612,10 @@ def check_log(dfs):
     for k, df in dfs.items():
         df = df.apply(pd.to_numeric, errors='coerce')
         fc_regex = "log2Fold[-_\s]?Changes?|log2FC"
-        cols = df.columns.tolist()
-        string_cols = ' '.join(cols)
-        check_fc = re.findall(fc_regex, string_cols, flags=re.I)
+        check_fc = [re.search(fc_regex, i, flags=re.I).group(0) for i in df.columns if re.search(fc_regex, i, flags=re.I) is not None]
 
         if check_fc:
-            d_pvals = df.filter(regex=re.compile("p[-_\s]?valu?e?", re.I))
+            d_pvals = df.filter(regex="(?i)p[-_\s]?valu?e?", axis=1)
             d_neglogpval = np.log10(d_pvals) * (-1)
             d_neglogpval.columns = d_neglogpval.columns.str.replace(
                 "p[-_\s]?valu?e?", "negative_log_pval", regex=True,
@@ -606,11 +624,11 @@ def check_log(dfs):
             df_dict2[f"{k}"] = df2
 
         else:
-            d_ratios = df.filter(regex=re.compile("ratio", re.I))
+            d_ratios = df.filter(regex="(?i)ratio", axis=1)
             d_log2FC = np.log2(d_ratios)
             d_log2FC.columns = d_log2FC.columns.str.replace("ratio", "log2FC", regex=True, flags=re.IGNORECASE)
 
-            d_pvals = df.filter(regex=re.compile("p[-_\s]?valu?e?", re.I))
+            d_pvals = df.filter(regex="(?i)p[-_\s]?valu?e?", axis=1)
             d_neglogpval = np.log10(d_pvals) * (-1)
             d_neglogpval.columns = d_neglogpval.columns.str.replace(
                 "p[-_\s]?valu?e?", "negative_log_pval", regex=True,
@@ -660,8 +678,7 @@ def volcano(dfs, list_of_days, colorlist):
                 FC_col_name = list([col for col in df.columns if tp in col if "log2FC" in col])
                 fold_changes = df[FC_col_name[0]]
                 pval_col_name = list([col for col in df.columns if tp in col if "negative_log_pval" in col])
-                # edited to negative instead of neg so we can pass all the dfs through data formatter
-                # (to include the log2ratio and -log pval)
+
                 pvals = df[pval_col_name[0]]
                 for_annotation = pd.concat([fold_changes, pvals], axis=1)
                 if xaxes != (0.0, 0.0) and yaxes != (0.0):
@@ -686,7 +703,7 @@ def volcano(dfs, list_of_days, colorlist):
                 top10annotation.append(
                     top_10.rename(columns={FC_col_name[0]: "log2FC", pval_col_name[0]: "negative_log_pval"}))
 
-                plt.grid(b=True, which="major", axis="both", alpha=0.3)
+                plt.grid(visible=True, which="major", axis="both", alpha=0.3)
                 plt.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
                 plt.title(f"Volcano plot across {tp_or_comp}", loc='center')
                 plt.legend(bbox_to_anchor=(1.04, 1), loc='upper left')
@@ -716,15 +733,17 @@ def volcano(dfs, list_of_days, colorlist):
             annotationconcat_bottom = pd.concat(bottom10annotation, axis=0)
             annotationconcat_bottom = annotationconcat_bottom.sort_values(by=["log2FC"], ascending=True).head(10)
 
-            topoverall = list(annotationconcat_top.index)
-            bottomoverall = list(annotationconcat_bottom.index)
+            # in case I forget for annotation:
+            # 1. get the top 10 of each comparison and rename the annotation cols to log2FC and negative_log_pval (generic)
+            # 2. concat all the top 10s for each comparison along axis=0 and sort by highest log2FC
+            # 3. the result is a long df of 2 cols (log2FC, neglogpval), where my xy annotation coordinates is x = log2FC (1st col), y = neglogpval (2nd col)
 
             for i in range(len(annotationconcat_top)):
-                plt.annotate(text=topoverall[i], xy=(annotationconcat_top.iloc[i, 0], annotationconcat_top.iloc[i, 1]),
+                plt.annotate(text=annotationconcat_top.index[i], xy=(annotationconcat_top.iloc[i, 0], annotationconcat_top.iloc[i, 1]),
                              xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
                              fontsize=7)  # top 10
             for i in range(len(annotationconcat_bottom)):
-                plt.annotate(text=bottomoverall[i],
+                plt.annotate(text=annotationconcat_bottom.index[i],
                              xy=(annotationconcat_bottom.iloc[i, 0], annotationconcat_bottom.iloc[i, 1]),
                              xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
                              fontsize=7)  # bottom 10
@@ -800,7 +819,7 @@ def volcano(dfs, list_of_days, colorlist):
                 else:
                     ax = plt.subplot(nrows, 3, j)
 
-                ax.grid(b=True, which="major", axis="both", alpha=0.3)
+                ax.grid(visible=True, which="major", axis="both", alpha=0.3)
                 ax.scatter(user_filter[FC_col_name[0]], user_filter[pval_col_name[0]], alpha=0.7, label=complabels)
                 ax.axhline(y=0, color='r', linestyle='dashed')
                 ax.axvline(x=0, linestyle='dashed')
@@ -831,15 +850,12 @@ def volcano(dfs, list_of_days, colorlist):
             annotationconcat_bottom = pd.concat(bottom10annotation, axis=0)
             annotationconcat_bottom = annotationconcat_bottom.sort_values(by=["log2FC"], ascending=True).head(10)
 
-            topoverall = list(annotationconcat_top.index)
-            bottomoverall = list(annotationconcat_bottom.index)
-
             for i in range(len(annotationconcat_top)):
-                plt.annotate(text=topoverall[i], xy=(annotationconcat_top.iloc[i, 0], annotationconcat_top.iloc[i, 1]),
+                plt.annotate(text=annotationconcat_top.index[i], xy=(annotationconcat_top.iloc[i, 0], annotationconcat_top.iloc[i, 1]),
                              xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
                              fontsize=7)  # top 10
             for i in range(len(annotationconcat_bottom)):
-                plt.annotate(text=bottomoverall[i],
+                plt.annotate(text=annotationconcat_bottom.index[i],
                              xy=(annotationconcat_bottom.iloc[i, 0], annotationconcat_bottom.iloc[i, 1]),
                              xytext=(0, 3), horizontalalignment='center', textcoords='offset points',
                              fontsize=7)  # bottom 10
@@ -922,17 +938,17 @@ def degs(dfs, list_of_days, colorlist):
         tp_or_comp = "comparisons"
     ####################################### Filter DF by Pvals and FC #################################################
 
-    pval_regex = "p[-_\s]?valu?e?"
-    fc_regex = "log2Fold[-_\s]?Changes?|log2FC"
+    pval_regex = "(?i)p[-_\s]?valu?e?"
+    fc_regex = "(?i)log2Fold[-_\s]?Changes?|log2FC"
 
     new_dfs = {}
 
     def organised_df():
         df_list = [dfs[x] for x in df_names]
         for name, df in zip(df_names, df_list):
-            pvalcols = df.filter(regex=re.compile(pval_regex, flags=re.I))
+            pvalcols = df.filter(regex=pval_regex, axis=1)
             pvalcols.columns = pvalcols.columns.str.replace(pval_regex, "pval", regex=True)
-            fccols = df.filter(regex=re.compile(fc_regex, flags=re.I))
+            fccols = df.filter(regex=fc_regex, axis=1)
             fccols.columns = fccols.columns.str.replace(fc_regex, "log2FC", regex=True)
             newdf = pd.concat([pvalcols, fccols], axis=1)
             new_dfs[name] = newdf
@@ -940,8 +956,7 @@ def degs(dfs, list_of_days, colorlist):
     organised_df()
     newdf_list = [new_dfs[x] for x in df_names]  # only contains adj pval and log2FC
 
-    upreg_deg_count = []
-    downreg_deg_count = []
+    upreg_deg_count, downreg_deg_count = [], []
 
     if len(dfs) == 1:
         stacked1 = go.Figure()
@@ -951,7 +966,7 @@ def degs(dfs, list_of_days, colorlist):
                 pval_col_pertp = df[pval_name_pertp[0]]
                 pval_filter_pertp = (pval_col_pertp[(pval_col_pertp <= pval_cutoff)]).to_frame()
 
-                fc_name_pertp = list([col for col in df.columns if "log2FC_{}".format(tp) in col])
+                fc_name_pertp = list([col for col in df.columns if f"log2FC_{tp}" in col])
                 fc_col_pertp = df[fc_name_pertp[0]]
                 fc_filter_pertp = (
                     fc_col_pertp[((fc_col_pertp >= log2fc_cutoff) | (fc_col_pertp < -(log2fc_cutoff)))]).to_frame()
@@ -1002,7 +1017,7 @@ def degs(dfs, list_of_days, colorlist):
                 pval_col_pertp = df[pval_name_pertp[0]]
                 pval_filter_pertp = (pval_col_pertp[(pval_col_pertp <= pval_cutoff)]).to_frame()
 
-                fc_name_pertp = list([col for col in df.columns if "log2FC_{}".format(tp) in col])
+                fc_name_pertp = list([col for col in df.columns if f"log2FC_{tp}" in col])
                 fc_col_pertp = df[fc_name_pertp[0]]
                 fc_filter_pertp = (
                     fc_col_pertp[((fc_col_pertp >= log2fc_cutoff) | (fc_col_pertp < -(log2fc_cutoff)))]).to_frame()
@@ -1058,9 +1073,10 @@ def degs(dfs, list_of_days, colorlist):
     stack_success = st.success("Plot complete!")
     time.sleep(0.25)
     stack_success.empty()
-    st.plotly_chart(stacked1, use_container_width=True)
+    deg_graph, deg_data  = st.tabs(["Bar Chart", "Data"])
+    deg_graph.plotly_chart(stacked1, use_container_width=True)
     deg_to_dl = [deg_dict[f"{name}_{tp}"] for name in df_names for tp in list_of_days]
-    with st.expander("Expand to view and download DEGs per timepoint/comparison"):
+    with deg_data:
         st.info("Users may select the gene names within this dataframe and copy them for downstream analysis.")
         for k, v in deg_dict.items():
             st.write(f"**{k}**", v)
@@ -1119,20 +1135,7 @@ def deg_cluster(proportions, log_dfx):
                            col_cluster=True, yticklabels=True,
                            cbar_kws={'label': 'log2FC'})
         g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
-        # with st.expander("Expand for pathway clustergram dataframe from DEGs", expanded=False):
-        #     st.write("**User-Input Pathway Clustergram**")
-        #     st.dataframe(specific_cluster)
-        #     st.markdown(get_table_download_link([specific_cluster], "pathway_clustergram"), unsafe_allow_html=True)
         st.pyplot(g)
-        # col_linkage = g.dendrogram_col.linkage
-        # st.write("Column Linkage", col_linkage)
-        # denfig = plt.figure()
-        # dendro_col = dendrogram(col_linkage, orientation='top')
-        # st.pyplot(denfig)
-        # st.write("Row Linkage", g.dendrogram_row.linkage)
-        # denrowfig = plt.figure()
-        # dendro_row = dendrogram(g.dendrogram_row.linkage, orientation='left')
-        # st.pyplot(denrowfig)
 
     else:
         st.warning("Please choose more than 1 DEG or increase the log2 fold-change limit.")
@@ -1210,11 +1213,6 @@ def clustergram(dfx):
                             center=0, col_cluster=True, yticklabels=True, cbar_kws={'label':'log2FC'})
             g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
             st.pyplot(g)
-            # st.write("Column Linkage", g.dendrogram_col.linkage)
-            # denfig = plt.figure()
-            # dendro_col = dendrogram(g.dendrogram_col.linkage)
-            # st.pyplot(denfig)
-            # st.write("Row Linkage", g.dendrogram_row.linkage)
         except ValueError:
             st.warning("Increase the log2FC limit or add more genes.")
 
@@ -1230,6 +1228,7 @@ def select_enrichr_dataset():
         "GO Biological Process 2021": "GO_Biological_Process_2021",
         "GO Molecular Function 2021": "GO_Molecular_Function_2021",
         "KEGG 2021 Human": "KEGG_2021_Human",
+        "KEGG 2019 Mouse":"KEGG_2019_Mouse",
         "HumanCyc 2016": "HumanCyc_2016"
     }
 
@@ -1295,8 +1294,8 @@ def genes_used(premade_dict=None):
 
 def execute_enrichr(genelist, select_dataset, use_degs=False):
     st.subheader("Enrichr Analysis")
-    st.info("Expand the plot to view all of the terms.")
-    enrichr_results_exp = st.expander("Expand for enrichr dataframe", expanded=False)
+    enr_graph, enr_data = st.tabs(['Bar Chart', 'Data'])
+    enr_graph.info("Expand the plot to view all of the terms.")
     if not use_degs:
         select_enrichr = st.experimental_memo(gp.enrichr)(gene_list=genelist,
                                     gene_sets=select_dataset,
@@ -1316,11 +1315,10 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
         # Calculate -logP
         data_sig['-logP'] = np.log10(data_sig['Adjusted P-value']) * (-1)
         prettify_geneset = select_dataset.replace(".gmt", "")
-        enrichr_results_exp.write(f"**EnrichR analysis using {prettify_geneset}**")
-        enrichr_results_exp.write(data_trunc)
+        enr_data.write(f"**EnrichR analysis using {prettify_geneset}**")
+        enr_data.write(data_trunc)
         enrichr_download = [data_trunc]
-        enrichr_results_exp.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                                            file_name="enrichr_analysis.xlsx")
+        enr_data.markdown(get_table_download_link(enrichr_download, "enrichr"), unsafe_allow_html=True)
 
         # Plot bar graph
         toplot = data_sig.sort_values("-logP", ascending=True).tail(10)
@@ -1328,7 +1326,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
         fig.update_layout(title="Enrichr analysis of query genes", title_x=0.5, yaxis={'tickmode': 'linear'})
         fig.update_xaxes(title="-logP")
         fig.update_yaxes(title="Term")
-        st.plotly_chart(fig, use_container_width=True)
+        enr_graph.plotly_chart(fig, use_container_width=True)
 
 
     else:
@@ -1382,20 +1380,18 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
             data_down_sig['-logP'] = np.log10(data_down_sig['Adjusted P-value']) * (-1)
 
         prettify_geneset = select_dataset.replace(".gmt", "").replace("_", " ")
-        enrichr_results_exp.write(f"**EnrichR analysis using {prettify_geneset}**")
+        enr_data.write(f"**EnrichR analysis using {prettify_geneset}**")
 
         if data_up_trunc is not None and data_down_trunc is not None:
             toplot_up = data_up_sig.sort_values("-logP", ascending=True).tail(10)
             toplot_down = data_down_sig.sort_values("-logP", ascending=True).tail(10)
-            with enrichr_results_exp:
+            with enr_data:
                 st.write("Enrichr with upregulated DEGs")
                 st.dataframe(data_up_trunc)
                 st.write("Enrichr with downregulated DEGs")
                 st.dataframe(data_down_trunc)
                 enrichr_download = [data_up_trunc, data_down_trunc]
                 st.markdown(get_table_download_link(enrichr_download, "enrichr"), unsafe_allow_html=True)
-                # st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                #                    file_name="enrichr_updownDEGs_analysis.xlsx")
 
             fig = make_subplots(rows=2, cols=1, subplot_titles=["Upregulated DEGs", "Downregulated DEGs"],
                                 x_title="-logP", shared_xaxes=True)
@@ -1410,20 +1406,19 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
 
         elif data_up_trunc is not None and data_down_trunc is None:
             toplot_up = data_up_sig.sort_values("-logP", ascending=True).tail(10)
-            with enrichr_results_exp:
+            with enr_data:
                 st.write("Enrichr with upregulated DEGs")
                 st.dataframe(data_up_trunc)
                 enrichr_download = [data_up_trunc]
                 st.markdown(get_table_download_link(enrichr_download, "enrichr_upDEGs"), unsafe_allow_html=True)
-                # st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                #                    file_name="enrichr_upDEGs_analysis.xlsx")
+
             fig = go.Figure(go.Bar(x=toplot_up['-logP'], y=toplot_up.index, orientation='h', marker_color="#EF553B"))
             fig.update_xaxes(title="-logP")
             fig.update_yaxes(title="Term")
 
         else:
             toplot_down = data_down_sig.sort_values("-logP", ascending=True).tail(10)
-            with enrichr_results_exp:
+            with enr_data:
                 st.write("Enrichr with downregulated DEGs")
                 st.dataframe(data_down_trunc)
                 enrichr_download = [data_down_trunc]
@@ -1437,9 +1432,9 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
 
         fig.update_layout(title="Enriched Pathways (Top 10), adjpvalue < 0.05", title_x=0.5, showlegend=False,
                           yaxis={'tickmode': 'linear'})
-        enrichr_results_exp.info(
+        enr_data.info(
             "If nothing was plotted in the bar chart, the pathways did not meet the cutoff of adjusted p-value < 0.05")
-        st.plotly_chart(fig, use_container_width=True)
+        enr_graph.plotly_chart(fig, use_container_width=True)
 
 
 ############################################ Prerank and Visualisation #################################################
@@ -1453,6 +1448,7 @@ def select_prerank_dataset():
         "GO Biological Process 2021": "GO_Biological_Process_2021",
         "GO Molecular Function 2021": "GO_Molecular_Function_2021",
         "KEGG 2021 Human": "KEGG_2021_Human",
+        "KEGG 2019 Mouse":"KEGG_2019_Mouse",
         "HumanCyc 2016": "HumanCyc_2016"
     }
 
@@ -1497,7 +1493,7 @@ def execute_prerank(col_dict, geneset):
 
         prerank_results_dict[key] = running
 
-    prerank_results_exp = st.expander("Expand for prerank dataframe", expanded=False)
+    prerank_graph, prerank_data = st.tabs(["Bar Chart", "Data"])
 
     prerank_export = []
 
@@ -1550,13 +1546,13 @@ def execute_prerank(col_dict, geneset):
                           font=dict(
                               family='Arial', size=16)
                           )
-        st.plotly_chart(pos)
-        st.plotly_chart(neg)
+        prerank_graph.plotly_chart(pos)
+        prerank_graph.plotly_chart(neg)
 
-        prerank_results_exp.write(key)
-        prerank_results_exp.dataframe(ranked)
+        prerank_data.write(key)
+        prerank_data.dataframe(ranked)
 
-    prerank_results_exp.markdown(get_table_download_link(prerank_export, "GSEAprerank"), unsafe_allow_html=True)
+    prerank_data.markdown(get_table_download_link(prerank_export, "GSEAprerank"), unsafe_allow_html=True)
     # prerank_results_exp.download_button(label="Download prerank dataframe",
     #                                     data=to_excel(prerank_export),
     #                                     file_name="prerank_analysis.xlsx")
@@ -1673,13 +1669,14 @@ def string_query(DEG = None):
 choose_app = st.sidebar.multiselect("Choose an app to render in the main page 👉",
                                     options=["volcano plot", "DEGs", "enrichr", "GSEA prerank", "pathway clustergram",
                                              "STRING query", "correlation matrix"])
-qc_df(df_dict)
+cleaned_dict = qc_df(df_dict)
 
 if st.sidebar.checkbox("Show uploaded/demo dataframe"):
     for k, v in cleaned_dict.items():
         st.markdown(f"**{k}**")
         st.info("Click anywhere within the dataframe and use Cmd+F or Ctrl+F to search the dataframe.")
         st.dataframe(v)
+        # downloadzip = zip_file(list(cleaned_dict.values()), cleaned_dict.keys())
 
 for c in choose_app:
     with st.spinner("🔨Building your dashboard 🔨"):
