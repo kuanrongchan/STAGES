@@ -35,12 +35,9 @@ import seaborn as sns
 # from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# What's new in V2:
-# reverted AgGrid to st dataframe due to streamlit's own updates for it;
-# enabled GO pathways for GSEA prerank; 
-# added HumanCyc 2016 and KEGG 2019 Mouse to enrichr and prerank;
-# optimised some of the regex codes for volcano plot and DEGs
+# What's new: reverted AgGrid to st dataframe due to streamlit's own updates for it; enabled GO pathways for GSEA prerank; added HumanCyc 2016 to enrichr and prerank
 
+st.set_page_config(page_title="STAGEs", page_icon="📊")
 ################################################ for df download #######################################################
 def convert_df(df):
     return df.to_csv().encode('utf-8')
@@ -86,9 +83,7 @@ st.title("STAGEs Dashboard \U0001F4CA")
 ################################################# Documentation ########################################################
 documentation = st.sidebar.checkbox("Read the Docs", value=False, key='documentation')
 ################################################# File Uploader ########################################################
-df_query = st.sidebar.file_uploader(
-    'Upload your .csv/.xlsx file. A demo dataset will be uploaded if no files are uploaded',
-    accept_multiple_files=True)
+df_query = st.sidebar.file_uploader('Upload your .csv/.xlsx file', type = ['csv', 'xlsx'], accept_multiple_files=True)
 
 df_dict = {} # initial, but should use cleaned_dict after uploading and qc checks
 df_names = []
@@ -110,10 +105,13 @@ if len(df_query) != 0:
                 df_names.append(i)
 
 else:
-    testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
-    testname = "Demo"
-    df_dict[testname] = testdata
-    df_names.append(testname)
+    if st.sidebar.checkbox("Use demo dataset", value=False):
+        testdata = st.experimental_memo(pd.read_csv)("demo_dataframe_corrected.csv", index_col=0)
+        testname = "Demo"
+        df_dict[testname] = testdata
+        df_names.append(testname)
+    else:
+        st.stop()
 
 for df in df_dict.values():
     df.index = df.index.astype(str, copy=False) # expand to format actual dates from excel sheets as text
