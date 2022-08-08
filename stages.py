@@ -164,6 +164,7 @@ def read_docs():
     st.image("images/Fig3A.png", width=None) #changed-split Fig3
     st.markdown('''
     <div style="text-align: justify">
+    
     To determine the identity of the DEGs and their respective log2 fold-change values and p-values, users can click on the **Data** tab and the data table showing the respective values will be displayed. At the bottom of the page, users can download the data as an Excel file to easy visualisation of tables. An example of the output is as displayed:
     </div>
     ''', unsafe_allow_html=True)
