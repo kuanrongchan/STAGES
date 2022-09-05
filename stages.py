@@ -1444,9 +1444,9 @@ def select_prerank_dataset():
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome 2021": "Reactome.gmt",
         "Vaccinomics (In-house)": "Vaccinomics.gmt",
-        "GO Cellular Component 2021": "GO_Cellular_Component_2021",
-        "GO Biological Process 2021": "GO_Biological_Process_2021",
-        "GO Molecular Function 2021": "GO_Molecular_Function_2021",
+        # "GO Cellular Component 2021": "GO_Cellular_Component_2021",
+        # "GO Biological Process 2021": "GO_Biological_Process_2021",
+        # "GO Molecular Function 2021": "GO_Molecular_Function_2021",
         "KEGG 2021 Human": "KEGG_2021_Human",
         "KEGG 2019 Mouse":"KEGG_2019_Mouse",
         "HumanCyc 2016": "HumanCyc_2016"
