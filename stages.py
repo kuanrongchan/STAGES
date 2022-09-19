@@ -31,11 +31,9 @@ import plotly.figure_factory as ff
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-# from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
-# from mpl_toolkits.axes_grid1.colorbar import colorbar
 
 
-# What's new: reverted AgGrid to st dataframe due to streamlit's own updates for it; enabled GO pathways for GSEA prerank; added HumanCyc 2016 to enrichr and prerank
+# What's new: bug fixes for clustergram
 
 st.set_page_config(page_title="STAGEs", page_icon="📊")
 ################################################ for df download #######################################################
@@ -1132,6 +1130,7 @@ def deg_cluster(proportions, log_dfx):
         # plot
         g = sns.clustermap(specific_cluster, cmap='vlag', method='average', figsize=(f_width, f_height),
                            cbar_pos=(0.01, 0.1, 0.03, 0.1), center=0,
+                           dendrogram_ratio=(0.2, 0.1),
                            col_cluster=True, yticklabels=True,
                            cbar_kws={'label': 'log2FC'})
         g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
@@ -1157,7 +1156,7 @@ def clustergram(dfx):
         st.info("Note that you should deselect the default settings checkbox before setting your log2 fold-change to see the changes.")
         resetter = st.checkbox("Default settings", value=True, help="Do not filter by log2 fold-change cutoff", key='userclust')
         fc_slider = st.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
-                                    min_value=-10.0, max_value=10.0, step=0.1, value=(-1.0,1.0), key='userclust')
+                                    min_value=-10.0, max_value=10.0, step=0.1, value=(-1.0,1.0), key='userclust_fc')
         g_width = clust_expand.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                                       step=1, value=10, key='reg1')
         g_height = clust_expand.slider("Change clustergram height (in inches)", min_value=5, max_value=50,
@@ -1209,7 +1208,7 @@ def clustergram(dfx):
             # clustergram
             g = sns.clustermap(specific_cluster, cmap="vlag",
                             method='average', figsize=(g_width, g_height),
-                            cbar_pos=(0.01, 0.1, 0.03, 0.15),
+                            cbar_pos=(0.01, 0.1, 0.03, 0.15), dendrogram_ratio=(0.2, 0.1),
                             center=0, col_cluster=True, yticklabels=True, cbar_kws={'label':'log2FC'})
             g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11)
             st.pyplot(g)
@@ -1224,9 +1223,10 @@ def select_enrichr_dataset():
     geneset_dict = {
         "Blood Transcriptomic Modules (BTM)": "BTM.gmt",
         "Reactome 2021": "Reactome.gmt",
-        "Vaccinomics (In-house)": "Vaccinomics.gmt", "GO Cellular Component 2021": "GO_Cellular_Component_2021",
+        "Vaccinomics (In-house)": "Vaccinomics.gmt", 
         "GO Biological Process 2021": "GO_Biological_Process_2021",
         "GO Molecular Function 2021": "GO_Molecular_Function_2021",
+        "GO Cellular Component 2021": "GO_Cellular_Component_2021",
         "KEGG 2021 Human": "KEGG_2021_Human",
         "KEGG 2019 Mouse":"KEGG_2019_Mouse",
         "HumanCyc 2016": "HumanCyc_2016"
@@ -1423,8 +1423,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
                 st.dataframe(data_down_trunc)
                 enrichr_download = [data_down_trunc]
                 st.markdown(get_table_download_link(enrichr_download, "enrichr_downDEGs"), unsafe_allow_html=True)
-                # st.download_button(label="Download Enrichr dataframe", data=to_excel(enrichr_download),
-                #                    file_name="enrichr_downDEGs_analysis.xlsx")
+
             fig = go.Figure(
                 go.Bar(x=toplot_down['-logP'], y=toplot_down.index, orientation='h', marker_color="#636EFA"))
             fig.update_xaxes(title="-logP")
