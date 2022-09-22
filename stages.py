@@ -1096,7 +1096,7 @@ def deg_cluster(proportions, log_dfx):
     postdeg.info("Note that you should deselect the default settings checkbox before setting your log2 fold-change to see the changes.")
     resetter = postdeg.checkbox("Default settings", help="Do not filter by log2 fold-change cutoff", value=True, key='degbased')
     fc_slider = postdeg.slider("Adjust log2 fold-change here", help="The app will plot the values between the user-set range",
-                              min_value=-10.0, max_value=10.0, step=0.1, value=(-1.0,1.0), key='degbased')
+                              min_value=-10.0, max_value=10.0, step=0.1, value=(-1.0,1.0), key='degbasedfc')
 
     f_width = postdeg.slider("Change clustergram width (in inches)", min_value=5, max_value=20,
                              step=1, value=10)
