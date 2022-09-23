@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from os import CLD_CONTINUED
 import pandas as pd
 import numpy as np
 import time
@@ -578,31 +579,22 @@ def qc_df(df_dict):
 # Is a variable to allow the following functions to render either timepoint or comparison in plot titles
 is_tp = 1
 
-
 def timepoints(dfs):
-    pattern_days = "[-_\s]{1}(min[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+min)[-_\s]?|(hr[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+hr?)|(D[ay]*[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+D[ay]*)"
+    pattern_days = "[-_\s]{1}(min[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+min)[-_\s]?|(hr[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+hr?)|(Day*[0-9]*[.]?[0-9]+)|([0-9]*[.]?[0-9]+Day*)"
     tpcomps = []
     for k, df in dfs.items():
         extract_days = df.columns.str.extract(pattern_days, flags=re.IGNORECASE)
-        for num in range(6):  # 6 capture groups (0-5 but range including 5 has to +1)
-            temp = extract_days[num].unique().tolist()
-            for days in temp:
-                if days not in tpcomps:
-                    tpcomps.append(days)
-        tpcomps_nangone = [x for x in tpcomps if x == x]
-        if len(tpcomps_nangone) == 0:
+        for row in extract_days.index:
+            tpcomps += [tp for tp in extract_days.iloc[row] if str(tp) != "nan"]
+
+        if len(tpcomps) == 0: # means is static comparison
             global is_tp
             is_tp = 0
-
             pattern_comps = "(?<!adj)[-_\s]\w*\d*[-_\s]vs[-_\s]\w*\d*"
             findcomps = re.findall(pattern_comps, str(df.columns.tolist()), flags=re.I)
-            for c in findcomps:
-                cln = c.replace("_", "", 1)
-                if cln not in tpcomps:
-                    tpcomps.append(cln)
-            tpcomps_nangone = [x for x in tpcomps if str(x) != 'nan']
-    return tpcomps_nangone
+            tpcomps += [c.replace("_", "", 1) for c in findcomps]
 
+    return list(dict.fromkeys(tpcomps))
 
 ######################################### Check for log2FC columns only ################################################
 def check_log(dfs):
@@ -1717,8 +1709,6 @@ for c in choose_app:
                 run_enrichr = enrichr_exp.checkbox("Run Enrichr", value=False)
                 if run_enrichr:
                     execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=False)
-                else:
-                    pass
 
         elif c == 'GSEA prerank':
             list_of_days = timepoints(cleaned_dict)
@@ -1738,8 +1728,6 @@ for c in choose_app:
             run_prerank = prernk_exp.checkbox("Run GSEA prerank", value=False)
             if run_prerank:
                 execute_prerank(prerank_cols, prerank_dataset)
-            else:
-                pass
 
         elif c == "pathway clustergram":
             dfx = check_log(cleaned_dict)
