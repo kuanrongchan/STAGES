@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from os import CLD_CONTINUED
 import pandas as pd
 import numpy as np
 import time
@@ -34,7 +33,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-# What's new: bug fixes for clustergram
+# What's new: recoded the data cleaning codes, cleaned up code flow to only run data cleaning once per session
 
 st.set_page_config(page_title="STAGEs", page_icon="📊")
 ################################################ for df download #######################################################
@@ -1326,6 +1325,7 @@ def execute_enrichr(genelist, select_dataset, use_degs=False):
         downs = genelist[1]
         remove_dupes_up, remove_dupes_down = [], []
         data_up_trunc, data_down_trunc = None, None
+
         for f in ups:
             if f not in remove_dupes_up:
                 remove_dupes_up.append(f)
@@ -1660,7 +1660,13 @@ def string_query(DEG = None):
 choose_app = st.sidebar.multiselect("Choose an app to render in the main page 👉",
                                     options=["volcano plot", "DEGs", "enrichr", "GSEA prerank", "pathway clustergram",
                                              "STRING query", "correlation matrix"])
+
+# data processing and prepping for downstream analysis
 cleaned_dict = qc_df(df_dict)
+list_of_days = timepoints(cleaned_dict)
+colorlist = n_colors(list_of_days)
+dfx = check_log(cleaned_dict)
+#####################################################
 
 if st.sidebar.checkbox("Show uploaded/demo dataframe"):
     for k, v in cleaned_dict.items():
@@ -1673,15 +1679,9 @@ for c in choose_app:
     with st.spinner("🔨Building your dashboard 🔨"):
         time.sleep(0.25)
         if c == "volcano plot":
-            list_of_days = timepoints(cleaned_dict)
-            colorlist = n_colors(list_of_days)
-            dfx = check_log(cleaned_dict)
             volcanoplot = volcano(dfx, list_of_days, colorlist)
 
         elif c == "DEGs":
-            list_of_days = timepoints(cleaned_dict)
-            colorlist = n_colors(list_of_days)
-            dfx = check_log(cleaned_dict)
             degs(dfx, list_of_days, colorlist)
             postdeg = st.sidebar.expander("Expand to plot clustergram based on DEGs", expanded=False)
             with postdeg:
@@ -1711,9 +1711,6 @@ for c in choose_app:
                     execute_enrichr(genelist=genelist, select_dataset=select_dataset, use_degs=False)
 
         elif c == 'GSEA prerank':
-            list_of_days = timepoints(cleaned_dict)
-            dfx = check_log(cleaned_dict)
-
             prernk_exp = st.sidebar.expander("Expand for Prerank Analysis", expanded=False)
             select_df = prernk_exp.selectbox("Select your dataset to use", options=dfx.keys())
             if is_tp == 1:
@@ -1730,12 +1727,10 @@ for c in choose_app:
                 execute_prerank(prerank_cols, prerank_dataset)
 
         elif c == "pathway clustergram":
-            dfx = check_log(cleaned_dict)
             clust_expand = st.sidebar.expander("Expand for user-input pathway clustergram", expanded=False)
             clustergram(dfx)
 
         elif c == "correlation matrix":
-            dfx = check_log(cleaned_dict)
             corr_exp = st.sidebar.expander("Expand for correlation matrix", expanded=False)
             corr_matrix(dfx)
 
