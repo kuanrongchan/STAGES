@@ -1,5 +1,6 @@
 # Static and Temporal Analysis of Gene Expression Studies (STAGES)
-Picture 1.png![image](https://user-images.githubusercontent.com/91276553/191908061-cfe34355-feae-4c35-b407-e7727859552c.png)
+
+[STAGEs figure 1.pdf](https://github.com/kuanrongchan/STAGES/files/9631395/STAGEs.figure.1.pdf)
 
 
 STAGES (https://kuanrongchan-stages-stages-vpgh46.streamlitapp.com/) is an easy-to-use web tool that integrates data visualisation and pathway enrichment analysis for both static and temporal gene expression studies. STAGES is free and open to all users and there is no login requirement. The web tool works by running the Python programming language at backend to perform the data analysis and graph plotting, while the Streamlit framework is used to display the output data tables and graphs at frontend. Overall, STAGEs allow users to perform the following:
