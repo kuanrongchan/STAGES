@@ -1,0 +1,30 @@
+sep=,,,,,
+Input,Match type,Approved symbol,Approved name,HGNC ID,Location
+DEC1,Previous symbol,DELEC1,deleted in esophageal cancer 1,HGNC:23658,9q33.1
+MARC1,Previous symbol,MTARC1,mitochondrial amidoxime reducing component 1,HGNC:26189,1q41
+MARCH1,Previous symbol,MARCHF1,membrane associated ring-CH-type finger 1,HGNC:26077,4q32.2-q32.3
+MARC2,Previous symbol,MTARC2,mitochondrial amidoxime reducing component 2,HGNC:26064,1q41
+MARCH2,Previous symbol,MARCHF2,membrane associated ring-CH-type finger 2,HGNC:28038,19p13.2
+MARCH3,Previous symbol,MARCHF3,membrane associated ring-CH-type finger 3,HGNC:28728,5q23.2
+MARCH4,Previous symbol,MARCHF4,membrane associated ring-CH-type finger 4,HGNC:29269,2q35
+MARCH5,Previous symbol,MARCHF5,membrane associated ring-CH-type finger 5,HGNC:26025,10q23.32-q23.33
+MARCH6,Previous symbol,MARCHF6,membrane associated ring-CH-type finger 6,HGNC:30550,5p15.2
+MARCH7,Previous symbol,MARCHF7,membrane associated ring-CH-type finger 7,HGNC:17393,2q24.2
+MARCH8,Previous symbol,MARCHF8,membrane associated ring-CH-type finger 8,HGNC:23356,10q11.21-q11.22
+MARCH9,Previous symbol,MARCHF9,membrane associated ring-CH-type finger 9,HGNC:25139,12q14.1
+MARCH10,Previous symbol,MARCHF10,membrane associated ring-CH-type finger 10,HGNC:26655,17q23.2
+MARCH11,Previous symbol,MARCHF11,membrane associated ring-CH-type finger 11,HGNC:33609,5p15.1
+SEPT1,Previous symbol,SEPTIN1,septin 1,HGNC:2879,16p11.2
+SEPT2,Previous symbol,SEPTIN2,septin 2,HGNC:7729,2q37.3
+SEPT3,Previous symbol,SEPTIN3,septin 3,HGNC:10750,22q13.2
+SEPT4,Previous symbol,SEPTIN4,septin 4,HGNC:9165,17q22
+SEPT5,Previous symbol,SEPTIN5,septin 5,HGNC:9164,22q11.21
+SEPT6,Previous symbol,SEPTIN6,septin 6,HGNC:15848,Xq24
+SEPT7,Previous symbol,SEPTIN7,septin 7,HGNC:1717,7p14.2
+SEPT8,Previous symbol,SEPTIN8,septin 8,HGNC:16511,5q31.1
+SEPT9,Previous symbol,SEPTIN9,septin 9,HGNC:7323,17q25.3
+SEPT10,Previous symbol,SEPTIN10,septin 10,HGNC:14349,2q13
+SEPT11,Previous symbol,SEPTIN11,septin 11,HGNC:25589,4q21.1
+SEPT12,Previous symbol,SEPTIN12,septin 12,HGNC:26348,16p13.3
+SEPT14,Previous symbol,SEPTIN14,septin 14,HGNC:33280,7p11.2
+SEP15,Alias symbol,SELENOF,selenoprotein F,HGNC:17705,1p22.3
