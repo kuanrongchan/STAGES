@@ -169,12 +169,12 @@ class Prerank_STAGES():
 
             pos_nes_sort = pos_nes.sort_values(by=['NES'], ascending=True).tail(prerank_showX)
             pos_nes_sort.reset_index(inplace=True) # Compatibility issues with python 3.7, where the names argument was not valid at pandas 1.3.5
-            pos_nes_sort = pos_nes_sort.rename({'index':'Term'}) # Subsequently due to this version error, have to manually rename the index column to term
+            pos_nes_sort = pos_nes_sort.rename(columns = {'index':'Term'}) # Subsequently due to this version error, have to manually rename the index column to term
             pos_nes_sort['direction'] = "positive"
 
             neg_nes_sort = neg_nes.sort_values(by=['negative NES'], ascending=True).tail(prerank_showX)
             neg_nes_sort.reset_index(inplace=True) # Compatibility issues with python 3.7, where the names argument was not valid at pandas 1.3.5
-            neg_nes_sort = neg_nes_sort.rename({'index':'Term'}) # Subsequently due to this version error, have to manually rename the index column to term
+            neg_nes_sort = neg_nes_sort.rename(columns = {'index':'Term'}) # Subsequently due to this version error, have to manually rename the index column to term
             neg_nes_sort['direction'] = "negative"
 
             prerank_sig_out[f'Positive_enrichment_{key}'] = pos_nes_sort
