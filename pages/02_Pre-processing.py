@@ -30,7 +30,7 @@ ss.initialise_state({'test_fdr':'None',
                      'baseline': None,
                      'comparisonopts_nobaseline':[],
                      'against_baseline':None,
-                     'equalvar':False,
+                     'equalvar':True,
                      'use_corrected_pval':False,
                      'submit_comparison':False,
                      'ready':None,
@@ -126,7 +126,7 @@ try:
             ss.save_state({'comparisonopts_nobaseline':comparisonopts_nobaseline})
             against_baseline = prep_exp.multiselect(label=f"Select groups within **{adata_vars[st.session_state['comp_var']]}** to compare against baseline ie choose B where B vs A", options = st.session_state['comparisonopts_nobaseline'], default = st.session_state['against_baseline'])
             ss.save_state({'against_baseline':against_baseline})
-            equalvar = prep_exp.checkbox(label="Assume equal variance for comparisons", value = st.session_state['equalvar'], on_change=ss.binaryswitch, args = ('equalvar', ))
+            equalvar = prep_exp.checkbox(label="Assume equal population variance", value = st.session_state['equalvar'], on_change=ss.binaryswitch, args = ('equalvar', ))
             test_fdr = prep_exp.selectbox("Select multiple test correction method", options = list(padj_mtds.keys()), index = list(padj_mtds.keys()).index(st.session_state['test_fdr']))
             ss.save_state({'test_fdr':test_fdr})
             if st.session_state['test_fdr'] != 0:
@@ -183,7 +183,7 @@ try:
             ss.save_state({'comparisonopts_nobaseline':comparisonopts_nobaseline})
             against_baseline = prep_exp.multiselect(label=f"Select the groups within **{adata_vars[st.session_state['comp_var']]}** to compare against baseline ie choose B where B vs A", options = st.session_state['comparisonopts_nobaseline'], default = st.session_state['against_baseline'])
             ss.save_state({'against_baseline':against_baseline})
-            equalvar = prep_exp.checkbox(label="Assume equal variance for comparisons", value = st.session_state['equalvar'], on_change=ss.binaryswitch, args = ('equalvar', ))
+            equalvar = prep_exp.checkbox(label="Assume equal population variance", value = st.session_state['equalvar'], on_change=ss.binaryswitch, args = ('equalvar', ))
             test_fdr = prep_exp.selectbox("Select multiple test correction method", options = list(padj_mtds.keys()), index = list(padj_mtds.keys()).index(st.session_state['test_fdr']))
             ss.save_state({'test_fdr':test_fdr})
             if st.session_state['test_fdr'] != 0:
