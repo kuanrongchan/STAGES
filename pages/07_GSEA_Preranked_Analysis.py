@@ -53,7 +53,7 @@ try:
         ss.save_state({'add_geneset':add_geneset})
         # ss.save_state({'geneset_dict':st.session_state['geneset_dict']|st.session_state['add_geneset']}) # | merges both dictionaries for python 3.10 only
         ss.save_state({'geneset_dict':{**st.session_state['geneset_dict'], **st.session_state['add_geneset']}})
-        
+
     # Selecting genesets (BTM or reactome) to plot from a list
     geneset_opts = list(st.session_state['geneset_dict'].keys())
     geneset = prnk_opts.radio(label='Select a geneset', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_prerank']))
@@ -80,8 +80,8 @@ try:
                                         help="Show only the top n pathways from a filtered set of pathways")
     prerank_ht = prnk_opts.number_input("Bar plot height (in px)", min_value=200, max_value=1600, step=50, value=st.session_state['prerank_ht'])
     ss.save_state({'prerank_pthresh': round(prerank_pthresh,2),
-                'prerank_showX':prerank_showX,
-                'prerank_ht':prerank_ht})
+                   'prerank_showX':prerank_showX,
+                   'prerank_ht':prerank_ht})
     plot_prerank = prnk_opts.checkbox("Run GSEA Prerank", value = st.session_state['plot_prerank'], on_change=ss.binaryswitch, args=("plot_prerank", ))
 
     if plot_prerank:
