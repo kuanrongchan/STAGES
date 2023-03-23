@@ -51,8 +51,9 @@ try:
     if st.session_state['add_geneset_in'] is not None:
         add_geneset = fileuploads.gmt_to_dict(st.session_state['add_geneset_in'])
         ss.save_state({'add_geneset':add_geneset})
-        ss.save_state({'geneset_dict':st.session_state['geneset_dict']|st.session_state['add_geneset']}) # | merges both dictionaries for python 3.10 only
-
+        # ss.save_state({'geneset_dict':st.session_state['geneset_dict']|st.session_state['add_geneset']}) # | merges both dictionaries for python 3.10 only
+        ss.save_state({'geneset_dict':{**st.session_state['geneset_dict'], **st.session_state['add_geneset']}})
+        
     # Selecting genesets (BTM or reactome) to plot from a list
     geneset_opts = list(st.session_state['geneset_dict'].keys())
     geneset = prnk_opts.radio(label='Select a geneset', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_prerank']))
