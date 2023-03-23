@@ -111,5 +111,6 @@ try:
                             data=file_downloads.to_excel(st.session_state['prerank_res_all'].values(),sheetnames=st.session_state['prerank_res_all'].keys()),
                             file_name="GSEAPreranked_results.xlsx")
 
-except AttributeError:
-    st.error("Perhaps you forgot to run through the pre-processing step?")
+except AttributeError as a:
+    # st.error("Perhaps you forgot to run through the pre-processing step?")
+    st.error(a)
