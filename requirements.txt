@@ -4,7 +4,7 @@ streamlit
 streamlit_tags
 scipy
 numpy
-pandas
+pandas>=1.5.3
 scikit_learn
 openpyxl==3.1.0
 xlrd

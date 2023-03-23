@@ -168,11 +168,11 @@ class Prerank_STAGES():
             neg_nes["negative NES"] = neg_nes["NES"] * -1
 
             pos_nes_sort = pos_nes.sort_values(by=['NES'], ascending=True).tail(prerank_showX)
-            pos_nes_sort.reset_index(inplace=True, names='Term')
+            pos_nes_sort.reset_index(inplace=True)
             pos_nes_sort['direction'] = "positive"
 
             neg_nes_sort = neg_nes.sort_values(by=['negative NES'], ascending=True).tail(prerank_showX)
-            neg_nes_sort.reset_index(inplace=True, names='Term')
+            neg_nes_sort.reset_index(inplace=True)
             neg_nes_sort['direction'] = "negative"
 
             prerank_sig_out[f'Positive_enrichment_{key}'] = pos_nes_sort
