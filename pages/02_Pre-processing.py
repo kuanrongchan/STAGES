@@ -226,7 +226,9 @@ try:
         log_dict = tested.log_transform(st.session_state['ready'], comparison_dict=st.session_state['comparisons'], use_corrected_pval=st.session_state['use_corrected_pval'])
         ss.save_state({'log_dict_ready':log_dict})
         st.header("Pre-processed data (ratios and p-values)")
-        _ = {st.subheader(k):st.dataframe(v) for k,v in st.session_state['ready'].items()}
+        for k,v in st.session_state['ready'].items():
+            st.subheader(k)
+            st.dataframe(v)
 
 except KeyError:
     st.error("Perhaps you forgot to upload a dataset or use the demo data?")
