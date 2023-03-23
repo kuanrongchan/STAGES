@@ -90,9 +90,31 @@ view_df = file_opts.checkbox("View demo/uploaded gene expression dataset", value
 if view_df is True:
     main_expr, meta_expr, anova_expr = st.tabs(['Gene Expression Data', 'Metadata', 'Ratios and P-value Data'])
     exprdict, metadatadict, anovadict = st.session_state['expr_dict'], st.session_state['meta_dict'], st.session_state['anova_dict']
-    _ = {main_expr.subheader(k):main_expr.dataframe(v) for k,v in exprdict.items()} if exprdict is not None else main_expr.info("No gene expression counts uploaded")
-    _ = {meta_expr.subheader(k):meta_expr.dataframe(v) for k,v in metadatadict.items()} if metadatadict is not None else meta_expr.info("No metadata uploaded")
-    _ = {anova_expr.subheader(k):anova_expr.dataframe(v) for k,v in anovadict.items()} if anovadict is not None else anova_expr.info("No ratios and p-values uploaded")
+
+    if exprdict is not None:
+        for k,v in exprdict.items():
+            main_expr.subheader(k)
+            main_expr.dataframe(v)
+    else:
+        main_expr.info("No gene expression counts uploaded")
+
+    if metadatadict is not None:
+        for k,v in metadatadict.items():
+            meta_expr.subheader(k)
+            meta_expr.dataframe(v)
+    else:
+        meta_expr.info("No metadata uploaded")
+
+    if anovadict is not None:
+        for k,v in anovadict.items():
+            anova_expr.subheader(k)
+            anova_expr.dataframe(v)
+    else:
+        anova_expr.info("No ratios and p-values uploaded")
+
+    # _ = {main_expr.subheader(k):main_expr.dataframe(v) for k,v in exprdict.items()} if exprdict is not None else main_expr.info("No gene expression counts uploaded")
+    # _ = {meta_expr.subheader(k):meta_expr.dataframe(v) for k,v in metadatadict.items()} if metadatadict is not None else meta_expr.info("No metadata uploaded")
+    # _ = {anova_expr.subheader(k):anova_expr.dataframe(v) for k,v in anovadict.items()} if anovadict is not None else anova_expr.info("No ratios and p-values uploaded")
 
 ################################### DEBUGGING STAGE #############################################
 # ss.initialise_state(dict(viewdf = False, use_demo = False, cleandict = None))
