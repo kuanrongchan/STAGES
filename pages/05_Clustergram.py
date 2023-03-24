@@ -81,7 +81,7 @@ try:
         cbar_width = st.number_input("Adjust colourbar width", min_value=0.0, max_value=1.0, step=0.01, value = st.session_state['clust_cbarwidth'])
         cbar_height = st.number_input("Adjust colourbar height", min_value=0.0, max_value=1.0, step=0.01, value = st.session_state['clust_cbarheight'])
 
-        plot_clust = st.checkbox("Plot pathway clustergram", value=st.session_state['clust_submit'], on_change=ss.binaryswitch, args=('clust_submit', ))
+        plot_clust = st.checkbox("Plot clustergram", value=st.session_state['clust_submit'], on_change=ss.binaryswitch, args=('clust_submit', ))
 
     if plot_clust:
         ss.save_state({'clust_dendror':dendrogram_r,

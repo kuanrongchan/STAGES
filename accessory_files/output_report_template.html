@@ -14,6 +14,8 @@
         h1 {font-size: 36px;}
         h2 {font-size: 24px;}
         h3 {font-size: 18px;}
+        .keeptogether {page-break-inside: avoid;}
+        .breakbefore {page-break-before: always;}
     </style>
 </head>
 
@@ -23,28 +25,28 @@
     <h2>Correlation matrix</h2>
     <img src='data:image/png;base64,{{cmatrix}}'>
 
-    <div class="deg">
+    <div class="deg breakbefore">
         <h2>Differential Expression Analysis</h2>
 
         <h3>Volcano Plot</h3>
         <img src='data:image/png;base64,{{volplot}}'>
 
-        <h3>Cumulative Distribution Plot</h3>
-        <img src='data:image/png;base64,{{cdf}}'>
+        <h3 class="keeptogether">Cumulative Distribution Plot</h3>
+        <img class='keeptogether' src='data:image/png;base64,{{cdf}}'>
 
-        <h3>Stacked Bar Plot</h3>
-        <p>Using a cutoff of {{pval_fmt}} < {{bar_pval}} and fold-change of {{bar_fc}}, these were the number of differentially expressed genes (DEGs) obtained.</p>
-        <img src = 'data:image/png;base64,{{barplot}}'>
+        <h3 class="keeptogether">Stacked Bar Plot</h3>
+        <p class="keeptogether">Using a cutoff of {{pval_fmt}} < {{bar_pval}} and fold-change of {{bar_fc}}, these were the number of differentially expressed genes (DEGs) obtained.</p>
+        <img class="keeptogether" src = 'data:image/png;base64,{{barplot}}'>
     </div>
 
-    <h2>Clustergram</h2>
-    <p>The clustergram shows genes you've either selected from your DEGs or manually entered.</p>
-    <img src = 'data:image/png;base64,{{clustergram}}'>
+    <h2 class="breakbefore">Clustergram</h2>
+    <p class="keeptogether">The clustergram shows genes you've either selected from your DEGs or manually entered.</p>
+    <img class='keeptogether' src = 'data:image/png;base64,{{clustergram}}'>
 
 
-    <h2>Enrichr Analysis</h2>
-    <p>These were the top pathways based on DEGs you've selected or manually entered genes. Your parameters are as follows:</p>
-    <ul>
+    <h2 class="breakbefore">Enrichr Analysis</h2>
+    <p class="keeptogether">These were the top pathways based on DEGs you've selected or manually entered genes. Your parameters are as follows:</p>
+    <ul class="keeptogether">
         <li>Geneset selected: {{geneset_enr}}</li>
         <li>Genes used:</li>
         {% for k in enr_genedict.keys() %}
@@ -55,27 +57,27 @@
         <li>Adjusted p-value threshold < {{enr_pthresh}}</li>
         <li>Top {{enr_showX}} pathways shown</li>
     </ul>
-    <img src = 'data:image/png;base64,{{enrichr}}'>
+    <img class='keeptogether' src = 'data:image/png;base64,{{enrichr}}'>
 
 
-    <h2>GSEA Preranked Analysis</h2>
-    <p>These were the top pathways based on your parameters. Your parameters are as follows:</p>
-    <ul>
+    <h2 class="breakbefore">GSEA Preranked Analysis</h2>
+    <p class="keeptogether">These were the top pathways based on your parameters. Your parameters are as follows:</p>
+    <ul class="keeptogether">
         <li>Geneset selected: {{geneset_prerank}}</li>
         <li>Column for ranking used: {{prerank_choose_col}}</li>
         <li>Adjusted p-value threshold < {{prerank_pthresh}}</li>
         <li>Top {{prerank_showX}} pathways shown</li>
     </ul>
-    <img src = 'data:image/png;base64,{{prerank}}'>
+    <img class="keeptogether" src = 'data:image/png;base64,{{prerank}}'>
 
 
-    <h2>STRING Network Query</h2>
-    <p>You used the following sets of genes:</p>
+    <h2 class="breakbefore">STRING Network Query</h2>
+    <p class="keeptogether">You used the following sets of genes:</p>
     {% for k,v in string_dict.items() %}
-    <ul>
+    <ul class="keeptogether">
         <li>{{k}}</li>
     </ul>
-    <img src = 'data:image/png;base64,{{v}}'>
+    <img class="keeptogether" src = 'data:image/png;base64,{{v}}'>
     {% endfor %}
 </body>
 </html>

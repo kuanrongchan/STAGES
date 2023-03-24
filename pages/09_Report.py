@@ -10,14 +10,15 @@ import plotly
 import matplotlib
 from PIL import Image
 from datetime import datetime
+import pytz
 
 from helper_functions.downloads import file_downloads
 
 
 st.header("Report Generation")
 # Get time
-today = datetime.now()
-dt_string = today.strftime("%d %B %Y %I:%M:%S %p")
+today = datetime.now(tz=pytz.timezone("Asia/Singapore"))
+dt_string = today.strftime("%d %B %Y %I:%M:%S %p (GMT%Z)")
 
 st.info("If you skipped any of the steps in the process, the report will still display the header but not the plots as they were not run.")
 

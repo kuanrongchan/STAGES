@@ -42,7 +42,7 @@ st.header("Differential Expression Analysis")
 
 try:
     ######### VOLCANO PLOT ##################
-    volcano_t, cdf_t, bar_t, data_t = st.tabs(["Volcano Plot", "Cumulative Distribution Function", "Bar Plots", "Data"])
+    volcano_t, cdf_t, bar_t, data_t = st.tabs(["Volcano Plot", "Cumulative Distribution Function", "Differential Expression Bar Plots", "Data"])
     vol_opts = st.sidebar.expander("Volcano plot options", expanded=True)
     use_corrected_pval_fmt = "adjusted p-value" if st.session_state['use_corrected_pval'] else "p-value"
 
@@ -55,7 +55,7 @@ try:
                                 min_value=-10.0, max_value=10.0, step=0.1, value= st.session_state['xaxes_volcano'])
     ss.save_state({'xaxes_volcano':xaxes})
 
-    yaxes = vol_opts.slider(f"Choose -log10 {use_corrected_pval_fmt} boundaries for volcano plot",
+    yaxes = vol_opts.number_input(f"Choose -log10 {use_corrected_pval_fmt} boundaries for volcano plot",
                                 help="The app will plot the values less than or equal to the user-set value",
                                 min_value=0.0, max_value=50.0, step=0.1, value=st.session_state['yaxes_volcano'])
     ss.save_state({'yaxes_volcano':yaxes})
@@ -112,7 +112,7 @@ try:
         file_downloads.create_pdf(st.session_state['cdf_plot'], "cumulative_density_DEGs", graph_module='plotly')
 
     ######### BAR PLOT #################
-    deg_opts = st.sidebar.expander("Differential expression options", expanded=True)
+    deg_opts = st.sidebar.expander("Differential expression bar plot options", expanded=True)
     bar_pval = deg_opts.number_input(f"Choose {use_corrected_pval_fmt} threshold for differentially expressed genes", min_value = 0.00, max_value = 1.00, step = 0.01, value = st.session_state['bar_pval'])
     bar_fc = deg_opts.number_input(label="Adjust fold-change cutoff here ", value=st.session_state['bar_fc'], min_value=0.0, max_value=20.0, step=0.1)
     bar_width = deg_opts.number_input(label="Adjust bar plot width (in px)", min_value=300, max_value=1200, value=st.session_state['bar_width'], step=50)

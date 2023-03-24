@@ -21,7 +21,7 @@ ss.initialise_state({'add_geneset_in':None,
                                       "GO Molecular Function 2021": "GO_Molecular_Function_2021",
                                       "GO Cellular Component 2021": "GO_Cellular_Component_2021",
                                       "KEGG 2021 Human": "KEGG_2021_Human",
-                                      "KEGG 2019 Mouse":"KEGG_2019_Mouse",
+                                    #   "KEGG 2019 Mouse":"KEGG_2019_Mouse",
                                       "HumanCyc 2016": "HumanCyc_2016"
                                       },
                       'geneset_enr':"Blood Transcriptomic Modules (BTM)",
@@ -63,7 +63,7 @@ if degs is not None: # If there were DEGs already
                                       help="Leave this field blank if you wish to input a custom set of gene names",
                                       options = list(degs.keys()),
                                       default=st.session_state['enr_useDEG'])
-
+    ss.save_state({'enr_useDEG':enr_useDEG})
 
     if len(enr_useDEG) == 0: # if no DEGs selected, provide text area for input
         enr_textgene = enr_opts.text_area("Enter custom list of genes here (if not using DEGs)",
@@ -72,8 +72,7 @@ if degs is not None: # If there were DEGs already
         ss.save_state({'enr_textgene':enr_textgene,
                        'enr_useDEG':None})
     else: # If DEGs selected, use the enr_useDEG and revert textgene to None
-        ss.save_state({'enr_textgene': None,
-                       'enr_useDEG':enr_useDEG})
+        ss.save_state({'enr_textgene': None})
     
 else:
     enr_textgene = enr_opts.text_area("Enter custom list of genes here",
