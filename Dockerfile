@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y wkhtmltopdf xvfb\
     git \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/kohcl17/stageswip.git .
+RUN git clone https://github.com/kuanrongchan/STAGES.git .
 
 RUN pip3 install -r requirements.txt
 
