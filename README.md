@@ -204,11 +204,11 @@ Enrichr is a tool developed by [Ma’ayan lab](https://maayanlab.cloud/Enrichr/)
     - Custom gene set uploader (optional)
         - Users may choose to upload their own GMT file whose format is as follows:
         
-        |  |  |  |  |  |
-        | --- | --- | --- | --- | --- |
-        | Module_A | Describe_module_A | Gene 1 | Gene 2 |  |
-        | Module_B | Describe_module_B | Gene 1  | Gene 2 | Gene 3 |
-        |  |  |  |  |  |
+            |  |  |  |  |  |
+            | --- | --- | --- | --- | --- |
+            | Module_A | Describe_module_A | Gene 1 | Gene 2 |  |
+            | Module_B | Describe_module_B | Gene 1  | Gene 2 | Gene 3 |
+            |  |  |  |  |  |
         
         - NOTE: there should not be any header columns in the file
 
@@ -254,7 +254,7 @@ GSEA preranked analysis uses a user-selected ranking of genes to determine if th
         - Customise the height of the bar plots in pixels
         - The range is from 200 to 1600 px
 
-Current limitation: prerank of GO libraries may result in the server crashing as they are large and the server has memory limits of 1GB and running GO libraries would consume approximately 3GB of memory. One way to alleviate this issue would be to run this tool locally with Docker (explained at the end under [Local Usage](https://github.com/kuanrongchan/STAGES#local-usage)).
+Current limitation: prerank of GO libraries may result in the server crashing as the server has memory limits of 1GB. One way to alleviate this issue would be to run this tool locally with Docker (explained at the end under [Local Usage](https://github.com/kuanrongchan/STAGES#local-usage)).
 
 ## STRING Query
 
