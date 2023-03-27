@@ -20,7 +20,7 @@ STAGES (https://kuanrongchan-stages-stages-vpgh46.streamlitapp.com/) is an easy-
 
 # Getting started
 ## File Upload
-Users may choose to either use a demo dataset (given in fold-changes and pvalues), or one of 3 file options:
+Users may choose to either use a demo dataset (given in ratios and p-values), or one of 3 file options:
 
 1. RNASeq raw counts
 
