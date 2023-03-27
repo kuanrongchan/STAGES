@@ -113,6 +113,7 @@ class Enrichr_STAGES():
             fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
             fig.update_layout(title=f"Enriched Pathways (Top {enr_showX}) for user-input genes<br>adjusted p-value < {enr_pthresh}", title_x=0.5,
                             showlegend=False,
+                            xaxis_title = "-log10 (adjusted p-value)",
                             yaxis={'tickmode': 'linear'},
                             font=dict(family='Arial', size=14),
                             width = 750, height = enr_ht)
@@ -215,6 +216,7 @@ class Prerank_STAGES():
         fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
         fig.update_layout(title=f"Top {prerank_showX} GSEA Preranked Pathways from {selected_col}<br>adjusted p-value < {prerank_pthresh}", title_x=0.5,
                          showlegend=False,
+                         xaxis_title = "|NES|",
                          yaxis={'tickmode': 'linear'},
                          font=dict(family='Arial', size=14),
                          width = 750, height = prerank_ht,
