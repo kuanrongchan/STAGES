@@ -189,12 +189,12 @@ Having completed the differential expression analysis in the previous page, ther
     - Colourbar limit double-ended slider
         - This option will rescale the colours to fit the lower and upper colourbar limits. The centre of this colourbar will always be fixed at 0.
     - Colourbar position from the left and bottom number input
-        - These options will reposition the colourbar such that it does not overlap with the axes
-        - The number input ranges from 0.0 to 1.0.
+        - These options will reposition the colourbar such that users may prevent its overlap with the axes
+        - The number input ranges from 0.0 to 1.0
     - Colourbar width and height options
-        - The number input ranges from 0.0 to 1.0.
+        - The number input ranges from 0.0 to 1.0
 
-NOTE: to prevent the input options from glitching and resetting to the last saved state, deselect the “Plot pathway clustergram” checkbox and make the necessary changes before reselecting it
+NOTE: to prevent the input options from glitching and resetting to the last saved state, deselect the “Plot clustergram” checkbox and make the necessary changes before reselecting it.
 
 ## Enrichr
 
@@ -227,9 +227,9 @@ Enrichr is a tool developed by [Ma’ayan lab](https://maayanlab.cloud/Enrichr/)
 
     - Bar plot height
         - Customise the height of the bar plots in pixels.
-        - The range is from 200 to 1600 px.
+        - The range is from 200 to 1600 px
 
-NOTE: Larger gene sets like Gene Ontology (GO) may take longer to run than other gene sets
+NOTE: Larger gene sets like Gene Ontology (GO) may take longer to run than other gene sets.
 
 ## GSEA Preranked Analysis
 
@@ -254,7 +254,7 @@ GSEA preranked analysis uses a user-selected ranking of genes to determine if th
         - Customise the height of the bar plots in pixels
         - The range is from 200 to 1600 px
 
-Current limitation: prerank of GO libraries may result in the server crashing as they are large and the server has memory limits of 1GB and running GO libraries would consume approximately 3GB of memory. One way to alleviate this issue would be to run this tool locally with Docker (explained at the end under [Local Usage]()).
+Current limitation: prerank of GO libraries may result in the server crashing as they are large and the server has memory limits of 1GB and running GO libraries would consume approximately 3GB of memory. One way to alleviate this issue would be to run this tool locally with Docker (explained at the end under [Local Usage](https://github.com/kuanrongchan/STAGES#local-usage)).
 
 ## STRING Query
 
@@ -273,7 +273,7 @@ Current limitation: The lack of customisation available and the species being li
 
 # Local Usage
 
-- Due to memory constraints imposed by streamlit, users may choose to run this webtool locally on their own machine.
+- Due to memory constraints on the online webtool, users may choose to run this webtool locally on their own machine.
 
 ## Initial Set-up
 1. Users will have to download 2 items:
@@ -287,7 +287,7 @@ Current limitation: The lack of customisation available and the species being li
     docker build -t stages . # Builds the Docker image (necessary packages and environment). This only needs to be run for the first time on setup.
     docker run -p 8501:8501 stages # runs the Docker image
     ```
-    If the build was successful, this should be displayed in the output. Copy the URL into your browser and run the app. If 0.0.0.0 does not run, try http://localhost:8501.
+    If the build was successful, this should be displayed in the output. Copy the URL into your browser and run the app. If the URL does not run, try http://localhost:8501.
 
     ```bash
     You can now view your Streamlit app in your browser.
