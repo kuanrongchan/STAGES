@@ -1,5 +1,5 @@
 plotly
-plotly_express
+plotly-express
 matplotlib
 streamlit
 streamlit_tags
