@@ -30,15 +30,15 @@
     <div class="deg breakbefore">
         <h2>Differential Expression Analysis</h2>
 
-        <h3>Volcano Plot</h3>
-        <img src='data:image/png;base64,{{volplot}}'>
+        <h3>Stacked Bar Plot</h3>
+        <p class="keeptogether">Using a cutoff of {{pval_fmt}} < {{bar_pval}} and fold-change of {{bar_fc}}, these were the number of differentially expressed genes (DEGs) obtained.</p>
+        <img class="keeptogether" src = 'data:image/png;base64,{{barplot}}'>
+
+        <h3 class="breakbefore">Volcano Plot</h3>
+        <img class="keeptogether" src='data:image/png;base64,{{volplot}}'>
 
         <h3 class="breakbefore">Cumulative Distribution Plot</h3>
         <img class='keeptogether' src='data:image/png;base64,{{cdf}}'>
-
-        <h3 class="breakbefore">Stacked Bar Plot</h3>
-        <p class="keeptogether">Using a cutoff of {{pval_fmt}} < {{bar_pval}} and fold-change of {{bar_fc}}, these were the number of differentially expressed genes (DEGs) obtained.</p>
-        <img class="keeptogether" src = 'data:image/png;base64,{{barplot}}'>
     </div>
 
     <h2 class="breakbefore">Clustergram</h2>
@@ -56,7 +56,6 @@
                 <li>{{k}}</li>
             </ul>
         {% endfor %}
-        <li>Adjusted p-value threshold < {{enr_pthresh}}</li>
         <li>Top {{enr_showX}} pathways shown</li>
     </ul>
     <img class='keeptogether' src = 'data:image/png;base64,{{enrichr}}'>
@@ -67,7 +66,6 @@
     <ul class="keeptogether">
         <li>Geneset selected: {{geneset_prerank}}</li>
         <li>Column for ranking used: {{prerank_choose_col}}</li>
-        <li>Adjusted p-value threshold < {{prerank_pthresh}}</li>
         <li>Top {{prerank_showX}} pathways shown</li>
     </ul>
     <img class="keeptogether" src = 'data:image/png;base64,{{prerank}}'>

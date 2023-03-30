@@ -73,7 +73,7 @@ else:
     pval_fmt = ""
 
 session_data = {}
-for key in ['bar_pval', 'bar_fc', 'geneset_enr', 'enr_genedict','enr_pthresh', 'enr_showX', 'geneset_prerank', 'prerank_choose_col', 'prerank_pthresh', 'prerank_showX']:
+for key in ['bar_pval', 'bar_fc', 'geneset_enr', 'enr_genedict', 'enr_showX', 'geneset_prerank', 'prerank_choose_col', 'prerank_showX']:
     if key in st.session_state:
         session_data[key] = st.session_state[key]
     else:
@@ -99,12 +99,10 @@ outputText = template.render(date = dt_string,
                              clustergram=all_plots_bytes['clustergram_plot'],
                              geneset_enr=session_data['geneset_enr'],
                              enr_genedict=session_data['enr_genedict'],
-                             enr_pthresh=session_data['enr_pthresh'],
                              enr_showX=session_data['enr_showX'],
                              enrichr=all_plots_bytes['enrichr_plots'],
                              geneset_prerank=session_data['geneset_prerank'],
                              prerank_choose_col=session_data['prerank_choose_col'],
-                             prerank_pthresh=session_data['prerank_pthresh'],
                              prerank_showX=session_data['prerank_showX'],
                              prerank=all_plots_bytes['prerank_plots'],
                              string_dict=string)
