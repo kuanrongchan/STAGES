@@ -133,29 +133,29 @@ b. A correlation matrix showing the relationship between the log2 fold-change va
 
 This page features three plots and a data ouput tab:
 
-1. Volcano plot
+1. DEG bar plot
 
-    a. Users may change the log2 fold-change sliders where plot will show the genes within the range of the double-ended slider
-
-    b. Users may also opt to change the -log10 p/adjusted-values where the plot will be updated with genes that are less than or equal to the plot boundaries
-
-2. Cumulative Distribution plot
-
-    a. Users may also view the trend in their gene expression data in a cumulative distribution curve, where genes are plotted from 0 to 3 (a current hard limit)
-
-    b. The number of genes indicated are the total number of genes that meet the fold-change threshold (regardless of up or down regulation)
-
-    c. The sidebar expander options for this plot include a p/adjusted p-value cutoff as well as a marker styling option
-
-3. DEG bar plot
-
-    a. Having viewed the volcano and cumulative distribution plots, users may then use this information to decide on a p/adjusted-p value and fold-change cutoff with the number input options in the sidebar expander for ‘Differential expression options’
+    a. Users may select a p/adjusted-p value and fold-change cutoff with the number input options in the sidebar expander for ‘Differential expression bar plot options’
     
     b. Aesthetics such as the width and height of the stacked bar plot may also be changed in the sidebar expander
     
     c. These settings will be the basis for the DEGs in subsequent analyses
 
-4. Data
+2. Volcano plot
+
+    a. Users may change the log2 fold-change sliders where plot will show the genes within the range of the double-ended slider
+
+    b. Users may also opt to change the -log10 p/adjusted-values where the plot will be updated with genes that are less than or equal to the plot boundaries
+
+3. Cumulative Distribution plot
+
+    a. Users may also view the trend in their gene expression data in a cumulative distribution curve, where genes are plotted from 0 < |FC| < 20
+
+    b. The number of genes indicated are the total number of genes that meet the fold-change threshold (regardless of up or down regulation)
+
+    c. The sidebar expander options for this plot include a p/adjusted p-value cutoff as well as a marker styling option
+
+4. DEG Identity
 
     a. The user’s DEGs will then be displayed in the output tab and is available for download as an excel file
 
@@ -219,11 +219,8 @@ Enrichr is a tool developed by [Ma’ayan lab](https://maayanlab.cloud/Enrichr/)
     - DEG selection
         - Users may select any number of sets of DEGs to use in enrichr
 
-    - Adjusted p-value threshold
-        - Users may choose to plot the pathways that meet the adjusted p-value cutoff of the selected threshold
-
     - Display top n pathways to plot
-        - Further filtering of the pathway bar plots is available by selecting the top n pathways to plot after the pathways meet the adjusted p-value threshold designated by the user
+        - Further filtering of the pathway bar plots is available by selecting the top n pathways to plot after the pathways meet the adjusted p-value threshold of < 0.05
 
     - Bar plot height
         - Customise the height of the bar plots in pixels.
@@ -246,8 +243,6 @@ GSEA preranked analysis uses a user-selected ranking of genes to determine if th
         - This is mostly applicable if multiple gene expression datasets are uploaded
     - Select comparison to use for prerank
         - The function will rank the selected log2 fold-change comparisons in descending order
-    - Adjusted p-value threshold
-        - Users may choose to plot the pathways that meet the adjusted p-value cutoff of the selected threshold.
     - Display top n pathways to plot
         - Further filtering of the pathway bar plots is available by selecting the top n pathways to plot after the pathways meet the adjusted p-value threshold designated by the user
     - Bar plot height

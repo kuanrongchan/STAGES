@@ -81,12 +81,13 @@ else:
     ss.save_state({'enr_textgene':enr_textgene})
 
 
-enr_pthresh = enr_opts.number_input("Choose adjusted p-value threshold of enriched pathways to plot", min_value = 0.00, max_value=1.00, step=0.01, value = st.session_state['enr_pthresh'])
+# enr_pthresh = enr_opts.number_input("Choose adjusted p-value threshold of enriched pathways to plot", min_value = 0.00, max_value=1.00, step=0.01, value = st.session_state['enr_pthresh'])
 enr_showX = enr_opts.number_input("Display top n pathways from selected p-value cutoff", min_value=1, max_value=100, step=1,
                                      value=st.session_state['enr_showX'],
                                      help="Show only the top n pathways from a filtered set of pathways")
 enr_ht = enr_opts.number_input("Bar plot height (in px)", min_value=200, max_value=1600, step=50, value=st.session_state['enr_ht'])
-ss.save_state({'enr_pthresh': round(enr_pthresh,2),
+ss.save_state({
+            #    'enr_pthresh': round(enr_pthresh,2),
                'enr_showX':enr_showX,
                'enr_ht':enr_ht})
 plot_enr = enr_opts.checkbox("Run Enrichr", value = st.session_state['plot_enr'], on_change=ss.binaryswitch, args=("plot_enr", ))
@@ -101,11 +102,29 @@ if plot_enr:
         res_all, res_sig = enr.execute_enrichr(gene_dict=st.session_state['enr_genedict'], select_dataset=get_geneset, enr_pthresh=st.session_state['enr_pthresh'], enr_showX=st.session_state['enr_showX'])
         ss.save_state({'enr_res_all':res_all,
                        'enr_res_sig':res_sig})
-        enr_plots = enr.enr_barplot(st.session_state['enr_res_sig'],
-                                    enr_useDEG=st.session_state['enr_useDEG'],
-                                    enr_pthresh=st.session_state['enr_pthresh'],
-                                    enr_showX=st.session_state['enr_showX'],
-                                    enr_ht=st.session_state['enr_ht'])
+        
+        if 'bar_fc' in st.session_state:
+            enr_plots = enr.enr_barplot(st.session_state['enr_res_sig'],
+                                        enr_useDEG=st.session_state['enr_useDEG'],
+                                        enr_pthresh=0.05,
+                                        deg_fc=st.session_state['bar_fc'],
+                                        deg_pval=st.session_state['bar_pval'],
+                                        use_corrected_pval=st.session_state['use_corrected_pval'],
+                                        select_dataset=st.session_state['geneset_enr'],
+                                        # enr_pthresh=st.session_state['enr_pthresh'],
+                                        enr_showX=st.session_state['enr_showX'],
+                                        enr_ht=st.session_state['enr_ht'])
+        else:
+            enr_plots = enr.enr_barplot(st.session_state['enr_res_sig'],
+                            enr_useDEG=st.session_state['enr_useDEG'],
+                            enr_pthresh=0.05,
+                            deg_fc=None,
+                            deg_pval=None,
+                            use_corrected_pval=st.session_state['use_corrected_pval'],
+                            select_dataset=st.session_state['geneset_enr'],
+                            # enr_pthresh=st.session_state['enr_pthresh'],
+                            enr_showX=st.session_state['enr_showX'],
+                            enr_ht=st.session_state['enr_ht'])
         ss.save_state({'enrichr_plots':enr_plots})
         with enr_plots_t:
             st.plotly_chart(enr_plots, theme=None, use_container_width=False)

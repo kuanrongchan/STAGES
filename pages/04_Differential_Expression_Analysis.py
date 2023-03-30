@@ -41,10 +41,37 @@ ss.initialise_state({'reset_volcano':False,
 st.header("Differential Expression Analysis")
 
 try:
-    ######### VOLCANO PLOT ##################
-    volcano_t, cdf_t, bar_t, data_t = st.tabs(["Volcano Plot", "Cumulative Distribution Function", "Differential Expression Bar Plots", "Data"])
-    vol_opts = st.sidebar.expander("Volcano plot options", expanded=True)
+    bar_t, volcano_t, cdf_t, data_t = st.tabs(["Differential Expression Bar Plots", "Volcano Plot", "Cumulative Distribution Function", "DEG identity"])
     use_corrected_pval_fmt = "adjusted p-value" if st.session_state['use_corrected_pval'] else "p-value"
+    ######### BAR PLOT #################
+    deg_opts = st.sidebar.expander("Differential expression bar plot options", expanded=True)
+    bar_pval = deg_opts.number_input(f"Choose {use_corrected_pval_fmt} threshold for differentially expressed genes", min_value = 0.00, max_value = 1.00, step = 0.01, value = st.session_state['bar_pval'])
+    bar_fc = deg_opts.number_input(label="Adjust fold-change cutoff here ", value=st.session_state['bar_fc'], min_value=0.0, max_value=20.0, step=0.1)
+    bar_width = deg_opts.number_input(label="Adjust bar plot width (in px)", min_value=300, max_value=1200, value=st.session_state['bar_width'], step=50)
+    bar_height = deg_opts.number_input(label="Adjust bar plot height (in px)", min_value=300, max_value=1200, value=st.session_state['bar_height'], step=50)
+
+    ss.save_state({'bar_pval':bar_pval,
+                   'bar_fc':bar_fc,
+                   'bar_width':bar_width,
+                   'bar_height':bar_height})
+
+    stacked1, proportions = DE.degs(st.session_state['log_dict_ready'],
+                                            st.session_state['comparisons'],
+                                            pval_cutoff=st.session_state['bar_pval'],
+                                            fc_cutoff=st.session_state['bar_fc'],
+                                            u_width=st.session_state['bar_width'],
+                                            u_height=st.session_state['bar_height'],
+                                            use_corrected_pval=st.session_state['use_corrected_pval'])
+
+    ss.save_state({'degs':proportions,
+                   'barplot':stacked1})
+
+    with bar_t:
+        st.plotly_chart(stacked1, theme=None, use_container_width=False)
+        file_downloads.create_pdf(stacked1, "stacked_DEG_plot", graph_module='plotly')
+
+    ######### VOLCANO PLOT ##################
+    vol_opts = st.sidebar.expander("Volcano plot options", expanded=True)
 
     reset = vol_opts.checkbox("Reset to default settings", value=st.session_state['reset_volcano'], on_change=ss.binaryswitch, args=('reset_volcano', ))
     if reset:
@@ -111,32 +138,6 @@ try:
         st.plotly_chart(st.session_state['cdf_plot'], theme=None, use_container_width=True)
         file_downloads.create_pdf(st.session_state['cdf_plot'], "cumulative_density_DEGs", graph_module='plotly')
 
-    ######### BAR PLOT #################
-    deg_opts = st.sidebar.expander("Differential expression bar plot options", expanded=True)
-    bar_pval = deg_opts.number_input(f"Choose {use_corrected_pval_fmt} threshold for differentially expressed genes", min_value = 0.00, max_value = 1.00, step = 0.01, value = st.session_state['bar_pval'])
-    bar_fc = deg_opts.number_input(label="Adjust fold-change cutoff here ", value=st.session_state['bar_fc'], min_value=0.0, max_value=20.0, step=0.1)
-    bar_width = deg_opts.number_input(label="Adjust bar plot width (in px)", min_value=300, max_value=1200, value=st.session_state['bar_width'], step=50)
-    bar_height = deg_opts.number_input(label="Adjust bar plot height (in px)", min_value=300, max_value=1200, value=st.session_state['bar_height'], step=50)
-
-    ss.save_state({'bar_pval':bar_pval,
-                   'bar_fc':bar_fc,
-                   'bar_width':bar_width,
-                   'bar_height':bar_height})
-
-    stacked1, proportions = DE.degs(st.session_state['log_dict_ready'],
-                                            st.session_state['comparisons'],
-                                            pval_cutoff=st.session_state['bar_pval'],
-                                            fc_cutoff=st.session_state['bar_fc'],
-                                            u_width=st.session_state['bar_width'],
-                                            u_height=st.session_state['bar_height'],
-                                            use_corrected_pval=st.session_state['use_corrected_pval'])
-
-    ss.save_state({'degs':proportions,
-                   'barplot':stacked1})
-
-    with bar_t:
-        st.plotly_chart(stacked1, theme=None, use_container_width=False)
-        file_downloads.create_pdf(stacked1, "stacked_DEG_plot", graph_module='plotly')
 
     ####### DATA OUTPUT ###############
     with data_t:

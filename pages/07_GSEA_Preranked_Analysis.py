@@ -74,12 +74,13 @@ prerank_choose_col_idx = col_opts.index(prerank_choose_col)
 ss.save_state({'prerank_choose_col_idx':prerank_choose_col_idx,
             'prerank_choose_col':prerank_choose_col})
 
-prerank_pthresh = prnk_opts.number_input("Choose adjusted p-value threshold of enriched pathways to plot", min_value = 0.00, max_value=1.00, step=0.01, value = st.session_state['prerank_pthresh'])
+# prerank_pthresh = prnk_opts.number_input("Choose adjusted p-value threshold of enriched pathways to plot", min_value = 0.00, max_value=1.00, step=0.01, value = st.session_state['prerank_pthresh'])
 prerank_showX = prnk_opts.number_input("Display top n pathways from selected p-value cutoff", min_value=1, max_value=100, step=1,
                                     value=st.session_state['prerank_showX'],
                                     help="Show only the top n pathways from a filtered set of pathways")
 prerank_ht = prnk_opts.number_input("Bar plot height (in px)", min_value=200, max_value=1600, step=50, value=st.session_state['prerank_ht'])
-ss.save_state({'prerank_pthresh': round(prerank_pthresh,2),
+ss.save_state({
+                # 'prerank_pthresh': round(prerank_pthresh,2),
                 'prerank_showX':prerank_showX,
                 'prerank_ht':prerank_ht})
 plot_prerank = prnk_opts.checkbox("Run GSEA Prerank", value = st.session_state['plot_prerank'], on_change=ss.binaryswitch, args=("plot_prerank", ))
@@ -89,13 +90,14 @@ if plot_prerank:
     get_geneset = st.session_state['geneset_dict'][st.session_state['geneset_prerank']]
     all_res, sig_res = prnk.execute_prerank(col_dict=get_col,
                                             select_dataset=get_geneset,
-                                            prerank_pthresh=st.session_state['prerank_pthresh'],
+                                            prerank_pthresh=0.05,
                                             prerank_showX=st.session_state['prerank_showX'])
     ss.save_state({'prerank_res_all':all_res,
                 'prerank_res_sig':sig_res})
     sig_plots = prnk.prerank_barplot(st.session_state['prerank_res_sig'],
                                     selected_col = st.session_state['prerank_choose_col'],
-                                    prerank_pthresh=st.session_state['prerank_pthresh'],
+                                    select_dataset=st.session_state['geneset_prerank'],
+                                    # prerank_pthresh=st.session_state['prerank_pthresh'],
                                     prerank_showX=st.session_state['prerank_showX'],
                                     prerank_ht=st.session_state['prerank_ht'])
     ss.save_state({'prerank_plots':sig_plots})

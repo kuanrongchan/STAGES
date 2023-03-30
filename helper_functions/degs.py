@@ -291,7 +291,7 @@ class PreDEGs():
     
     @st.cache_data
     def deg_cdf(_self, ready_dict, comparison_dict, pval=0.05, markermode='lines', use_corrected_pval=False):
-        FC_step = [i/10 for i in range(0, 31, 1)]
+        FC_step = [i/10 for i in range(0, 201, 1)]
         fig = go.Figure()
         for k,v in ready_dict.items():
             comparisons = comparison_dict[k]
@@ -404,7 +404,7 @@ class DEGs():
                 stacked1.for_each_trace(lambda trace:trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name))
         
         stacked1.update_layout(showlegend=True, barmode='stack',
-                            title=f"Number of DEGs across comparisons<br>(FC {fc_cutoff}; {p_format} {pval_cutoff})",
+                            title=f"Number of DEGs across comparisons<br>(FC {fc_cutoff:.2f}; {p_format} {pval_cutoff})",
                             title_x=0.5,
                             legend_title_text='DEGs:',
                             font=dict(family='Arial', size=14), width=u_width, height=u_height)

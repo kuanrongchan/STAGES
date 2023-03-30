@@ -73,7 +73,7 @@ class Enrichr_STAGES():
         return enr_all, enr_significant
     
     @st.cache_data
-    def enr_barplot(_self, enr_significant, enr_useDEG=None, enr_pthresh=0.05, enr_showX=10, enr_ht=500):
+    def enr_barplot(_self, enr_significant, enr_useDEG=None, deg_fc=1.30, deg_pval=0.05, use_corrected_pval=True, select_dataset="BTM", enr_pthresh=0.05, enr_showX=10, enr_ht=500):
         if enr_useDEG is not None: # which implies it will require DEGs
             fig = make_subplots(rows=len(enr_significant), cols=1, subplot_titles=list(enr_significant.keys()),
                                 x_title="-log10 (adjusted p-value)", shared_xaxes=True,
@@ -92,7 +92,7 @@ class Enrichr_STAGES():
                                      row = i, col = 1)
                 i += 1
             fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
-            fig.update_layout(title=f"Enriched Pathways (Top {enr_showX}), adjusted p-value < {enr_pthresh}", title_x=0.5,
+            fig.update_layout(title=f"Top {enr_showX} {select_dataset} pathways<br>|FC| > {deg_fc}, {'adjusted p-value' if use_corrected_pval else 'p-value'} < {deg_pval}", title_x=0.5,
                               showlegend=False,
                               yaxis={'tickmode': 'linear'},
                               font=dict(family='Arial', size=14),
@@ -111,7 +111,7 @@ class Enrichr_STAGES():
                                  hovertemplate="<b>%{y}</b><br>-logadjP: %{x}<br>Enriched genes: %{customdata}")
                                  )
             fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
-            fig.update_layout(title=f"Enriched Pathways (Top {enr_showX}) for user-input genes<br>adjusted p-value < {enr_pthresh}", title_x=0.5,
+            fig.update_layout(title=f"Top {enr_showX} {select_dataset} pathways for user-input genes<br>", title_x=0.5,
                             showlegend=False,
                             xaxis_title = "-log10 (adjusted p-value)",
                             yaxis={'tickmode': 'linear'},
@@ -183,8 +183,8 @@ class Prerank_STAGES():
         return prerank_all_out, prerank_sig_out
 
     @st.cache_data
-    def prerank_barplot(_self, prerank_sig, selected_col, prerank_pthresh=0.05, prerank_showX=10, prerank_ht = 1000):
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True,vertical_spacing=0.05, subplot_titles=list(prerank_sig.keys()))
+    def prerank_barplot(_self, prerank_sig, selected_col, prerank_pthresh=0.05, select_dataset=None, prerank_showX=10, prerank_ht = 1000):
+        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, x_title = "|NES|", vertical_spacing=0.05, subplot_titles=list(prerank_sig.keys()))
         i = 1
         for k,v in prerank_sig.items():
             wrap_prnk_sig = ["<br>".join(textwrap.wrap(a, 30)) for a in v.Term]
@@ -214,9 +214,8 @@ class Prerank_STAGES():
                                         row = i, col = 1)
                 i += 1
         fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
-        fig.update_layout(title=f"Top {prerank_showX} GSEA Preranked Pathways from {selected_col}<br>adjusted p-value < {prerank_pthresh}", title_x=0.5,
+        fig.update_layout(title=f"Top {prerank_showX} GSEA Preranked {select_dataset} Pathways<br>({selected_col})", title_x=0.5,
                          showlegend=False,
-                         xaxis_title = "|NES|",
                          yaxis={'tickmode': 'linear'},
                          font=dict(family='Arial', size=14),
                          width = 750, height = prerank_ht,
