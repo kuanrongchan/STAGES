@@ -29,6 +29,7 @@ ss.initialise_state({'add_geneset_in':None,
                       'enr_textgene':'COL1A2;DCN;IL6;IL8;LIF;MGP;MMP1;MMP2;MMP9',
                       'enr_pthresh':0.05,
                       'enr_showX':10,
+                      'enr_showall':True,
                       'plot_enr':True,
                       'enr_genedict':None,
                       'enr_ht':500,
@@ -81,10 +82,16 @@ else:
     ss.save_state({'enr_textgene':enr_textgene})
 
 
+enr_showall = enr_opts.checkbox("Show all enriched pathways with adjusted p-value < 0.05", value=st.session_state['enr_showall'], on_change=ss.binaryswitch, args=('enr_showall', ))
 # enr_pthresh = enr_opts.number_input("Choose adjusted p-value threshold of enriched pathways to plot", min_value = 0.00, max_value=1.00, step=0.01, value = st.session_state['enr_pthresh'])
-enr_showX = enr_opts.number_input("Display top n pathways from selected p-value cutoff", min_value=1, max_value=100, step=1,
-                                     value=st.session_state['enr_showX'],
-                                     help="Show only the top n pathways from a filtered set of pathways")
+
+if not enr_showall:
+    enr_showX = enr_opts.number_input("Display top n pathways based on pathway's adjusted p-value < 0.05", min_value=1, max_value=100, step=1,
+                                        value=st.session_state['enr_showX'],
+                                        help="Show only the top n pathways from a filtered set of pathways")
+else:
+    enr_showX = st.session_state['enr_showX']
+
 enr_ht = enr_opts.number_input("Bar plot height (in px)", min_value=200, max_value=1600, step=50, value=st.session_state['enr_ht'])
 ss.save_state({
             #    'enr_pthresh': round(enr_pthresh,2),
@@ -99,7 +106,11 @@ if plot_enr:
     if len(gene_dict) == 0:
         st.warning("Please ensure that there is more than 1 gene from DEGs or genes are manually entered!")
     else:
-        res_all, res_sig = enr.execute_enrichr(gene_dict=st.session_state['enr_genedict'], select_dataset=get_geneset, enr_pthresh=st.session_state['enr_pthresh'], enr_showX=st.session_state['enr_showX'])
+        res_all, res_sig = enr.execute_enrichr(gene_dict=st.session_state['enr_genedict'],
+                                               select_dataset=get_geneset,
+                                               enr_pthresh=st.session_state['enr_pthresh'],
+                                               enr_showall=st.session_state['enr_showall'],
+                                               enr_showX=st.session_state['enr_showX'])
         ss.save_state({'enr_res_all':res_all,
                        'enr_res_sig':res_sig})
         
@@ -112,6 +123,7 @@ if plot_enr:
                                         use_corrected_pval=st.session_state['use_corrected_pval'],
                                         select_dataset=st.session_state['geneset_enr'],
                                         # enr_pthresh=st.session_state['enr_pthresh'],
+                                        enr_showall=st.session_state['enr_showall'],
                                         enr_showX=st.session_state['enr_showX'],
                                         enr_ht=st.session_state['enr_ht'])
         else:
@@ -123,6 +135,7 @@ if plot_enr:
                             use_corrected_pval=st.session_state['use_corrected_pval'],
                             select_dataset=st.session_state['geneset_enr'],
                             # enr_pthresh=st.session_state['enr_pthresh'],
+                            enr_showall = st.session_state['enr_showall'],
                             enr_showX=st.session_state['enr_showX'],
                             enr_ht=st.session_state['enr_ht'])
         ss.save_state({'enrichr_plots':enr_plots})
@@ -137,3 +150,5 @@ if plot_enr:
             st.download_button(label="Download Enrichr Results",
                                data=file_downloads.to_excel(st.session_state['enr_res_all'].values(), sheetnames=st.session_state['enr_res_all'].keys()),
                                file_name="Enrichr_results.xlsx")
+
+st.write(gp.__version__)

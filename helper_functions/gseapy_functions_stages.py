@@ -35,7 +35,7 @@ class Enrichr_STAGES():
         return query
     
     @st.cache_data
-    def execute_enrichr(_self, gene_dict, select_dataset, enr_pthresh=0.05, enr_showX=10):
+    def execute_enrichr(_self, gene_dict, select_dataset, enr_pthresh=0.05, enr_showall=True, enr_showX=10):
         '''
         Parameters
         ----------
@@ -68,12 +68,16 @@ class Enrichr_STAGES():
             data_sig['-logadjP'] = np.log10(data_sig['Adjusted P-value']) * (-1)
 
             # Sort and return
-            enr_significant[k] = data_sig.sort_values(by = "-logadjP", ascending = True).tail(enr_showX)
+            if not enr_showall:
+                enr_significant[k] = data_sig.sort_values(by = "-logadjP", ascending = True).tail(enr_showX)
+            else:
+                enr_significant[k] = data_sig.sort_values(by = "-logadjP", ascending = True)
             enr_all[k] = data
         return enr_all, enr_significant
     
     @st.cache_data
-    def enr_barplot(_self, enr_significant, enr_useDEG=None, deg_fc=1.30, deg_pval=0.05, use_corrected_pval=True, select_dataset="BTM", enr_pthresh=0.05, enr_showX=10, enr_ht=500):
+    def enr_barplot(_self, enr_significant, enr_useDEG=None, deg_fc=1.30, deg_pval=0.05, use_corrected_pval=True, select_dataset="BTM", enr_pthresh=0.05, enr_showall=True, enr_showX=10, enr_ht=500):
+        title_fmt = f"All significant {select_dataset} pathways" if enr_showall else f"Top {enr_showX} {select_dataset} pathways"
         if enr_useDEG is not None: # which implies it will require DEGs
             fig = make_subplots(rows=len(enr_significant), cols=1, subplot_titles=list(enr_significant.keys()),
                                 x_title="-log10 (adjusted p-value)", shared_xaxes=True,
@@ -92,7 +96,7 @@ class Enrichr_STAGES():
                                      row = i, col = 1)
                 i += 1
             fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
-            fig.update_layout(title=f"Top {enr_showX} {select_dataset} pathways<br>|FC| > {deg_fc}, {'adjusted p-value' if use_corrected_pval else 'p-value'} < {deg_pval}", title_x=0.5,
+            fig.update_layout(title=f"{title_fmt}<br>DEGs based on |FC| > {deg_fc}, {'adjusted p-value' if use_corrected_pval else 'p-value'} < {deg_pval}", title_x=0.5,
                               showlegend=False,
                               yaxis={'tickmode': 'linear'},
                               font=dict(family='Arial', size=14),
@@ -111,7 +115,7 @@ class Enrichr_STAGES():
                                  hovertemplate="<b>%{y}</b><br>-logadjP: %{x}<br>Enriched genes: %{customdata}")
                                  )
             fig.update_yaxes(title="Term", tickmode='linear', tick0=0, dtick=0, automargin=True)
-            fig.update_layout(title=f"Top {enr_showX} {select_dataset} pathways for user-input genes<br>", title_x=0.5,
+            fig.update_layout(title=f"{title_fmt} for user-input genes", title_x=0.5,
                             showlegend=False,
                             xaxis_title = "-log10 (adjusted p-value)",
                             yaxis={'tickmode': 'linear'},

@@ -9,7 +9,7 @@ pandas>=1.3.5
 scikit_learn
 openpyxl==3.1.0
 xlrd
-gseapy
+gseapy>=1.0.4
 XlsxWriter
 inflect
 dateparser

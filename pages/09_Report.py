@@ -65,7 +65,7 @@ if 'string_plots' in st.session_state:
         data = base64.b64encode(b.getbuffer()).decode("ascii")
         string[k] = data
 else:
-    string = {}
+    string = {"None":None}
 
 if 'use_corrected_pval' in st.session_state:
     pval_fmt = "adjusted p-value" if st.session_state['use_corrected_pval'] else "p-value"
@@ -73,7 +73,13 @@ else:
     pval_fmt = ""
 
 session_data = {}
-for key in ['bar_pval', 'bar_fc', 'geneset_enr', 'enr_genedict', 'enr_showX', 'geneset_prerank', 'prerank_choose_col', 'prerank_showX']:
+if 'enr_showall' in st.session_state:
+    if st.session_state['enr_showall']:
+        session_data['enr_showX'] = "All"
+    else:
+        session_data['enr_showX'] = f"Top {st.session_state['enr_showX']}"
+
+for key in ['bar_pval', 'bar_fc', 'geneset_enr', 'enr_genedict', 'geneset_prerank', 'prerank_choose_col', 'prerank_showX']:
     if key in st.session_state:
         session_data[key] = st.session_state[key]
     else:
