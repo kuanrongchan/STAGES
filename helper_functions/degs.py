@@ -32,12 +32,16 @@ class PreDEGs():
 
     @st.cache_data
     def volcano(_self,
-    user_log, comparison_dict,
-    reset=False, xaxes = (0.0, 0.0), yaxes = 0.0,
-    interactive_volcano = False,
-    use_corrected_pval = False
-    ):
+                user_log,
+                comparison_dict,
+                reset=False,
+                xaxes = (0.0, 0.0),
+                yaxes = 0.0,
+                interactive_volcano = False,
+                use_corrected_pval = False):
+        
         plt.style.use("ggplot")
+        p_format = "adjusted p-value" if use_corrected_pval else "p-value"
         top10annotation, bottom10annotation = [], []
         
         unlist_comparisons = sorted(list(set([item for sublist in comparison_dict.values() for item in sublist])), reverse=True)
@@ -85,7 +89,7 @@ class PreDEGs():
                     plt.scatter(user_filter[fc_name], user_filter[pval_name], alpha=0.8, label=complabels, c = [hex_clr])
                     plt.title("Volcano plot across comparisons", loc='center')
                     plt.xlabel('log2(Fold-change)')
-                    plt.ylabel('-log10(p-value)')
+                    plt.ylabel(f'-log10({p_format})')
                     plt.axhline(y=0, color='r', linestyle='dashed')
                     plt.axvline(x=0, linestyle='dashed')
 
@@ -103,12 +107,14 @@ class PreDEGs():
 
                     if interactive_volcano:
                         volcano1.add_trace(go.Scatter(x=user_filter[fc_name], y=user_filter[pval_name],
-                                                    mode='markers',
-                                                    name = complabels, hovertext=list(user_filter.index),
-                                                    marker=dict(color=hex_clr, size=8), opacity=0.9,
-                                                    legendgroup=tp
-                                                    )
-                                        )
+                                                      customdata=list(user_filter.index),
+                                                      mode='markers',
+                                                      name = complabels,
+                                                      hovertemplate=f"<b>%{{customdata}}</b><br>-log10({p_format}): %{{y:.2f}}<br>log2(Fold-change): %{{x:.2f}}",
+                                                      marker=dict(color=hex_clr, size=8), opacity=0.9,
+                                                      legendgroup=tp
+                                                      )
+                                                      )
                 annotationconcat_top = pd.concat(top10annotation, axis=0)
                 annotationconcat_top = annotationconcat_top.sort_values(by=["log2FC"], ascending=False).head(10)
 
@@ -136,7 +142,8 @@ class PreDEGs():
                                 title="Interactive volcano across comparisons",
                                 legend_title_text="Comparisons",
                                 font=dict(family='Arial', size=14),
-                                xaxis_title="log2(Fold-change)",yaxis_title="-log10(p-value)")
+                                xaxis_title="log2(Fold-change)",
+                                yaxis_title = f"-log10({p_format})")
 
             if xaxes != (0.0,0.0):
                 volcano1.update_xaxes(range=[xaxes[0], xaxes[1]])
@@ -215,9 +222,11 @@ class PreDEGs():
 
                     if interactive_volcano:
                         volcano1.add_trace(go.Scatter(x=user_filter[fc_name], y=user_filter[pval_name],
-                                                    mode='markers',
-                                                    name=complabels, hovertext=list(user_filter.index),
-                                                    marker=dict(color=hex_clr, size=8, opacity=0.9), legendgroup=str(i)),
+                                                      mode='markers',
+                                                      customdata=list(user_filter.index),
+                                                      name = complabels,
+                                                      hovertemplate=f"<b>%{{customdata}}</b><br>-log10({p_format}): %{{y:.2f}}<br>log2(Fold-change): %{{x:.2f}}",
+                                                      marker=dict(color=hex_clr, size=8, opacity=0.9), legendgroup=str(i)),
                                         row=v_row, col=v_col)
                         i += 1
 
@@ -272,7 +281,7 @@ class PreDEGs():
             plt.tick_params(labelcolor="none", bottom=False, left=False)
             fig.suptitle("Volcano plot across comparisons", fontsize=14)
             plt.xlabel("log2(Fold-change)")
-            plt.ylabel("-log10(p-value)")
+            plt.ylabel(f"-log10({p_format})")
 
             if xaxes != (0.0,0.0):
                 volcano1.update_xaxes(range=[xaxes[0], xaxes[1]])
@@ -283,15 +292,17 @@ class PreDEGs():
             volcano1.for_each_trace(lambda trace: trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name))
 
             volcano1.update_layout(showlegend=True,
-                                title="Interactive volcano across comparisons", title_x=0.5,
-                                legend_title_text="Comparisons",
-                                font=dict(family='Arial', size=14)
+                                   yaxis_title = f"-log10({p_format})",
+                                   title="Interactive volcano across comparisons", title_x=0.5,
+                                   legend_title_text="Comparisons",
+                                   font=dict(family='Arial', size=14)
                                 )
         return fig, volcano1
     
     @st.cache_data
     def deg_cdf(_self, ready_dict, comparison_dict, pval=0.05, markermode='lines', use_corrected_pval=False):
         FC_step = [i/10 for i in range(0, 201, 1)]
+        p_format = "adjusted p-value" if use_corrected_pval else "p-value"
         fig = go.Figure()
         for k,v in ready_dict.items():
             comparisons = comparison_dict[k]
@@ -312,7 +323,7 @@ class PreDEGs():
                 n_total = [x + y for x, y in zip(n_p, n_n)]
                 fig.add_trace(go.Scatter(
                     x=FC_step, y=n_total, name=comp.replace("_"," "),
-                    hovertemplate=f"p-value: {pval}<br>FC: %{{x}}<br>number of DEGs: %{{y}}",
+                    hovertemplate=f"{p_format}: {pval}<br>FC: %{{x}}<br>number of DEGs: %{{y}}",
                     mode=markermode))
 
         fig.update_layout(title="DE cutoff plot of DEG numbers at various points",
