@@ -177,7 +177,7 @@ class PreDEGs():
                     complabels = tp.replace("_", " ").replace("-", " ")
                     hex_clr = legend_dict[complabels]
                     #### selecting the required FC and pval for plotting
-                    pval_name = f'negative_log_pval_{tp}'
+                    pval_name = pval_name = f'neg_log_adj_pval_{tp}' if use_corrected_pval else f'neg_log_pval_{tp}'
                     fc_name = f'log2FC_{tp}'
                     mini_df = df[[fc_name, pval_name]]
 
@@ -322,7 +322,7 @@ class PreDEGs():
                 n_n = [len(p_fc[(p_fc.iloc[:,0] < pval) & (p_fc.iloc[:,1] < -a)]) for a in FC_step]
                 n_total = [x + y for x, y in zip(n_p, n_n)]
                 fig.add_trace(go.Scatter(
-                    x=FC_step, y=n_total, name=comp.replace("_"," "),
+                    x=FC_step, y=n_total, name=f'{k}_{comp.replace("_"," ")}',
                     hovertemplate=f"{p_format}: {pval}<br>FC: %{{x}}<br>number of DEGs: %{{y}}",
                     mode=markermode))
 
@@ -347,9 +347,8 @@ class DEGs():
         p_format = "adjusted p-value" if use_corrected_pval else "p-value"
         ####################################### Filter DF by Pvals and FC #################################################
         proportions, deg_dict = {}, {}
-        for k,v in log_ready_dict.items():
-            comps = comparison_dict[k]
-            up, down = [], []
+        for k,v in log_ready_dict.items(): # for each file upload
+            comps = comparison_dict[k] # get the comparisons
             for cmp in comps:
                 pval_name = f"adj_pval_{cmp}" if use_corrected_pval else f"pval_{cmp}"
                 logfc_name = f"log2FC_{cmp}"
@@ -358,13 +357,11 @@ class DEGs():
                 deg_dict[f"{k}_{cmp}"] = degs
                 # calculating proportion of DEGs for pie chart
                 upreg_deg = degs[degs.loc[:, logfc_name] > 0]
-                up.append(len(upreg_deg))
-                proportions[f"{k}_upcount"] = up
+                proportions[f"{k}_{cmp}_upcount"] = [len(upreg_deg)]
                 proportions[f"UP_{k}_{cmp}"] = upreg_deg
 
                 downreg_deg = degs[degs.loc[:, logfc_name] < 0]
-                down.append(len(downreg_deg))
-                proportions[f"{k}_downcount"] = down
+                proportions[f"{k}_{cmp}_downcount"] = [len(downreg_deg)]
                 proportions[f"DOWN_{k}_{cmp}"] = downreg_deg
                 
         if len(log_ready_dict) == 1:
@@ -385,34 +382,36 @@ class DEGs():
                                         shared_yaxes=True)
             
         for k,v in log_ready_dict.items():
-            if len(log_ready_dict) == 1:
-                # Stacked Bar
-                stacked1.add_trace(
-                    go.Bar(x=comps, y=proportions[f'{k}_downcount'], name="Downregulated", marker_color="#636EFA"))
-                stacked1.add_trace(
-                    go.Bar(x=comps, y=proportions[f'{k}_upcount'], name="Upregulated", marker_color="#EF553B"))
-            else:
-                # Stacked Bar
-                stacked1.add_trace(
-                    go.Bar(x=comps, y=proportions[f'{k}_downcount'], name="Downregulated", marker_color="#636EFA",
-                            legendgroup="A"),
-                    row=stacked_row, col=stacked_col)
-                stacked1.add_trace(
-                    go.Bar(x=comps, y=proportions[f'{k}_upcount'], name="Upregulated", marker_color="#EF553B",
-                            legendgroup="B"),
-                    row=stacked_row, col=stacked_col)
+            comps = comparison_dict[k]
+            for cmp in comps:
+                if len(log_ready_dict) == 1:
+                    # Stacked Bar
+                    stacked1.add_trace(
+                        go.Bar(x=[cmp], y=proportions[f'{k}_{cmp}_downcount'], name="Downregulated", marker_color="#636EFA"))
+                    stacked1.add_trace(
+                        go.Bar(x=[cmp], y=proportions[f'{k}_{cmp}_upcount'], name="Upregulated", marker_color="#EF553B"))
+                else:
+                    # Stacked Bar
+                    stacked1.add_trace(
+                        go.Bar(x=[cmp], y=proportions[f'{k}_{cmp}_downcount'], name="Downregulated", marker_color="#636EFA",
+                                legendgroup="A"),
+                                row=stacked_row, col=stacked_col)
+                    stacked1.add_trace(
+                        go.Bar(x=[cmp], y=proportions[f'{k}_{cmp}_upcount'], name="Upregulated", marker_color="#EF553B",
+                                legendgroup="B"),
+                                row=stacked_row, col=stacked_col)
 
-                stacked_col += 1
-                if len(log_ready_dict) % 2 == 0 and stacked_col > 2:
-                    stacked_col = 1
-                    stacked_row += 1
-                elif len(log_ready_dict) % 2 != 0 and stacked_col > 3:
-                    stacked_col = 1
-                    stacked_row += 1
+            stacked_col += 1
+            if len(log_ready_dict) % 2 == 0 and stacked_col > 2:
+                stacked_col = 1
+                stacked_row += 1
+            elif len(log_ready_dict) % 2 != 0 and stacked_col > 3:
+                stacked_col = 1
+                stacked_row += 1
 
-                ## removing duplicate legends
-                names = set()
-                stacked1.for_each_trace(lambda trace:trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name))
+        ## removing duplicate legends
+        names = set()
+        stacked1.for_each_trace(lambda trace:trace.update(showlegend=False) if (trace.name in names) else names.add(trace.name))
         
         stacked1.update_layout(showlegend=True, barmode='stack',
                             title=f"Number of DEGs across comparisons<br>(FC {fc_cutoff:.2f}; {p_format} {pval_cutoff})",
