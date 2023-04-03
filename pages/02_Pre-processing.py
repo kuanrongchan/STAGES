@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 from helper_functions.preprocessing import tested, counts_pp
 from helper_functions.session_state import ss
+from helper_functions.downloads import file_downloads
 
 st.session_state.update(st.session_state)
 
@@ -229,6 +230,9 @@ try:
         for k,v in st.session_state['ready'].items():
             st.subheader(k)
             st.dataframe(v)
+        st.download_button(label="Download Processed Data", data=file_downloads.to_excel(st.session_state['ready'].values(),
+                                                                                         sheetnames=st.session_state['ready'].keys()), file_name="processed_data.xlsx")
+        
 
 except KeyError:
     st.error("Perhaps you forgot to upload a dataset or use the demo data?")

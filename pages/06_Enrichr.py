@@ -55,8 +55,8 @@ if st.session_state['add_geneset_in'] is not None:
 
 # Selecting genesets (BTM or reactome) to plot from a list
 geneset_opts = list(st.session_state['geneset_dict'].keys())
-geneset = enr_opts.radio(label='Select a geneset', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_enr']))
-ss.save_state({'geneset_enr':geneset})
+geneset_enr = enr_opts.radio(label='Select a geneset for Enrichr', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_enr']))
+ss.save_state({'geneset_enr':geneset_enr})
 
 degs = st.session_state['degs'] if "degs" in st.session_state else None
 if degs is not None: # If there were DEGs already
@@ -150,5 +150,3 @@ if plot_enr:
             st.download_button(label="Download Enrichr Results",
                                data=file_downloads.to_excel(st.session_state['enr_res_all'].values(), sheetnames=st.session_state['enr_res_all'].keys()),
                                file_name="Enrichr_results.xlsx")
-
-st.write(gp.__version__)

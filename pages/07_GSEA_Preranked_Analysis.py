@@ -43,7 +43,7 @@ st.header("GSEA Preranked Analysis")
 # try:
 prnk_opts = st.sidebar.expander("GSEA Preranked Analysis Options", expanded=True)
 
-add_geneset_in = prnk_opts.file_uploader("Upload a gene set here (optional)", type="gmt", accept_multiple_files=True, help="Reupload not required if gene set has already been uploaded once")
+add_geneset_in = prnk_opts.file_uploader("Upload a gene set here (optional)", type="gmt", accept_multiple_files=True, help="Reupload not required if gene set has already been uploaded once", key="add_geneset_prnk")
 ss.save_state({'add_geneset_in':add_geneset_in})
 
 prnk_plots_t, prnk_data_t = st.tabs(["Bar plots", "Data"])
@@ -53,11 +53,14 @@ if st.session_state['add_geneset_in'] is not None:
     ss.save_state({'add_geneset':add_geneset})
     # ss.save_state({'geneset_dict':st.session_state['geneset_dict']|st.session_state['add_geneset']}) # | merges both dictionaries for python 3.10 only
     ss.save_state({'geneset_dict':{**st.session_state['geneset_dict'], **st.session_state['add_geneset']}})
+else:
+    ss.save_state({'geneset_dict':st.session_state['geneset_dict']})
+
 
 # Selecting genesets (BTM or reactome) to plot from a list
 geneset_opts = list(st.session_state['geneset_dict'].keys())
-geneset = prnk_opts.radio(label='Select a geneset', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_prerank']))
-ss.save_state({'geneset_prerank':geneset})
+geneset_prnk = prnk_opts.radio(label='Select a geneset for prerank', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_prerank']))
+ss.save_state({'geneset_prerank':geneset_prnk})
 
 df_opts = list(st.session_state['log_dict_ready'].keys())
 prerank_selected_df = prnk_opts.selectbox("Select dataframe to use in GSEA preranked analysis", options = df_opts, index = st.session_state['prerank_selected_df_idx'])
