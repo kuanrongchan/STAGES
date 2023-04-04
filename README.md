@@ -249,7 +249,7 @@ GSEA preranked analysis uses a user-selected ranking of genes to determine if th
         - Customise the height of the bar plots in pixels
         - The range is from 200 to 1600 px
 
-Current limitation: prerank of GO libraries may result in the server crashing as the server has memory limits of 1GB. One way to alleviate this issue would be to run this tool locally with Docker (explained at the end under [Local Usage](https://github.com/kuanrongchan/STAGES#local-usage)).
+Current limitation: prerank of GO libraries may result in the server crashing as the server has memory limits of 1GB. One way to alleviate this issue would be to run this tool locally with Docker (explained at the end under [Local Usage](#local-usage)).
 
 ## STRING Query
 
@@ -296,7 +296,7 @@ Current limitation: The lack of customisation available and the species being li
 1. Run the container
 ![](images/docker_instruction_1.png)
 
-2. Open the webtool in your brower
+2. Open the webtool in your browser
 ![](images/docker_instruction_2.png)
 
 ### Running Docker container within the command line
