@@ -367,8 +367,6 @@ class DEGs():
         if len(log_ready_dict) == 1:
             stacked1 = go.Figure()
         else:
-            stacked_row = 1
-            stacked_col = 1
             if len(log_ready_dict) % 2 == 0:
                 nrows = math.ceil(len(log_ready_dict) / 2)
                 stacked1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(log_ready_dict.keys())),
@@ -380,7 +378,9 @@ class DEGs():
                                         y_title='Number of DEGs', 
                                         vertical_spacing=0.5, horizontal_spacing=0.02,
                                         shared_yaxes=True)
-            
+        
+        stacked_row = 1
+        stacked_col = 1
         for k,v in log_ready_dict.items():
             comps = comparison_dict[k]
             for cmp in comps:

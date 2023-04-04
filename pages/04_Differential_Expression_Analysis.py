@@ -117,12 +117,11 @@ try:
     ########## CDF PLOT ###############
     line_options = ["lines", "markers", "lines+markers"]
     cdf_exp = st.sidebar.expander("Cumulative distribution function options", expanded=True)
-    cdf_pthresh = cdf_exp.number_input(f"Choose {use_corrected_pval_fmt} threshold for differentially expressed genes",
+    cdf_pthresh = cdf_exp.number_input(f"Choose {use_corrected_pval_fmt} threshold for cumulative distribution function plot",
                                     min_value = 0.00,
                                     max_value = 1.00,
                                     step = 0.01,
-                                    value = st.session_state['cdf_pthresh'],
-                                    key="cdf_pthresh2")
+                                    value = st.session_state['cdf_pthresh'])
     cdf_linemode = cdf_exp.selectbox("Choose line mode", options=line_options,
                                     format_func=lambda x: x.title().replace("+", " & "),
                                     index = line_options.index(st.session_state['cdf_linemode']))
