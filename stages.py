@@ -6,7 +6,7 @@ st.title("STAGEs Dashboard \U0001F4CA")
 
 with st.expander("Expand for help", expanded=False):
     st.markdown('''
-    <style>table {box-sizing=content-box}</style>
+    <div style="overflow-x:auto;">
 
     # Static and Temporal Analysis of Gene Expression Studies (STAGES)
     [![DOI](https://zenodo.org/badge/426521541.svg)](https://zenodo.org/badge/latestdoi/426521541)
@@ -296,6 +296,7 @@ with st.expander("Expand for help", expanded=False):
         ```
     ## Subsequent Usage
     ### Running Docker container interactively within the desktop app
+    </div>
     ''', unsafe_allow_html=True
     )
     st.markdown("Run the container")

@@ -77,7 +77,7 @@ class Enrichr_STAGES():
     
     @st.cache_data
     def enr_barplot(_self, enr_significant, enr_useDEG=None, deg_fc=1.30, deg_pval=0.05, use_corrected_pval=True, select_dataset="BTM", enr_pthresh=0.05, enr_showall=True, enr_showX=10, enr_ht=500):
-        title_fmt = f"All significant {select_dataset} pathways" if enr_showall else f"Top {enr_showX} {select_dataset} pathways"
+        title_fmt = f"All significant Enrichr {select_dataset} pathways" if enr_showall else f"Top {enr_showX} Enrichr {select_dataset} pathways"
         if enr_useDEG is not None: # which implies it will require DEGs
             fig = make_subplots(rows=len(enr_significant), cols=1, subplot_titles=list(enr_significant.keys()),
                                 x_title="-log10 (adjusted p-value)", shared_xaxes=True,
