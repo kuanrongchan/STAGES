@@ -74,9 +74,25 @@ if st.session_state['df_in'] is not None and st.session_state['demo'] is False:
                 ss.save_state({'meta_dict':meta_dict})
 
 elif st.session_state['df_in'] is None and st.session_state['demo'] is True:
-    testdata = pd.read_csv("accessory_files/demo_dataframe_corrected.csv", index_col=0)
-    cleandict = {"Demo":testdata}
-    ss.save_state(dict(anova_dict = cleandict))
+    databank = {"Ratios and P-values":"accessory_files/demo_dataframe_corrected.csv",
+                "RNAseq Counts":["accessory_files/Goll_Francisella_counts.csv", "accessory_files/Goll_Francisella_metadata.csv"],
+                'Log2-Normalised Data':["accessory_files/Ad5_Seroneg_Zak_counts.csv", "accessory_files/Ad5_Seroneg_Zak_metadata.csv"]}
+    
+    if st.session_state['file_type'] == "Ratios and P-values":
+        testdata = pd.read_csv(databank["Ratios and P-values"], index_col=0)
+        cleandict = {"Demo":testdata}
+        ss.save_state(dict(anova_dict = cleandict,
+                           expr_dict = None,
+                           meta_dict = None))
+    
+    else:
+        exprmatrix = pd.read_csv(databank[st.session_state['file_type']][0], index_col=0)
+        exprmeta = pd.read_csv(databank[st.session_state['file_type']][1], index_col=0)
+        exprmatrix_dict = {'Demo':exprmatrix}
+        exprmeta_dict = {'Demo_metadata':exprmeta}
+        ss.save_state(dict(expr_dict = exprmatrix_dict,
+                           meta_dict = exprmeta_dict,
+                           anova_dict = None))
 
 elif st.session_state['df_in'] is not None and st.session_state['demo'] is True:
     st.warning("Deselect demo dataset to use uploaded file or clear cache to remove your file!")

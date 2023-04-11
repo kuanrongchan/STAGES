@@ -26,7 +26,7 @@ with st.expander("Expand for help", expanded=False):
     
     # Getting started
     ## File Upload
-    Users may choose to either use a demo dataset (given in ratios and p-values), or one of 3 file options:
+    Users may choose to either use a demo dataset (input is dependent on user's selected file type), or one of 3 file options:
 
     1. **RNASeq raw counts**
 
