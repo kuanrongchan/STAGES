@@ -41,7 +41,7 @@ ss.initialise_state({'reset_volcano':False,
 st.header("Differential Expression Analysis")
 
 try:
-    bar_t, volcano_t, cdf_t, data_t = st.tabs(["Differential Expression Bar Plots", "Volcano Plot", "Cumulative Distribution Function", "DEG identity"])
+    bar_t, cdf_t,  volcano_t, data_t = st.tabs(["Differential Expression Bar Plots", "Cumulative Distribution Function", "Volcano Plot", "DEG identity"])
     use_corrected_pval_fmt = "adjusted p-value" if st.session_state['use_corrected_pval'] else "p-value"
     ######### BAR PLOT #################
     deg_opts = st.sidebar.expander("Differential expression bar plot options", expanded=True)
@@ -70,7 +70,30 @@ try:
         st.plotly_chart(stacked1, theme=None, use_container_width=False)
         file_downloads.create_pdf(stacked1, "stacked_DEG_plot", graph_module='plotly')
 
-    ######### VOLCANO PLOT ##################
+    ########## CDF PLOT ###############
+    line_options = ["lines", "markers", "lines+markers"]
+    cdf_exp = st.sidebar.expander("Cumulative distribution function options", expanded=True)
+    cdf_pthresh = cdf_exp.number_input(f"Choose {use_corrected_pval_fmt} threshold for cumulative distribution function plot",
+                                    min_value = 0.00,
+                                    max_value = 1.00,
+                                    step = 0.01,
+                                    value = st.session_state['cdf_pthresh'])
+    cdf_linemode = cdf_exp.selectbox("Choose line mode", options=line_options,
+                                    format_func=lambda x: x.title().replace("+", " & "),
+                                    index = line_options.index(st.session_state['cdf_linemode']))
+    ss.save_state({'cdf_pthresh': round(cdf_pthresh,2), 'cdf_linemode':cdf_linemode})
+    cdf_plot = preDE.deg_cdf(st.session_state['ready'],
+                            st.session_state['comparisons'],
+                            pval=st.session_state['cdf_pthresh'],
+                            markermode=st.session_state['cdf_linemode'],
+                            use_corrected_pval=st.session_state['use_corrected_pval'])
+    ss.save_state({'cdf_plot':cdf_plot})
+
+    with cdf_t:
+        st.plotly_chart(st.session_state['cdf_plot'], theme=None, use_container_width=True)
+        file_downloads.create_pdf(st.session_state['cdf_plot'], "cumulative_density_DEGs", graph_module='plotly')
+
+######### VOLCANO PLOT ##################
     vol_opts = st.sidebar.expander("Volcano plot options", expanded=True)
 
     reset = vol_opts.checkbox("Reset to default settings", value=st.session_state['reset_volcano'], on_change=ss.binaryswitch, args=('reset_volcano', ))
@@ -113,30 +136,6 @@ try:
         else:
             st.pyplot(st.session_state['volcano_plots_static'])
             file_downloads.create_pdf(st.session_state['volcano_plots_static'], "volcano_plot", graph_module='pyplot')
-
-    ########## CDF PLOT ###############
-    line_options = ["lines", "markers", "lines+markers"]
-    cdf_exp = st.sidebar.expander("Cumulative distribution function options", expanded=True)
-    cdf_pthresh = cdf_exp.number_input(f"Choose {use_corrected_pval_fmt} threshold for cumulative distribution function plot",
-                                    min_value = 0.00,
-                                    max_value = 1.00,
-                                    step = 0.01,
-                                    value = st.session_state['cdf_pthresh'])
-    cdf_linemode = cdf_exp.selectbox("Choose line mode", options=line_options,
-                                    format_func=lambda x: x.title().replace("+", " & "),
-                                    index = line_options.index(st.session_state['cdf_linemode']))
-    ss.save_state({'cdf_pthresh': round(cdf_pthresh,2), 'cdf_linemode':cdf_linemode})
-    cdf_plot = preDE.deg_cdf(st.session_state['ready'],
-                            st.session_state['comparisons'],
-                            pval=st.session_state['cdf_pthresh'],
-                            markermode=st.session_state['cdf_linemode'],
-                            use_corrected_pval=st.session_state['use_corrected_pval'])
-    ss.save_state({'cdf_plot':cdf_plot})
-
-    with cdf_t:
-        st.plotly_chart(st.session_state['cdf_plot'], theme=None, use_container_width=True)
-        file_downloads.create_pdf(st.session_state['cdf_plot'], "cumulative_density_DEGs", graph_module='plotly')
-
 
     ####### DATA OUTPUT ###############
     with data_t:
