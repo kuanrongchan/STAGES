@@ -78,6 +78,8 @@ if 'enr_showall' in st.session_state:
         session_data['enr_showX'] = "All"
     else:
         session_data['enr_showX'] = f"Top {st.session_state['enr_showX']}"
+else:
+    session_data['enr_showX'] = "No"
 
 for key in ['bar_pval', 'bar_fc', 'geneset_enr', 'enr_genedict', 'geneset_prerank', 'prerank_choose_col', 'prerank_showX']:
     if key in st.session_state:
