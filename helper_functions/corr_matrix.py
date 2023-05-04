@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 import phik
 from scipy import stats
 import textwrap
@@ -23,21 +24,21 @@ class Correlation():
             concat_corr = concat_fc.phik_matrix()
         
         # plot
-        mask = np.triu(np.ones_like(concat_corr, dtype=bool))
-        df_mask = concat_corr.mask(mask)
-        whitespace_cols = [a.replace("_", " ") for a in df_mask.columns]
-        long_tick_names = ["<br>".join(textwrap.wrap(a, 30)) for a in whitespace_cols]
-        z_raw = df_mask.to_numpy().round(3)
-        corr_matrix = px.imshow(z_raw, x = long_tick_names,
-                                y = long_tick_names,
-                                color_continuous_scale = px.colors.diverging.RdBu_r,
-                                color_continuous_midpoint=0.0,
-                                text_auto = True,
-                                zmin=-1,
-                                zmax=1,
-                                labels = {"color":f"{method} {corr_symbols[method]}"})
-        
-        corr_matrix.update_layout(
+        if concat_fc.shape[1] != 1:
+            mask = np.triu(np.ones_like(concat_corr, dtype=bool))
+            df_mask = concat_corr.mask(mask)
+            whitespace_cols = [a.replace("_", " ") for a in df_mask.columns]
+            long_tick_names = ["<br>".join(textwrap.wrap(a, 30)) for a in whitespace_cols]
+            z_raw = df_mask.to_numpy().round(3)
+            corr_matrix = px.imshow(z_raw, x = long_tick_names,
+                                    y = long_tick_names,
+                                    color_continuous_scale = px.colors.diverging.RdBu_r,
+                                    color_continuous_midpoint=0.0,
+                                    text_auto = True,
+                                    zmin=-1,
+                                    zmax=1,
+                                    labels = {"color":f"{method} {corr_symbols[method]}"})
+            corr_matrix.update_layout(
             title_text="Comparison correlation matrix (based on log2FC values)",
             title_x=0.5,
             coloraxis_colorbar_x=0.8,
@@ -50,6 +51,9 @@ class Correlation():
             font=dict(
                 family='Arial', size=14)
         )
+        else:
+            corr_matrix = go.Figure()
+
 
         # NaN values are not handled automatically and are displayed in the figure
         # So we need to get rid of the text manually

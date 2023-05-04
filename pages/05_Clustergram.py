@@ -118,7 +118,7 @@ try:
             file_downloads.create_pdf(st.session_state['clustergram_plot'], "Clustergram", "pyplot")
         
         except ValueError:
-            st.error("At least 2 genes must be entered!")
+            st.error("At least 2 genes must be entered or more than 1 comparison must be made!")
 
 except AttributeError:
     st.error("Perhaps you forgot to run through the pre-processing step?")
