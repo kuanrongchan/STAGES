@@ -4,7 +4,7 @@
 ![Untitled(16)](https://user-images.githubusercontent.com/91276553/191908584-196eb3d5-612f-4262-98ed-0ba1deac838c.png)
 
 
-STAGES (https://kuanrongchan-stages-stages-vpgh46.streamlitapp.com/) or (https://kohcl17-stages-mirror-stages-zvg7qu.streamlit.app/) is an easy-to-use web tool that integrates data visualisation and pathway enrichment analysis for both static and temporal gene expression studies. STAGES is free and open to all users and there is no login requirement. The web tool works by running the Python programming language at backend to perform the data analysis and graph plotting, while the Streamlit framework is used to display the output data tables and graphs at frontend. Overall, STAGEs allow users to perform the following:
+STAGES (https://kuanrongchan-stages-stages-vpgh46.streamlit.app/) or (https://kohcl17-stages-mirror-stages-zvg7qu.streamlit.app/) is an easy-to-use web tool that integrates data visualisation and pathway enrichment analysis for both static and temporal gene expression studies. STAGES is free and open to all users and there is no login requirement. The web tool works by running the Python programming language at backend to perform the data analysis and graph plotting, while the Streamlit framework is used to display the output data tables and graphs at frontend. Overall, STAGEs allow users to perform the following:
 
 1. Conduct simple pre-processing and t-tests from count data or directly upload ratios and p-values
 2. Correlation matrix comparing transcriptomics responses between different experimental conditions
