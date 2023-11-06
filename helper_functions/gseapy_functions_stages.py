@@ -120,6 +120,7 @@ class Enrichr_STAGES():
                             xaxis_title = "-log10 (adjusted p-value)",
                             yaxis={'tickmode': 'linear'},
                             font=dict(family='Arial', size=14),
+                            plot_bgcolor = "white",
                             width = 750, height = enr_ht)
         return fig
 
@@ -222,6 +223,7 @@ class Prerank_STAGES():
                          showlegend=False,
                          yaxis={'tickmode': 'linear'},
                          font=dict(family='Arial', size=14),
+                         plot_bgcolor = "white",
                          width = 750, height = prerank_ht,
                          margin={'t':120}
                          )
