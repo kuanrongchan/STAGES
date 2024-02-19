@@ -64,9 +64,9 @@ class PreDEGs():
                     pval_name = f'neg_log_adj_pval_{tp}' if use_corrected_pval else f'neg_log_pval_{tp}'
                     fc_name = f'log2FC_{tp}'
                     mini_df = df[[fc_name, pval_name]]
-                    max_y_in_df = sorted(mini_df.loc[:, pval_name], reverse=True)[:2] # get the 2 largest values in each comparison
-                    smallest_possible_maxy = math.ceil(min(max_y_in_df[0], max_y_in_df[1])) # take the max of the 2 values to prevent infinity errors
-                    highest_y = smallest_possible_maxy if smallest_possible_maxy > highest_y else highest_y # loop until we can get the highest possible y value of all comparisons
+                    mini_df = mini_df.replace({np.inf:100})
+                    max_y_in_df = mini_df.loc[:, pval_name].max()
+                    highest_y = max_y_in_df if max_y_in_df > highest_y else highest_y # loop until we can get the highest possible y value of all comparisons
                     
                     if xaxes != (0.0, 0.0) and yaxes != (0.0):
                         user_filter = mini_df[(mini_df[pval_name] <= yaxes) & (mini_df[fc_name].between(xaxes[0], xaxes[1],inclusive='both'))]
@@ -181,12 +181,12 @@ class PreDEGs():
                     pval_name  = f'neg_log_adj_pval_{tp}' if use_corrected_pval else f'neg_log_pval_{tp}'
                     fc_name = f'log2FC_{tp}'
                     mini_df = df[[fc_name, pval_name]]
-                    max_y_in_df = sorted(mini_df.loc[:, pval_name], reverse=True)[:2] # get the 2 largest values in each comparison
-                    smallest_possible_maxy = math.ceil(min(max_y_in_df[0], max_y_in_df[1])) # take the max of the 2 values to prevent infinity errors
+                    mini_df = mini_df.replace({np.inf:100})
+                    max_y_in_df = mini_df.loc[:, pval_name].max()
 
                     min_x = math.floor(mini_df[fc_name].min()) if math.floor(mini_df[fc_name].min()) < min_x else min_x
                     max_x = math.ceil(mini_df[fc_name].max()) if math.ceil(mini_df[fc_name].max()) > max_x else max_x
-                    max_y = smallest_possible_maxy if smallest_possible_maxy > max_y else max_y
+                    max_y = max_y_in_df if max_y_in_df > max_y else max_y
 
                     if xaxes != (0.0, 0.0) and yaxes != (0.0):
                         user_filter = mini_df[(mini_df[pval_name] <= yaxes) & (mini_df[fc_name].between(xaxes[0], xaxes[1],inclusive='both'))]
