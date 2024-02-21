@@ -99,25 +99,30 @@ try:
                     'clust_genedict':gene_dict,
                     'clust_genevals':gene_vals})
         
-        try:
-            get_clustergram = clustergram.cluster_plot(st.session_state['clust_genevals'],
-                                                    gene_dict=st.session_state['clust_genedict'],
-                                                    vminmax=st.session_state['clust_vminmax'],
-                                                    cbar_left=st.session_state['clust_cbarleft'],
-                                                    cbar_bottom=st.session_state['clust_cbarbottom'],
-                                                    cbar_width=st.session_state['clust_cbarwidth'],
-                                                    cbar_height=st.session_state['clust_cbarheight'],
-                                                    width=st.session_state['clust_width'],
-                                                    height=st.session_state['clust_height'],
-                                                    dendrogram_r=st.session_state['clust_dendror'],
-                                                    dendrogram_c=st.session_state['clust_dendroc'],
-                                                    cluster_cols=st.session_state['clust_cols']
+        get_clustergram, missing_vals = clustergram.cluster_plot(st.session_state['clust_genevals'],
+                                                                 gene_dict=st.session_state['clust_genedict'],
+                                                                 vminmax=st.session_state['clust_vminmax'],
+                                                                 cbar_left=st.session_state['clust_cbarleft'],
+                                                                 cbar_bottom=st.session_state['clust_cbarbottom'],
+                                                                 cbar_width=st.session_state['clust_cbarwidth'],
+                                                                 cbar_height=st.session_state['clust_cbarheight'],
+                                                                 width=st.session_state['clust_width'],
+                                                                 height=st.session_state['clust_height'],
+                                                                 dendrogram_r=st.session_state['clust_dendror'],
+                                                                 dendrogram_c=st.session_state['clust_dendroc'],
+                                                                 cluster_cols=st.session_state['clust_cols']
                                                     )
-            ss.save_state({'clustergram_plot':get_clustergram})
+        ss.save_state({'clustergram_plot':get_clustergram})
+        if len(missing_vals) != 0:
+            with st.expander("Missing genes", expanded = False):
+                st.info("Some genes were not found in one or more comparisons and were removed from the clustergram. See below for details.")
+                st.dataframe(pd.DataFrame({'missing_genes': missing_vals}))
+
+        if st.session_state['clustergram_plot'] is not None:
             st.pyplot(st.session_state['clustergram_plot'])
             file_downloads.create_pdf(st.session_state['clustergram_plot'], "Clustergram", "pyplot")
         
-        except ValueError:
+        else:
             st.error("At least 2 genes must be entered or more than 1 comparison must be made!")
 
 except AttributeError:

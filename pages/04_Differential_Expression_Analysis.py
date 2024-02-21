@@ -1,18 +1,5 @@
 # Housekeeping
 from helper_functions.session_state import ss
-import regex as re
-
-# Stats and data wrangling
-import pandas as pd
-import numpy as np
-import math
-
-# Plotting modules
-import matplotlib.pyplot as plt
-import plotly.colors as pc
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.figure_factory as ff
 
 # Helper functions
 from helper_functions.degs import preDE, DE
@@ -23,7 +10,7 @@ import streamlit as st
 
 st.session_state.update(st.session_state)
 ss.initialise_state({'reset_volcano':False,
-                     'xaxes_volcano':(0.0,0.0),
+                    'xaxes_volcano':(0.0,0.0),
                      'yaxes_volcano':0.0,
                      'interactive_volcano':False,
                      'volcano_plots_static':None,
@@ -56,12 +43,12 @@ try:
                    'bar_height':bar_height})
 
     stacked1, proportions = DE.degs(st.session_state['log_dict_ready'],
-                                            st.session_state['comparisons'],
-                                            pval_cutoff=st.session_state['bar_pval'],
-                                            fc_cutoff=st.session_state['bar_fc'],
-                                            u_width=st.session_state['bar_width'],
-                                            u_height=st.session_state['bar_height'],
-                                            use_corrected_pval=st.session_state['use_corrected_pval'])
+                                    st.session_state['comparisons'],
+                                    pval_cutoff=st.session_state['bar_pval'],
+                                    fc_cutoff=st.session_state['bar_fc'],
+                                    u_width=st.session_state['bar_width'],
+                                    u_height=st.session_state['bar_height'],
+                                    use_corrected_pval=st.session_state['use_corrected_pval'])
 
     ss.save_state({'degs':proportions,
                    'barplot':stacked1})
@@ -116,7 +103,6 @@ try:
     vol_plot, iplot = preDE.volcano(
         user_log=st.session_state['log_dict_ready'],
         comparison_dict=st.session_state['comparisons'],
-        reset = st.session_state['reset_volcano'],
         xaxes=st.session_state['xaxes_volcano'],
         yaxes=st.session_state['yaxes_volcano'],
         interactive_volcano= st.session_state['interactive_volcano'],

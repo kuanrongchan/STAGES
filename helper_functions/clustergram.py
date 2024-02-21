@@ -61,33 +61,41 @@ class Clustergram():
                      cluster_cols = True):
         colnames_whitespaced = [i.replace("_"," ") for i in compiled_logFC.columns]
         wrap_colnames = ["\n".join(textwrap.wrap(a, width=30, break_long_words=False)) for a in colnames_whitespaced]
-        reformatted_logFC = compiled_logFC
+
+        # drop those FCs with null values
+        null_fc = compiled_logFC.apply(lambda x: x == pd.isna(x).any(), axis = 1).index.to_list()
+        reformatted_logFC = compiled_logFC[~compiled_logFC.index.isin(null_fc)]
         reformatted_logFC.columns = wrap_colnames
 
         dendrogram_c = 0.0 if not cluster_cols else dendrogram_c
-        g = sns.clustermap(reformatted_logFC,
-                            cmap="vlag",
-                            method='average',
-                            cbar_pos=(cbar_left, cbar_bottom, cbar_width, cbar_height),
-                            center=0, 
-                            vmin = vminmax[0],
-                            vmax = vminmax[1],
-                            z_score=None,
-                            col_cluster=cluster_cols,
-                            yticklabels=True,
-                            figsize=(width, height),
-                            dendrogram_ratio=(dendrogram_r, dendrogram_c),
-                            linewidths=1, linecolor='white',
-                            cbar_kws = {"label": "log2FC", 'orientation':'horizontal', 'ticks':[vminmax[0], 0, vminmax[1]]})
 
-        g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11, rotation=0)
-        g.ax_heatmap.set_ylabel("")
-        titles = '\n'.join([i for i in gene_dict.keys()])
-        g.fig.suptitle(f"Clustergram from \n {titles}", x=0.5, y=1.04, fontsize=14, fontweight='bold')
-        for _, spine in g.ax_heatmap.spines.items():
-            spine.set_visible(True)
-            spine.set_edgecolor("black")
-        return g
+        if reformatted_logFC.shape[0] > 3:
+            g = sns.clustermap(reformatted_logFC,
+                                cmap="vlag",
+                                method='average',
+                                cbar_pos=(cbar_left, cbar_bottom, cbar_width, cbar_height),
+                                center=0, 
+                                vmin = vminmax[0],
+                                vmax = vminmax[1],
+                                z_score=None,
+                                col_cluster=cluster_cols,
+                                yticklabels=True,
+                                figsize=(width, height),
+                                dendrogram_ratio=(dendrogram_r, dendrogram_c),
+                                linewidths=1, linecolor='white',
+                                cbar_kws = {"label": "log2FC", 'orientation':'horizontal', 'ticks':[vminmax[0], 0, vminmax[1]]})
+
+            g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11, rotation=0)
+            g.ax_heatmap.set_ylabel("")
+            titles = '\n'.join([i for i in gene_dict.keys()])
+            g.figure.suptitle(f"Clustergram from \n {titles}", x=0.5, y=1.04, fontsize=14, fontweight='bold')
+            for _, spine in g.ax_heatmap.spines.items():
+                spine.set_visible(True)
+                spine.set_edgecolor("black")
+            return g, null_fc
+        
+        else:
+            return None, null_fc
 
 genePP = GeneHandler()
 clustergram = Clustergram()

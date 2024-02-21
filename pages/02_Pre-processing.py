@@ -75,7 +75,11 @@ try:
                                                                                     method=test_fdr_match,
                                                                                     is_sorted = True)
                     corrected_vals = pd.DataFrame(data = {f"adj_pval_{comp}":corrected}, index = pval_col.index)
-                    adj_df_per_k = pd.concat([adj_df_per_k, comp_df, corrected_vals], axis=1)
+                    try:
+                        adj_df_per_k = pd.concat([adj_df_per_k, comp_df, corrected_vals], axis=1, verify_integrity=True)
+                    except ValueError:
+                        st.error("Duplicated columns found. Perhaps you already have adjusted p-values? If so, opt for None in multiple test correction and tick the checkbox to use corrected p-values for subsequent analysis.")
+                        st.stop()
 
                 adjusted_dfs[k] = adj_df_per_k
             ss.save_state({'test_fdr':test_fdr, 'comparisons':comps, 'ready':adjusted_dfs})

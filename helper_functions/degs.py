@@ -1,18 +1,15 @@
 # Housekeeping
-from helper_functions.session_state import ss
-import regex as re
+import re
 
 # Stats and data wrangling
 import pandas as pd
 import numpy as np
-import math
 
 # Plotting modules
 import matplotlib.pyplot as plt
 import plotly.colors as pc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.figure_factory as ff
 
 import streamlit as st
 
@@ -34,7 +31,6 @@ class PreDEGs():
     def volcano(_self,
                 user_log,
                 comparison_dict,
-                reset=False,
                 xaxes = (0.0, 0.0),
                 yaxes = 0.0,
                 interactive_volcano = False,
@@ -154,7 +150,7 @@ class PreDEGs():
         else:
             i = 1
             if len(user_log) % 2 == 0:
-                nrows = math.ceil(len(user_log) / 2)
+                nrows = int(np.ceil(len(user_log) / 2))
                 extras = nrows*2 - len(user_log)
                 volcano1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(user_log.keys())),
                                         x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_xaxes=True, shared_yaxes=True)
@@ -163,7 +159,7 @@ class PreDEGs():
                 fig, axs = plt.subplots(nrows=nrows, ncols=2, sharex=True, sharey = True, figsize=(8, 7))
 
             else:
-                nrows = math.ceil(len(user_log) / 3)
+                nrows = int(np.ceil(len(user_log) / 3))
                 extras = nrows*3 - len(user_log)
                 volcano1 = make_subplots(rows=nrows, cols=3, subplot_titles=(list(user_log.keys())),
                                         x_title="log2(Fold-Change)", y_title="-log10(p-value)", shared_xaxes=True, shared_yaxes=True)
@@ -184,8 +180,8 @@ class PreDEGs():
                     mini_df = mini_df.replace({np.inf:100})
                     max_y_in_df = mini_df.loc[:, pval_name].max()
 
-                    min_x = math.floor(mini_df[fc_name].min()) if math.floor(mini_df[fc_name].min()) < min_x else min_x
-                    max_x = math.ceil(mini_df[fc_name].max()) if math.ceil(mini_df[fc_name].max()) > max_x else max_x
+                    min_x = np.floor(mini_df[fc_name].min()) if np.floor(mini_df[fc_name].min()) < min_x else min_x
+                    max_x = np.ceil(mini_df[fc_name].max()) if np.ceil(mini_df[fc_name].max()) > max_x else max_x
                     max_y = max_y_in_df if max_y_in_df > max_y else max_y
 
                     if xaxes != (0.0, 0.0) and yaxes != (0.0):
@@ -371,12 +367,12 @@ class DEGs():
             stacked1 = go.Figure()
         else:
             if len(log_ready_dict) % 2 == 0:
-                nrows = math.ceil(len(log_ready_dict) / 2)
+                nrows = int(np.ceil(len(log_ready_dict) / 2))
                 stacked1 = make_subplots(rows=nrows, cols=2, subplot_titles=(list(log_ready_dict.keys())),
                                         y_title='Number of DEGs',
                                         vertical_spacing = 0.5, shared_yaxes=True)
             else:
-                nrows = math.ceil(len(log_ready_dict) / 3)
+                nrows = int(np.ceil(len(log_ready_dict) / 3))
                 stacked1 = make_subplots(rows=nrows, cols=3, subplot_titles=(list(log_ready_dict.keys())),
                                         y_title='Number of DEGs', 
                                         vertical_spacing=0.5, horizontal_spacing=0.02,
