@@ -112,6 +112,7 @@ try:
                                                                  dendrogram_c=st.session_state['clust_dendroc'],
                                                                  cluster_cols=st.session_state['clust_cols']
                                                     )
+
         ss.save_state({'clustergram_plot':get_clustergram})
         if len(missing_vals) != 0:
             with st.expander("Missing genes", expanded = False):

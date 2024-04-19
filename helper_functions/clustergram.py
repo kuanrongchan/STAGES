@@ -63,7 +63,7 @@ class Clustergram():
         wrap_colnames = ["\n".join(textwrap.wrap(a, width=30, break_long_words=False)) for a in colnames_whitespaced]
 
         # drop those FCs with null values
-        null_fc = compiled_logFC.apply(lambda x: x == pd.isna(x).any(), axis = 1).index.to_list()
+        null_fc = compiled_logFC[compiled_logFC.apply(lambda x: pd.isna(x).any(), axis = 1)].index.to_list()
         reformatted_logFC = compiled_logFC[~compiled_logFC.index.isin(null_fc)]
         reformatted_logFC.columns = wrap_colnames
 
