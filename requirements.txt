@@ -5,7 +5,7 @@ streamlit
 streamlit_tags
 scipy
 numpy
-numba==0.56.4
+numba==0.57.1
 pandas
 scikit_learn
 openpyxl
@@ -19,7 +19,7 @@ seaborn
 regex
 kaleido
 statsmodels
-decoupler==1.2.0
+decoupler
 anndata
 scanpy
 pdfkit
