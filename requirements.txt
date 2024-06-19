@@ -5,6 +5,7 @@ streamlit
 streamlit_tags
 scipy
 numpy
+numba==0.56.4
 pandas
 scikit_learn
 openpyxl
