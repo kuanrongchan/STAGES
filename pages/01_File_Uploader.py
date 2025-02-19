@@ -36,7 +36,7 @@ df_query = file_opts.file_uploader('Upload your file', type = ['csv', 'txt', 'xl
 
 clear = file_opts.button("Clear cache", on_click=ss.clear_output)
 if clear:
-    st.experimental_rerun()
+    st.rerun()
 # # Save the df_query so that the data remains stored as the conditions will be met via proxy (df_in session state)
 # ## Note that the df_in is not actually able to be read in as data directly, but rather is just a number for my conditions to be met
 # ## In this case, st.cache_data around the read_xfile method is still required

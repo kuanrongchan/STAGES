@@ -28,6 +28,7 @@ ss.initialise_state({'cluster_useDEG': None,
                      'clust_cbarbottom':0.05,
                      'clust_cbarwidth':0.15,
                      'clust_cbarheight':0.02,
+                     'clust_gene_fontsize': 6,
                      'clust_genelist':None,
                      'clust_genedict':None,
                      'clust_genevals':None,
@@ -80,6 +81,7 @@ try:
         cbar_bottom = st.number_input("Adjust colourbar position from bottom", min_value=0.0, max_value=1.0, step=0.01, value = st.session_state['clust_cbarbottom'])
         cbar_width = st.number_input("Adjust colourbar width", min_value=0.0, max_value=1.0, step=0.01, value = st.session_state['clust_cbarwidth'])
         cbar_height = st.number_input("Adjust colourbar height", min_value=0.0, max_value=1.0, step=0.01, value = st.session_state['clust_cbarheight'])
+        gene_fontsize = st.number_input("Adjust gene font size", min_value = 0, max_value = 18, step = 1, value = st.session_state['clust_gene_fontsize'])
 
         plot_clust = st.checkbox("Plot clustergram", value=st.session_state['clust_submit'], on_change=ss.binaryswitch, args=('clust_submit', ))
 
@@ -91,7 +93,8 @@ try:
                     'clust_cbarleft':cbar_left,
                     'clust_cbarbottom':cbar_bottom,
                     'clust_cbarwidth':cbar_width,
-                    'clust_cbarheight':cbar_height
+                    'clust_cbarheight':cbar_height,
+                    'clust_gene_fontsize': gene_fontsize
                     })
         get_genes, gene_dict = genePP.genes_used(degs=degs, useDEG=st.session_state['cluster_useDEG'], textgene=st.session_state['cluster_textgene'])
         gene_vals = genePP.get_gene_vals(st.session_state['log_dict_ready'], get_genes)
@@ -110,7 +113,8 @@ try:
                                                                  height=st.session_state['clust_height'],
                                                                  dendrogram_r=st.session_state['clust_dendror'],
                                                                  dendrogram_c=st.session_state['clust_dendroc'],
-                                                                 cluster_cols=st.session_state['clust_cols']
+                                                                 cluster_cols=st.session_state['clust_cols'],
+                                                                 clust_gene_fontsize=st.session_state['clust_gene_fontsize']
                                                     )
 
         ss.save_state({'clustergram_plot':get_clustergram})

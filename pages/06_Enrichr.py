@@ -14,7 +14,8 @@ import streamlit as st
 
 ss.initialise_state({'add_geneset_in':None,
                      'add_geneset':None,
-                     'geneset_dict': {"Blood Transcriptomic Modules (BTM)": "accessory_files/BTM.gmt",
+                     'geneset_dict': {"Blood Transcriptomic Modules Plus (BTMplus)": "accessory_files/BTMPlus.gmt",
+                                      "Blood Transcriptomic Modules (BTM)": "accessory_files/BTM.gmt",
                                       "Reactome 2021": "accessory_files/Reactome.gmt",
                                       "Reactome 2022": "Reactome_2022",
                                       "Vaccinomics (In-house)": "accessory_files/Vaccinomics.gmt",
@@ -23,9 +24,10 @@ ss.initialise_state({'add_geneset_in':None,
                                       "GO Cellular Component 2023": "GO_Cellular_Component_2023",
                                       "KEGG 2021 Human": "KEGG_2021_Human",
                                     #   "KEGG 2019 Mouse":"KEGG_2019_Mouse",
-                                      "HumanCyc 2016": "HumanCyc_2016"
+                                      "HumanCyc 2016": "HumanCyc_2016",
+                                      "MSigDB Hallmark 2020": "MSigDB_Hallmark_2020"
                                       },
-                      'geneset_enr':"Blood Transcriptomic Modules (BTM)",
+                      'geneset_enr':"Blood Transcriptomic Modules Plus (BTMplus)",
                       'enr_useDEG':None,
                       'enr_textgene':'COL1A2;DCN;IL6;IL8;LIF;MGP;MMP1;MMP2;MMP9',
                       'enr_pthresh':0.05,
@@ -55,7 +57,7 @@ if st.session_state['add_geneset_in'] is not None:
     ss.save_state({'geneset_dict':{**st.session_state['geneset_dict'], **st.session_state['add_geneset']}})
 
 # Selecting genesets (BTM or reactome) to plot from a list
-geneset_opts = list(st.session_state['geneset_dict'].keys())
+geneset_opts = sorted(list(st.session_state['geneset_dict'].keys()))
 geneset_enr = enr_opts.radio(label='Select a geneset for Enrichr', options=geneset_opts, index = geneset_opts.index(st.session_state['geneset_enr']))
 ss.save_state({'geneset_enr':geneset_enr})
 

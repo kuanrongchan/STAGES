@@ -8,7 +8,7 @@ import streamlit as st
 st.session_state.update(st.session_state)
 ss.initialise_state({'string_useDEG':None,
                      'string_textgene':'COL1A2;DCN;IL6;IL8;LIF;MGP;MMP1;MMP2;MMP9',
-                     'plot_string':True,
+                     'plot_string':False,
                      'string_plots':None})
 
 st.header("STRING Network Query")
@@ -57,3 +57,6 @@ if plot_string:
             file_downloads.zip_imgs(tozip)
     else:
         st.warning("Please ensure that there is more than 1 gene from DEGs or genes are manually entered!")
+
+if plot_string is False and string_textgene is None:
+    st.error("Please select a set of DEGs or enter a list of genes!")
