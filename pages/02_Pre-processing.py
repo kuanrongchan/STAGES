@@ -102,7 +102,7 @@ try:
             split_long_violins = counts_pp.chunks(list(adata.obs_names), chunk_size=12)
             adata = st.session_state['adata']
             # Provide info here
-            st.info("The violin plots From the pre-processing options in the sidebar, select a threshold value that separates the violin plots into two (narrowest point).")
+            st.info("From the pre-processing options in the sidebar, select a threshold value that separates the violin plots into two (narrowest point).")
             bef, aft = st.tabs(['Before pre-processing', 'After pre-processing'])
             
             # Create violin plot
