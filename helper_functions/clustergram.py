@@ -58,9 +58,10 @@ class Clustergram():
                      height = 10,
                      dendrogram_r = 0.2,
                      dendrogram_c = 0.12,
-                     cluster_cols = True):
+                     cluster_cols = True,
+                     clust_gene_fontsize = 6):
         colnames_whitespaced = [i.replace("_"," ") for i in compiled_logFC.columns]
-        wrap_colnames = ["\n".join(textwrap.wrap(a, width=30, break_long_words=False)) for a in colnames_whitespaced]
+        wrap_colnames = ["\n".join(textwrap.wrap(a, width=20, break_long_words=False)) for a in colnames_whitespaced]
 
         # drop those FCs with null values
         null_fc = compiled_logFC[compiled_logFC.apply(lambda x: pd.isna(x).any(), axis = 1)].index.to_list()
@@ -68,6 +69,7 @@ class Clustergram():
         reformatted_logFC.columns = wrap_colnames
 
         dendrogram_c = 0.0 if not cluster_cols else dendrogram_c
+        yticklabels = False if clust_gene_fontsize == 0 else True
 
         if reformatted_logFC.shape[0] > 3:
             g = sns.clustermap(reformatted_logFC,
@@ -79,16 +81,17 @@ class Clustergram():
                                 vmax = vminmax[1],
                                 z_score=None,
                                 col_cluster=cluster_cols,
-                                yticklabels=True,
+                                yticklabels=yticklabels,
                                 figsize=(width, height),
                                 dendrogram_ratio=(dendrogram_r, dendrogram_c),
                                 linewidths=1, linecolor='white',
                                 cbar_kws = {"label": "log2FC", 'orientation':'horizontal', 'ticks':[vminmax[0], 0, vminmax[1]]})
-
-            g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=11, rotation=0)
+            
+            g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xmajorticklabels(), fontsize=clust_gene_fontsize*1.25, rotation=90)
+            g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize=clust_gene_fontsize, rotation=0)
             g.ax_heatmap.set_ylabel("")
             titles = '\n'.join([i for i in gene_dict.keys()])
-            g.figure.suptitle(f"Clustergram from \n {titles}", x=0.5, y=1.04, fontsize=14, fontweight='bold')
+            g.figure.suptitle(f"Clustergram from \n {titles}", x=0.5, y=1.04, fontsize=12, fontweight='bold')
             for _, spine in g.ax_heatmap.spines.items():
                 spine.set_visible(True)
                 spine.set_edgecolor("black")

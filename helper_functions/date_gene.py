@@ -287,7 +287,7 @@ def qc_df(df_dict):
             nodates(df) # converts old to new (eg. DEC1 -> DELEC1)
 
         elif len(date_search) == 0 and len(old_search) == 0:
-            numdate = [g for g in df.index.tolist() if re.search("^\d*[-/]?\W", g, flags=re.I)]
+            numdate = [g for g in df.index.tolist() if re.search("^\d+[-/]?\W", g, flags=re.I)]
             if len(numdate) != 0:
                 isnums += 1
                 if isnums == 1:
