@@ -22,4 +22,4 @@ statsmodels
 decoupler
 anndata
 scanpy
-pdfkit
+weasyprint
