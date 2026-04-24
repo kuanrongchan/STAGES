@@ -143,7 +143,7 @@ if plot_enr:
                             enr_ht=st.session_state['enr_ht'])
         ss.save_state({'enrichr_plots':enr_plots})
         with enr_plots_t:
-            st.plotly_chart(enr_plots, theme=None, use_container_width=False)
+            st.plotly_chart(enr_plots, theme=None, width = "content")
             file_downloads.create_pdf(enr_plots, fn="Enrichr plots", graph_module="plotly")
         
         with enr_data_t:

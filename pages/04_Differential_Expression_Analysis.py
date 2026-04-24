@@ -54,7 +54,7 @@ try:
                    'barplot':stacked1})
 
     with bar_t:
-        st.plotly_chart(stacked1, theme=None, use_container_width=False)
+        st.plotly_chart(stacked1, theme=None, width="content")
         file_downloads.create_pdf(stacked1, "stacked_DEG_plot", graph_module='plotly')
 
     ########## CDF PLOT ###############
@@ -77,7 +77,7 @@ try:
     ss.save_state({'cdf_plot':cdf_plot})
 
     with cdf_t:
-        st.plotly_chart(st.session_state['cdf_plot'], theme=None, use_container_width=True)
+        st.plotly_chart(st.session_state['cdf_plot'], theme=None, width='stretch')
         file_downloads.create_pdf(st.session_state['cdf_plot'], "cumulative_density_DEGs", graph_module='plotly')
 
 ######### VOLCANO PLOT ##################
@@ -116,7 +116,7 @@ try:
             st.pyplot(st.session_state['volcano_plots_static'])
             file_downloads.create_pdf(st.session_state['volcano_plots_static'], "volcano_plot", graph_module='pyplot')
 
-            st.plotly_chart(st.session_state['volcano_plots_interactive'], theme = None, use_container_width=True)
+            st.plotly_chart(st.session_state['volcano_plots_interactive'], theme = None, width = 'stretch')
             file_downloads.create_pdf(st.session_state['volcano_plots_interactive'], "interactive_volcano_plot", graph_module="plotly")
 
         else:

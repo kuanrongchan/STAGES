@@ -22,7 +22,7 @@ if "log_dict_ready" in st.session_state:
         mtx = cmatrix.corr_matrix(log_dict, method = st.session_state['corr_mtd'])
         ss.save_state({'corr_matrix_plot':mtx})
         st.info("If the plot is too small, please hover over the plot and click the expand button on the top right corner of the plot.")
-        st.plotly_chart(st.session_state['corr_matrix_plot'], theme = None, use_container_width=True)
+        st.plotly_chart(st.session_state['corr_matrix_plot'], theme = None, width="stretch")
 
         st.subheader("Pre-processed Data")
         data_exp = st.expander("Expand to show pre-processed data", expanded=False)
