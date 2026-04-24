@@ -107,7 +107,7 @@ if plot_prerank:
                                     prerank_showX=st.session_state['prerank_showX'],
                                     prerank_ht=st.session_state['prerank_ht'])
     ss.save_state({'prerank_plots':sig_plots})
-    prnk_plots_t.plotly_chart(st.session_state['prerank_plots'], theme=None, use_container_width=False)
+    prnk_plots_t.plotly_chart(st.session_state['prerank_plots'], theme=None, width='content')
     with prnk_plots_t:
         file_downloads.create_pdf(st.session_state['prerank_plots'], "Prerank_plots", "plotly")
 
