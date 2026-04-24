@@ -1,2 +1,2 @@
-chromium-browser
+chromium
 libgtk-4-dev
