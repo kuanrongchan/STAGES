@@ -1,16 +1,16 @@
 import pandas as pd
 import numpy as np
-import math
-import re
+# import math
+# import re
 
 import streamlit as st
 
 import seaborn as sns
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 import textwrap
 
-from helper_functions.session_state import ss
+# from helper_functions.session_state import ss
 
 class GeneHandler():
     def genes_used(self, degs, useDEG= None, textgene=None):

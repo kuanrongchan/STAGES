@@ -1,1 +1,2 @@
-libglib2.0-0
+chromium-browser
+libgtk-4-dev

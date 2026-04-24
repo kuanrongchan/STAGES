@@ -53,7 +53,7 @@ if plot_string:
         with str_netplots:
             for k, v in str_network.items():
                 st.write(f"**{k}**")
-                st.image(v, use_column_width=True)
+                st.image(v, width="stretch")
             file_downloads.zip_imgs(tozip)
     else:
         st.warning("Please ensure that there is more than 1 gene from DEGs or genes are manually entered!")

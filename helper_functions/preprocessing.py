@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
-import time
+# import time
 import math
 import regex as re
 
 import streamlit as st
-from streamlit_tags import st_tags, st_tags_sidebar
 
 import plotly.colors as pc
 import matplotlib.pyplot as plt

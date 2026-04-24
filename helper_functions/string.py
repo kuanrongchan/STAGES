@@ -27,7 +27,8 @@ class StringDb():
                 "species" : 9606, # species NCBI identifier 
                 "network_flavor": "confidence", # show confidence links
                 "caller_identity" : "stages", # your app name
-                "block_structure_pics_in_bubbles":1
+                "block_structure_pics_in_bubbles":1,
+                "flat_node_design" : 1
                 }
             if len(gene_ready) != 0:
                 response = st.cache_resource(requests.post)(request_url, data=params)

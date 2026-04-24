@@ -4,13 +4,11 @@ import time
 import math
 import re
 import base64
-from PIL import Image
+# from PIL import Image
 from io import BytesIO
 import zipfile
 
 import streamlit as st
-from streamlit_tags import st_tags, st_tags_sidebar
-
 
 class DLs():
     def convert_df(self, df):
