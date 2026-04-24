@@ -9,7 +9,6 @@ import decoupler as dc
 import scanpy as sc
 
 import streamlit as st
-from streamlit_tags import st_tags, st_tags_sidebar
 
 import plotly.colors as pc
 import matplotlib.pyplot as plt 
