@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 import jinja2
-import pdfkit
+from weasyprint import HTML
 import base64
 from io import BytesIO
 
@@ -123,5 +123,5 @@ HTML_inapp = open("STAGES_report.html", 'r', encoding='utf-8')
 source_code = HTML_inapp.read()
 components.html(source_code, height = 900, scrolling=True)
 
-pdf_out = pdfkit.from_string(outputText, False)
+pdf_out = HTML(outputText, False).write_pdf()
 st.download_button("Download STAGES report as PDF here", data=pdf_out, file_name="STAGES_report.pdf", mime='application/octet-stream')
